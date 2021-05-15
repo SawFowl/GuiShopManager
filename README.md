@@ -1,7 +1,7 @@
 # GuiShopManager
 
 ##### Info
-Plugin for creating in-game stores and auction on Sponge servers. \
+Plugin for creating in-game shops and auction on Sponge servers. \
 Requires the LocaleAPI plugin.
 
 ##### Permissions
