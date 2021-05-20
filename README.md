@@ -7,8 +7,8 @@ Requires the LocaleAPI plugin.
 ##### Permissions
 guishopmanager.reload : reoot plugin  \
 guishopmanager.create : creating a shop \
-guishopmanager.delete : deleting a shop
-guishopmanager.edit : editing a shop
+guishopmanager.delete : deleting a shop \
+guishopmanager.edit : editing a shop \
 guishopmanager.open.self : opening a shop yourself \
 guishopmanager.open : opening a shop to others \
 guishopmanager.auction.open : opening an auction to others \
