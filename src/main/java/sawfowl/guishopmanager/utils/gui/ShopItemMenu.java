@@ -340,10 +340,12 @@ public class ShopItemMenu {
 						Task.builder().delayTicks(5).execute(() -> {
 							if(editData.size > 0) {
 								if(buy) {
+									editData.itemStack.setQuantity(editData.size);
 									player.getInventory().offer(editData.itemStack.copy());
 									plugin.getEconomy().removeFromPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice(), editData.itemStack);
 								} else {
 									player.getInventory().query(QueryOperationTypes.ITEM_STACK_IGNORE_QUANTITY.of(editData.itemStack.copy())).poll(editData.size);
+									editData.itemStack.setQuantity(editData.size);
 									plugin.getEconomy().addToPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getSellPrice(), editData.itemStack);
 								}
 							}
@@ -378,6 +380,7 @@ public class ShopItemMenu {
 									plugin.getEconomy().removeFromPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice(), editData.itemStack);
 								} else {
 									player.getInventory().query(QueryOperationTypes.ITEM_STACK_IGNORE_QUANTITY.of(editData.itemStack.copy())).poll(editData.size);
+									editData.itemStack.setQuantity(editData.size);
 									plugin.getEconomy().addToPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getSellPrice(), editData.itemStack);
 								}
 							}
@@ -572,7 +575,7 @@ public class ShopItemMenu {
 
 	private ItemStack updateDisplayItemEdit(Player player, List<SerializedShopPrice> prices, EditData editData) {
 		ItemStack itemStack = editData.itemStack.copy();
-		List<Text> lore = new ArrayList<Text>();
+		List<Text> lore = itemStack.get(Keys.ITEM_LORE).orElse(new ArrayList<Text>());
 		if(itemStack.get(Keys.ITEM_LORE).isPresent()) {
 			itemStack.remove(Keys.ITEM_LORE);
 		}
@@ -592,7 +595,7 @@ public class ShopItemMenu {
 
 	private ItemStack updateDisplayItemTransaction(Player player, List<SerializedShopPrice> prices, EditData editData) {
 		ItemStack itemStack = editData.itemStack.copy();
-		List<Text> lore = new ArrayList<Text>();
+		List<Text> lore = itemStack.get(Keys.ITEM_LORE).orElse(new ArrayList<Text>());
 		if(itemStack.get(Keys.ITEM_LORE).isPresent()) {
 			itemStack.remove(Keys.ITEM_LORE);
 		}

@@ -185,10 +185,10 @@ public class AuctionMenus {
 					nbt.setInteger("Id", currentItem);
 					nmsStack.setTagCompound(nbt);
 					itemStack = ItemStackUtil.fromNative(nmsStack);
+					List<Text> itemLore = itemStack.get(Keys.ITEM_LORE).orElse(new ArrayList<Text>());
 					if(itemStack.get(Keys.ITEM_LORE).isPresent()) {
 						itemStack.remove(Keys.ITEM_LORE);
 					}
-					List<Text> itemLore = itemStack.get(Keys.ITEM_LORE).orElse(new ArrayList<Text>());
 					itemLore.add(plugin.getLocales().getLocalizedText(player.getLocale(), "Lore", "TransactionVariants"));
 					if(auctionItem.getPrices().get(0).getBet().doubleValue() > 0) {
 						itemLore.add(plugin.getLocales().getLocalizedText(player.getLocale(), "Lore", "AuctionBet")
@@ -483,8 +483,8 @@ public class AuctionMenus {
 						if(!editData.itemStack.getType().getId().equals(ItemTypes.AIR.getId()) && editData.save) {
 							player.getInventory().query(QueryOperationTypes.ITEM_STACK_IGNORE_QUANTITY.of(editData.itemStack.copy())).poll(editData.itemStack.getQuantity());
 							plugin.getAuctionItems().add(auctionStack);
-							if(plugin.getRootNode().getNode("Auction", "Expire", String.valueOf(editData.expire), "Fee", "Enable").getBoolean()) {
-								if(!plugin.getEconomy().fee(player, prices.get(editData.priceNumber).getCurrency(), BigDecimal.valueOf(plugin.getRootNode().getNode("Auction", "Expire", String.valueOf(editData.expire), "Fee", "Size").getDouble()))) {
+							if(plugin.getExpire(editData.expire).isFee()) {
+								if(!plugin.getEconomy().fee(player, prices.get(editData.priceNumber).getCurrency(), BigDecimal.valueOf(plugin.getExpire(editData.expire).getFee()))) {
 									return;
 								}
 							}
@@ -518,8 +518,8 @@ public class AuctionMenus {
 						if(!editData.itemStack.getType().getId().equals(ItemTypes.AIR.getId()) && editData.save) {
 							player.getInventory().query(QueryOperationTypes.ITEM_STACK_IGNORE_QUANTITY.of(editData.itemStack.copy())).poll(editData.itemStack.getQuantity());
 							plugin.getAuctionItems().add(auctionStack);
-							if(plugin.getRootNode().getNode("Auction", "Expire", String.valueOf(editData.expire), "Fee", "Enable").getBoolean()) {
-								if(!plugin.getEconomy().fee(player, prices.get(editData.priceNumber).getCurrency(), BigDecimal.valueOf(plugin.getRootNode().getNode("Auction", "Expire", String.valueOf(editData.expire), "Fee", "Size").getDouble()))) {
+							if(plugin.getExpire(editData.expire).isFee()) {
+								if(!plugin.getEconomy().fee(player, prices.get(editData.priceNumber).getCurrency(), BigDecimal.valueOf(plugin.getExpire(editData.expire).getFee()))) {
 									return;
 								}
 							}
@@ -834,8 +834,8 @@ public class AuctionMenus {
 				.replace("%size%", Text.of(betData.getCurrency().getSymbol(), betData.getMoney().doubleValue()))
 				.replace("%total%", Text.of(betData.getCurrency().getSymbol(), betData.getMoney().doubleValue() * itemStack.getQuantity())));
 		itemStack.offer(Keys.ITEM_LORE, lore);
-		if(plugin.getRootNode().getNode("Auction", "Expire", String.valueOf(editData.expire), "Tax", "Enable").getBoolean()) {
-			betData.setTax(plugin.getRootNode().getNode("Auction", "Expire", String.valueOf(editData.expire), "Tax", "Size").getDouble(), itemStack.getQuantity());
+		if(plugin.getExpire(editData.expire).isTax()) {
+			betData.setTax(plugin.getExpire(editData.expire).getTax(), itemStack.getQuantity());
 			lore.add(plugin.getLocales().getLocalizedText(player.getLocale(), "Lore", "Tax").replace("%size%", Text.of(betData.getCurrency().getSymbol(), betData.getTax())));
 		}
 		return itemStack;
@@ -873,7 +873,7 @@ public class AuctionMenus {
 			if(editData.bet) {
 				return BigDecimal.valueOf(((money * auctionStack.getSerializedItemStack().getQuantity()) / 100) * plugin.getExpire(editData.expire).getTax()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 			}
-			auctionStack.getPrices().get(editData.priceNumber).setTax(plugin.getRootNode().getNode("Auction", "Expire", String.valueOf(editData.expire), "Tax", "Size").getDouble(), auctionStack.getSerializedItemStack().getQuantity());
+			auctionStack.getPrices().get(editData.priceNumber).setTax(plugin.getExpire(editData.expire).getTax(), auctionStack.getSerializedItemStack().getQuantity());
 			return auctionStack.getPrices().get(editData.priceNumber).getTax();
 		}
 		return 0;

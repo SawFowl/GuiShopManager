@@ -52,16 +52,16 @@ public class Economy {
                     	player.sendMessage(plugin.getLocales().getLocalizedText(player.getLocale(), "Messages", "ItemSell")
                     			.replace("%item%", Text.builder().append(Text.of(itemStack)).onHover(TextActions.showItem(itemStack.createSnapshot())).build())
                     			.replace("%amount%", Text.of(itemStack.getQuantity()))
-                    			.replace("%added%", Text.of(money))
-                    			.replace("%balance%", Text.of(getPlayerBalance(player.getUniqueId(), currency))));
+                    			.replace("%added%", Text.of(currency.getSymbol(), money))
+                    			.replace("%balance%", Text.of(currency.getSymbol(), getPlayerBalance(player.getUniqueId(), currency))));
                 	}
                 	if(plugin.getRootNode().getNode("Debug").getBoolean()) {
                 		plugin.getLogger().info(plugin.getLocales().getLocalizedText(player.getLocale(), "Debug", "InfoTakeItems")
                 				.replace("%item%", Text.of(itemStack))
                     			.replace("%amount%", Text.of(itemStack.getQuantity()))
                 				.replace("%player%", Text.of(player.getName()))
-                				.replace("%added%", Text.of(money))
-                				.replace("%balance%", Text.of(getPlayerBalance(player.getUniqueId(), currency))).toPlain());
+                				.replace("%added%", Text.of(currency.getSymbol(), money))
+                				.replace("%balance%", Text.of(currency.getSymbol(), getPlayerBalance(player.getUniqueId(), currency))).toPlain());
                 	}
                 } else if ((result.getResult() == ResultType.FAILED || result.getResult() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getRootNode().getNode("Debug").getBoolean()) {
                 	plugin.getLogger().error(plugin.getLocales().getLocalizedText(player.getLocale(), "Debug", "ErrorGiveMoney")
@@ -84,16 +84,16 @@ public class Economy {
                     	player.sendMessage(plugin.getLocales().getLocalizedText(player.getLocale(), "Messages", "ItemBuy")
                     			.replace("%item%", Text.builder().append(Text.of(itemStack)).onHover(TextActions.showItem(itemStack.createSnapshot())).build())
                     			.replace("%amount%", Text.of(itemStack.getQuantity()))
-                    			.replace("%removed%", Text.of(money))
-                    			.replace("%balance%", Text.of(getPlayerBalance(player.getUniqueId(), currency))));
+                    			.replace("%removed%", Text.of(currency.getSymbol(), money))
+                    			.replace("%balance%", Text.of(currency.getSymbol(), getPlayerBalance(player.getUniqueId(), currency))));
                 	}
                 	if(plugin.getRootNode().getNode("Debug").getBoolean()) {
                 		plugin.getLogger().info(plugin.getLocales().getLocalizedText(player.getLocale(), "Debug", "InfoGiveItems")
                 				.replace("%item%", Text.of(itemStack))
                     			.replace("%amount%", Text.of(itemStack.getQuantity()))
                 				.replace("%player%", Text.of(player.getName()))
-                				.replace("%removed%", Text.of(money))
-                				.replace("%balance%", Text.of(getPlayerBalance(player.getUniqueId(), currency))).toPlain());
+                				.replace("%removed%", Text.of(currency.getSymbol(), money))
+                				.replace("%balance%", Text.of(currency.getSymbol(), getPlayerBalance(player.getUniqueId(), currency))).toPlain());
                 	}
                 } else if ((result.getResult() == ResultType.FAILED || result.getResult() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getRootNode().getNode("Debug").getBoolean()) {
                 	plugin.getLogger().error(plugin.getLocales().getLocalizedText(player.getLocale(), "Debug", "ErrorTakeMoney")
@@ -155,8 +155,8 @@ public class Economy {
                         				.replace("%item%", Text.of(itemStack))
                             			.replace("%amount%", Text.of(itemStack.getQuantity()))
                         				.replace("%player%", Text.of(buyer.getName()))
-                        				.replace("%removed%", Text.of(money))
-                        				.replace("%balance%", Text.of(getPlayerBalance(buyerUUID, currency))).toPlain());
+                        				.replace("%removed%", Text.of(currency.getSymbol(), money))
+                        				.replace("%balance%", Text.of(currency.getSymbol(), getPlayerBalance(buyerUUID, currency))).toPlain());
                         	}
                 		}
                 	}
@@ -177,6 +177,7 @@ public class Economy {
 		if(money.doubleValue() > 0) {
 			if(money.doubleValue() > getPlayerBalance(player.getUniqueId(), currency).doubleValue()) {
 	        	player.sendMessage(plugin.getLocales().getLocalizedText(player.getLocale(), "Messages", "NoMoneyForFee"));
+	            return false;
 			} else {
 		        try {
 		            Optional<UniqueAccount> uOpt = plugin.getEconomyService().getOrCreateAccount(player.getUniqueId());
@@ -188,7 +189,6 @@ public class Economy {
 				}
 			}
 		} else {
-            return true;
 		}
 		return false;
 	}

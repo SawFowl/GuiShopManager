@@ -98,7 +98,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 @Plugin(id = "guishopmanager",
 		name = "GuiShopManager",
-		version = "1.0.0-S7.1",
+		version = "1.0.1-S7.1",
 		dependencies = {
 				@Dependency(id = "localeapi@1.0.0")
 		},
