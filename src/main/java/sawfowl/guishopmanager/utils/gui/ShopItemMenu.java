@@ -3,7 +3,6 @@ package sawfowl.guishopmanager.utils.gui;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
@@ -65,8 +64,7 @@ public class ShopItemMenu {
 					if(event.getTransactions().isEmpty()) {
 						return;
 					}
-					Optional<SlotIndex> slotIndex = event.getTransactions().get(0).getSlot().getInventoryProperty(SlotIndex.class);
-					int id = slotIndex.get().getValue();
+					int id = event.getTransactions().get(0).getSlot().getInventoryProperty(SlotIndex.class).get().getValue();
 					event.setCancelled(true);
 					if(id == 18) {
 						if(!plugin.shopExists(shopId)) {
@@ -333,8 +331,7 @@ public class ShopItemMenu {
 					if(event.getTransactions().isEmpty()) {
 						return;
 					}
-					Optional<SlotIndex> slotIndex = event.getTransactions().get(0).getSlot().getInventoryProperty(SlotIndex.class);
-					int id = slotIndex.get().getValue();
+					int id = event.getTransactions().get(0).getSlot().getInventoryProperty(SlotIndex.class).get().getValue();
 					event.setCancelled(true);
 					if(id == 18) {
 						Task.builder().delayTicks(5).execute(() -> {
@@ -500,34 +497,34 @@ public class ShopItemMenu {
 				slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 			}
 			if(id <= 8) {
-				Text price = Text.of(" 1");
+				Text size = Text.of(" 1");
 				if(id == 1) {
-					price = Text.of(" 2");
+					size = Text.of(" 2");
 				}
 				if(id == 2) {
-					price = Text.of(" 4");
+					size = Text.of(" 4");
 				}
 				if(id == 3) {
-					price = Text.of(" 8");
+					size = Text.of(" 8");
 				}
 				if(id == 4) {
-					price = Text.of(" 16");
+					size = Text.of(" 16");
 				}
 				if(id == 5) {
-					price = Text.of(" 32");
+					size = Text.of(" 32");
 				}
 				if(id == 6) {
-					price = Text.of(" 64");
+					size = Text.of(" 64");
 				}
 				if(id == 7) {
-					price = Text.of(" 128");
+					size = Text.of(" 128");
 				}
 				if(id == 8) {
-					price = Text.of(" MAX");
+					size = Text.of(" MAX");
 				}
 				ItemStack changeSize = plugin.getFillItems().getItemStack(FillItems.valueOf("CHANGESIZE" + id));
 				changeSize.offer(Keys.ITEM_LORE, plugin.getLocales().getLocalizedListText(player.getLocale(), "Lore", "ChangeSize"));
-				changeSize.offer(Keys.DISPLAY_NAME, Text.of(plugin.getLocales().getLocalizedText(player.getLocale(), "FillItems", "Size").replace("%value%", Text.of(price))));
+				changeSize.offer(Keys.DISPLAY_NAME, Text.of(plugin.getLocales().getLocalizedText(player.getLocale(), "FillItems", "Size").replace("%value%", Text.of(size))));
 				slot.set(changeSize);
 			}
 			if(id == 13 && itemStack != null) {
@@ -578,9 +575,8 @@ public class ShopItemMenu {
 		List<Text> lore = itemStack.get(Keys.ITEM_LORE).orElse(new ArrayList<Text>());
 		if(itemStack.get(Keys.ITEM_LORE).isPresent()) {
 			itemStack.remove(Keys.ITEM_LORE);
+			lore.add(Text.EMPTY);
 		}
-		lore.clear();
-		
 		lore.add(plugin.getLocales().getLocalizedText(player.getLocale(), "Lore", "CurrentCurrency")
 				.replace("%currency%", Text.of(prices.get(editData.priceNumber).getCurrency().getDisplayName())));
 		for(SerializedShopPrice price : prices) {
@@ -598,8 +594,8 @@ public class ShopItemMenu {
 		List<Text> lore = itemStack.get(Keys.ITEM_LORE).orElse(new ArrayList<Text>());
 		if(itemStack.get(Keys.ITEM_LORE).isPresent()) {
 			itemStack.remove(Keys.ITEM_LORE);
+			lore.add(Text.EMPTY);
 		}
-		lore.clear();
 		lore.add(plugin.getLocales().getLocalizedText(player.getLocale(), "Lore", "CurrentCurrency")
 				.replace("%currency%", Text.of(prices.get(editData.priceNumber).getCurrency().getDisplayName())));
 		lore.add(plugin.getLocales().getLocalizedText(player.getLocale(), "Lore", "CurrentSize")
@@ -626,9 +622,7 @@ public class ShopItemMenu {
 	private Integer calculateMaxBuyItems(Player player, ItemStack itemStack, SerializedShopPrice serializedPrice) {
 		if(plugin.getEconomy().getPlayerBalance(player.getUniqueId(), serializedPrice.getCurrency()).doubleValue() < serializedPrice.getBuyPrice().doubleValue()) return 0;
 		int value = 0;
-		MainPlayerInventory mainPlayerInventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(MainPlayerInventory.class));
-		Iterable<Slot> slots = mainPlayerInventory.slots();
-		for(Slot playerSlot : slots) {
+		for(Inventory playerSlot : player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(MainPlayerInventory.class)).slots()) {
 			if(playerSlot.totalItems() == 0) {
 				value = value + itemStack.getMaxStackQuantity();
 			}

@@ -2,7 +2,6 @@ package sawfowl.guishopmanager.utils.gui;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
@@ -27,12 +26,6 @@ public class ShopMenu {
 		this.plugin = instance;
 	}
 
-	/**
-	 * 
-	 * @param shopMenu - редактируемое меню магазина
-	 * @param player - игрок которому откроется редактор
-	 * @param shopMainId
-	 */
 	public void createInventoryToEditor(ShopMenuData shopMenu, Player player, String shopId, int menuId) {
 		Text menuTitle = menuId == 1 ? plugin.getShop(shopId).getOrDefaultTitle(player.getLocale()) : Text.of(plugin.getShop(shopId).getOrDefaultTitle(player.getLocale()), " || ", menuId);
 		Inventory inventory = Inventory.builder().of(InventoryArchetypes.DOUBLE_CHEST)
@@ -41,8 +34,7 @@ public class ShopMenu {
 					if(event.getTransactions().isEmpty()) {
 						return;
 					}
-					Optional<SlotIndex> slotIndex = event.getTransactions().get(0).getSlot().getInventoryProperty(SlotIndex.class);
-					int id = slotIndex.get().getValue();
+					int id = event.getTransactions().get(0).getSlot().getInventoryProperty(SlotIndex.class).get().getValue();
 					if(id <= 53) {
 						event.setCancelled(true);
 					}
@@ -100,10 +92,11 @@ public class ShopMenu {
 				if(shopMenu.containsShopItem(id)) {
 					ShopItem shopItemStack = shopMenu.getShopItem(id);
 					ItemStack itemStack = shopItemStack.getItemStack();
+					List<Text> itemLore = itemStack.get(Keys.ITEM_LORE).orElse(new ArrayList<Text>());
 					if(itemStack.get(Keys.ITEM_LORE).isPresent()) {
 						itemStack.remove(Keys.ITEM_LORE);
+						itemLore.add(Text.EMPTY);
 					}
-					List<Text> itemLore = itemStack.get(Keys.ITEM_LORE).orElse(new ArrayList<Text>());
 					itemLore.add(plugin.getLocales().getLocalizedText(player.getLocale(), "Lore", "TransactionVariants"));
 					for(SerializedShopPrice serializablePrice : shopItemStack.getPrices()) {
 						itemLore.add(plugin.getLocales().getLocalizedText(player.getLocale(), "Lore", "Price")
@@ -134,12 +127,6 @@ public class ShopMenu {
 		player.openInventory(inventory);
 	}
 
-	/**
-	 * 
-	 * @param shopMenu - редактируемое меню магазина
-	 * @param player - игрок которому откроется редактор
-	 * @param shopMainId
-	 */
 	public void createInventoryToPlayer(ShopMenuData shopMenu, Player player, String shopId, int menuId) {
 		Text menuTitle = menuId == 1 ? plugin.getShop(shopId).getOrDefaultTitle(player.getLocale()) : Text.of(plugin.getShop(shopId).getOrDefaultTitle(player.getLocale()), " || ", menuId);
 		Inventory inventory = Inventory.builder().of(InventoryArchetypes.DOUBLE_CHEST)
@@ -148,8 +135,7 @@ public class ShopMenu {
 					if(event.getTransactions().isEmpty()) {
 						return;
 					}
-					Optional<SlotIndex> slotIndex = event.getTransactions().get(0).getSlot().getInventoryProperty(SlotIndex.class);
-					int id = slotIndex.get().getValue();
+					int id = event.getTransactions().get(0).getSlot().getInventoryProperty(SlotIndex.class).get().getValue();
 					if(id <= 53) {
 						event.setCancelled(true);
 					}
@@ -203,11 +189,11 @@ public class ShopMenu {
 				if(shopMenu.containsShopItem(id)) {
 					ShopItem shopItemStack = shopMenu.getShopItem(id);
 					ItemStack itemStack = shopItemStack.getItemStack();
+					List<Text> itemLore = itemStack.get(Keys.ITEM_LORE).orElse(new ArrayList<Text>());
 					if(itemStack.get(Keys.ITEM_LORE).isPresent()) {
 						itemStack.remove(Keys.ITEM_LORE);
+						itemLore.add(Text.EMPTY);
 					}
-					List<Text> itemLore = itemStack.get(Keys.ITEM_LORE).orElse(new ArrayList<Text>());
-					
 					itemLore.add(plugin.getLocales().getLocalizedText(player.getLocale(), "Lore", "TransactionVariants"));
 					for(SerializedShopPrice serializablePrice : shopItemStack.getPrices()) {
 						itemLore.add(plugin.getLocales().getLocalizedText(player.getLocale(), "Lore", "Price")

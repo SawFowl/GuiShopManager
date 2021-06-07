@@ -64,7 +64,7 @@ public class WorkTables extends WorkData {
 				plugin.getLogger().error(createAuctionTable);
 				plugin.getLogger().error(createAuctionExpiredTable);
 				plugin.getLogger().error(createAuctionExpiredBetTable);
-				plugin.getLogger().error("Create tables...");
+				plugin.getLogger().error("Create auction tables...");
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
 		}

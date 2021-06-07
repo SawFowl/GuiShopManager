@@ -98,12 +98,12 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 @Plugin(id = "guishopmanager",
 		name = "GuiShopManager",
-		version = "1.0.1-S7.1",
+		version = "1.0.2-S7.3",
 		dependencies = {
 				@Dependency(id = "localeapi@1.0.0")
 		},
 		authors = "SawFowl",
-		description = "Plugin for create chest shops.")
+		description = "Auction as in various MMORPG games, in-game admin shops. ")
 public class GuiShopManager {
 
 	@Inject
@@ -336,29 +336,18 @@ public class GuiShopManager {
 
 	private void setWorkDataClasses() {
 		workShopData = workAuctionData = null;
+		if(mySQL != null) {
+			mySQL = null;
+		}
 		if(rootNode.getNode("SplitStorage", "Auction").getBoolean() || rootNode.getNode("SplitStorage", "Shops").getBoolean()) {
 			if(rootNode.getNode("SplitStorage", "Auction").getBoolean()) {
-				mySQL = new MySQL(
-						instance,
-						rootNode.getNode("MySQL", "Host").getString(),
-						rootNode.getNode("MySQL", "Port").getString(),
-						rootNode.getNode("MySQL", "DataBase").getString(),
-						rootNode.getNode("MySQL", "User").getString(),
-						rootNode.getNode("MySQL", "Password").getString(),
-						rootNode.getNode("MySQL", "SSL").getString());
+				createMySQLConnect();
 				workAuctionData = new WorkTables(instance);
 			} else {
 				workAuctionData = new WorkConfigs(instance);
 			}
 			if(rootNode.getNode("SplitStorage", "Shops").getBoolean()) {
-				mySQL = new MySQL(
-						instance,
-						rootNode.getNode("MySQL", "Host").getString(),
-						rootNode.getNode("MySQL", "Port").getString(),
-						rootNode.getNode("MySQL", "DataBase").getString(),
-						rootNode.getNode("MySQL", "User").getString(),
-						rootNode.getNode("MySQL", "Password").getString(),
-						rootNode.getNode("MySQL", "SSL").getString());
+				createMySQLConnect();
 				workShopData = new WorkTables(instance);
 			} else {
 				File shopsDir = Paths.get(configDir + File.separator + rootNode.getNode("StorageFolder").getString()).toFile();
@@ -375,17 +364,21 @@ public class GuiShopManager {
 				}
 				workShopData = workAuctionData = new WorkConfigs(instance);
 			} else {
-				mySQL = new MySQL(
-						instance,
-						rootNode.getNode("MySQL", "Host").getString(),
-						rootNode.getNode("MySQL", "Port").getString(),
-						rootNode.getNode("MySQL", "DataBase").getString(),
-						rootNode.getNode("MySQL", "User").getString(),
-						rootNode.getNode("MySQL", "Password").getString(),
-						rootNode.getNode("MySQL", "SSL").getString());
+				createMySQLConnect();
 				workShopData = workAuctionData = new WorkTables(instance);
 			}
 		}
+	}
+
+	private void createMySQLConnect() {
+		mySQL = new MySQL(
+				instance,
+				rootNode.getNode("MySQL", "Host").getString(),
+				rootNode.getNode("MySQL", "Port").getString(),
+				rootNode.getNode("MySQL", "DataBase").getString(),
+				rootNode.getNode("MySQL", "User").getString(),
+				rootNode.getNode("MySQL", "Password").getString(),
+				rootNode.getNode("MySQL", "SSL").getString());
 	}
 
 	private void loadExpires() {
@@ -591,7 +584,6 @@ public class GuiShopManager {
 		}
 	}
 
-	// ЭКОНОМИКА
 	@Listener
     public void onChangeServiceProvider(ChangeServiceProviderEvent event) {
         if(event.getService().equals(EconomyService.class)) {

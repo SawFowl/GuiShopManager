@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.spongepowered.api.data.key.Keys;
@@ -62,8 +61,7 @@ public class AuctionMenus {
 					}
 					event.setCancelled(true);
 					Slot slot = event.getTransactions().get(0).getSlot();
-					Optional<SlotIndex> slotIndex = slot.getInventoryProperty(SlotIndex.class);
-					int id = slotIndex.get().getValue();
+					int id = slot.getInventoryProperty(SlotIndex.class).get().getValue();
 					if(id <= 44) {
 						if(plugin.getAuctionItems().isEmpty()) {
 							return;
@@ -266,8 +264,7 @@ public class AuctionMenus {
 	}
 
 	public void editBet(Player player, int page, int idAuctionItem) {
-		Text menuTitle = Text.of("Edit Bet");
-		menuTitle = plugin.getLocales().getLocalizedText(player.getLocale(), "Gui", "AuctionBet");
+		Text menuTitle = plugin.getLocales().getLocalizedText(player.getLocale(), "Gui", "AuctionBet");
 		EditData editData = new EditData();
 		SerializedAuctionStack auctionStack = plugin.getAuctionItems().get(idAuctionItem);
 		Currency currency = auctionStack.getPrices().get(0).getCurrency();
@@ -281,8 +278,7 @@ public class AuctionMenus {
 					if(event.getTransactions().isEmpty()) {
 						return;
 					}
-					Optional<SlotIndex> slotIndex = event.getTransactions().get(0).getSlot().getInventoryProperty(SlotIndex.class);
-					int id = slotIndex.get().getValue();
+					int id = event.getTransactions().get(0).getSlot().getInventoryProperty(SlotIndex.class).get().getValue();
 					event.setCancelled(true);
 					if(id == 18) {
 						if(plugin.getAuctionItems().contains(auctionStack) && betData.getMoney().doubleValue() > 0) {
@@ -476,8 +472,7 @@ public class AuctionMenus {
 					if(event.getTransactions().isEmpty()) {
 						return;
 					}
-					Optional<SlotIndex> slotIndex = event.getTransactions().get(0).getSlot().getInventoryProperty(SlotIndex.class);
-					int id = slotIndex.get().getValue();
+					int id = event.getTransactions().get(0).getSlot().getInventoryProperty(SlotIndex.class).get().getValue();
 					event.setCancelled(true);
 					if(id == 18) {
 						if(!editData.itemStack.getType().getId().equals(ItemTypes.AIR.getId()) && editData.save) {
@@ -731,8 +726,7 @@ public class AuctionMenus {
 					}
 					event.setCancelled(true);
 					Slot slot = event.getTransactions().get(0).getSlot();
-					Optional<SlotIndex> slotIndex = slot.getInventoryProperty(SlotIndex.class);
-					int slotId = slotIndex.get().getValue();
+					int slotId = event.getTransactions().get(0).getSlot().getInventoryProperty(SlotIndex.class).get().getValue();
 					if(slotId <= 53) {
 						String itemId = event.getCursorTransaction().getDefault().getType().getId();
 						net.minecraft.item.ItemStack nmsStack = ItemStackUtil.fromSnapshotToNative(event.getCursorTransaction().getDefault());
@@ -775,9 +769,10 @@ public class AuctionMenus {
 
 	private ItemStack getDisplayItem(Player player, SerializedAuctionStack auctionStack, EditData editData) {
 		ItemStack itemStack = editData.itemStack.copy();
-		List<Text> lore = new ArrayList<Text>();
+		List<Text> lore = itemStack.get(Keys.ITEM_LORE).orElse(new ArrayList<Text>());
 		if(itemStack.get(Keys.ITEM_LORE).isPresent()) {
 			itemStack.remove(Keys.ITEM_LORE);
+			lore.add(Text.EMPTY);
 		}
 		auctionStack.updateExpires(plugin.getExpire(editData.expire).getTime());
 		lore.add(plugin.getLocales().getLocalizedText(player.getLocale(), "Lore", "CurrentCurrency")
@@ -826,9 +821,10 @@ public class AuctionMenus {
 
 	private ItemStack getDisplayBetItem(Player player, SerializedBetData betData, EditData editData) {
 		ItemStack itemStack = editData.itemStack.copy();
-		List<Text> lore = new ArrayList<Text>();
+		List<Text> lore = itemStack.get(Keys.ITEM_LORE).orElse(new ArrayList<Text>());
 		if(itemStack.get(Keys.ITEM_LORE).isPresent()) {
 			itemStack.remove(Keys.ITEM_LORE);
+			lore.add(Text.EMPTY);
 		}
 		lore.add(plugin.getLocales().getLocalizedText(player.getLocale(), "Lore", "YourBet")
 				.replace("%size%", Text.of(betData.getCurrency().getSymbol(), betData.getMoney().doubleValue()))
@@ -844,9 +840,7 @@ public class AuctionMenus {
 	private Integer calculateMaxBuyItems(Player player, ItemStack itemStack, SerializedAuctionPrice serializedPrice) {
 		if(plugin.getEconomy().getPlayerBalance(player.getUniqueId(), serializedPrice.getCurrency()).doubleValue() < serializedPrice.getPrice().doubleValue()) return 0;
 		int value = 0;
-		MainPlayerInventory mainPlayerInventory = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(MainPlayerInventory.class));
-		Iterable<Slot> slots = mainPlayerInventory.slots();
-		for(Slot playerSlot : slots) {
+		for(Inventory playerSlot : player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(MainPlayerInventory.class)).slots()) {
 			if(playerSlot.totalItems() == 0) {
 				value = value + itemStack.getMaxStackQuantity();
 			}
