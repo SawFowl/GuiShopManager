@@ -2,12 +2,7 @@ package sawfowl.guishopmanager.utils.gui;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.Map.Entry;
-
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
@@ -32,23 +27,8 @@ import sawfowl.guishopmanager.utils.serialization.shop.SerializedShopPrice;
 public class ShopItemMenu {
 
 	private GuiShopManager plugin;
-	private Map<UUID, Long> times;
 	public ShopItemMenu(GuiShopManager guiShopManager) {
 		this.plugin = guiShopManager;
-		times = new HashMap<UUID, Long>();
-		Task.builder().async().intervalTicks(100).execute(() -> {
-			if(!times.isEmpty()) {
-				Map<UUID, Long> cache = new HashMap<UUID, Long>();
-				cache.putAll(times);
-				for(Entry<UUID, Long> entry : cache.entrySet()) {
-					if(entry.getValue() + 100 >= System.currentTimeMillis()) {
-						times.remove(entry.getKey());
-					}
-				}
-				cache.clear();
-				cache = null;
-			}
-		}).submit(plugin);
 	}
 
 	public void editItem(ShopMenuData shopMenu, Player player, String shopId, int menuID, int shopSlot, ItemStack itemStack, boolean buy) {
@@ -355,14 +335,6 @@ public class ShopItemMenu {
 					if(id == 18) {
 						Task.builder().delayTicks(5).execute(() -> {
 							player.closeInventory();
-							if(times.containsKey(player.getUniqueId())) {
-								if(times.get(player.getUniqueId()) + 200 >= System.currentTimeMillis()) {
-									plugin.getShopMenu().createInventoryToPlayer(shopMenu, player, shopId, menuID);
-									return;
-								}
-							} else {
-								times.put(player.getUniqueId(), System.currentTimeMillis());
-							}
 							if(editData.size > 0) {
 								if(buy) {
 									if(calculateMaxBuyItems(player, itemStack, prices.get(editData.priceNumber)) <= 0) return;
@@ -403,11 +375,6 @@ public class ShopItemMenu {
 					if(id == 26) {
 						Task.builder().delayTicks(5).execute(() -> {
 							player.closeInventory();
-							if(times.containsKey(player.getUniqueId())) {
-								if(times.get(player.getUniqueId()) + 200 >= System.currentTimeMillis()) return;
-							} else {
-								times.put(player.getUniqueId(), System.currentTimeMillis());
-							}
 							if(editData.size > 0) {
 								if(buy) {
 									if(calculateMaxBuyItems(player, itemStack, prices.get(editData.priceNumber)) <= 0) return;
