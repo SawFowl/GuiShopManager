@@ -2,7 +2,11 @@ package sawfowl.guishopmanager.utils.gui;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.Map.Entry;
 
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
@@ -28,8 +32,23 @@ import sawfowl.guishopmanager.utils.serialization.shop.SerializedShopPrice;
 public class ShopItemMenu {
 
 	private GuiShopManager plugin;
+	private Map<UUID, Long> times;
 	public ShopItemMenu(GuiShopManager guiShopManager) {
 		this.plugin = guiShopManager;
+		times = new HashMap<UUID, Long>();
+		Task.builder().async().intervalTicks(100).execute(() -> {
+			if(!times.isEmpty()) {
+				Map<UUID, Long> cache = new HashMap<UUID, Long>();
+				cache.putAll(times);
+				for(Entry<UUID, Long> entry : cache.entrySet()) {
+					if(entry.getValue() + 100 >= System.currentTimeMillis()) {
+						times.remove(entry.getKey());
+					}
+				}
+				cache.clear();
+				cache = null;
+			}
+		}).submit(plugin);
 	}
 
 	public void editItem(ShopMenuData shopMenu, Player player, String shopId, int menuID, int shopSlot, ItemStack itemStack, boolean buy) {
@@ -335,20 +354,33 @@ public class ShopItemMenu {
 					event.setCancelled(true);
 					if(id == 18) {
 						Task.builder().delayTicks(5).execute(() -> {
+							player.closeInventory();
+							if(times.containsKey(player.getUniqueId())) {
+								if(times.get(player.getUniqueId()) + 200 >= System.currentTimeMillis()) {
+									plugin.getShopMenu().createInventoryToPlayer(shopMenu, player, shopId, menuID);
+									return;
+								}
+							} else {
+								times.put(player.getUniqueId(), System.currentTimeMillis());
+							}
 							if(editData.size > 0) {
 								if(buy) {
+									if(calculateMaxBuyItems(player, itemStack, prices.get(editData.priceNumber)) <= 0) return;
 									editData.itemStack.setQuantity(editData.size);
 									player.getInventory().offer(editData.itemStack.copy());
 									plugin.getEconomy().removeFromPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice(), editData.itemStack);
 								} else {
+									if(totalItemsInPlayerInventory(player, itemStack) <= 0) {
+										plugin.getShopMenu().createInventoryToPlayer(shopMenu, player, shopId, menuID);
+										return;
+									}
 									player.getInventory().query(QueryOperationTypes.ITEM_STACK_IGNORE_QUANTITY.of(editData.itemStack.copy())).poll(editData.size);
 									editData.itemStack.setQuantity(editData.size);
 									plugin.getEconomy().addToPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getSellPrice(), editData.itemStack);
 								}
+								editData.size = 0;
 							}
-							player.closeInventory();
 							plugin.getShopMenu().createInventoryToPlayer(shopMenu, player, shopId, menuID);
-							
 						}).submit(plugin);
 					}
 					if(id == 22) {
@@ -370,18 +402,26 @@ public class ShopItemMenu {
 					}
 					if(id == 26) {
 						Task.builder().delayTicks(5).execute(() -> {
+							player.closeInventory();
+							if(times.containsKey(player.getUniqueId())) {
+								if(times.get(player.getUniqueId()) + 200 >= System.currentTimeMillis()) return;
+							} else {
+								times.put(player.getUniqueId(), System.currentTimeMillis());
+							}
 							if(editData.size > 0) {
 								if(buy) {
+									if(calculateMaxBuyItems(player, itemStack, prices.get(editData.priceNumber)) <= 0) return;
 									editData.itemStack.setQuantity(editData.size);
 									player.getInventory().offer(editData.itemStack.copy());
 									plugin.getEconomy().removeFromPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice(), editData.itemStack);
 								} else {
+									if(totalItemsInPlayerInventory(player, itemStack) <= 0) return;
 									player.getInventory().query(QueryOperationTypes.ITEM_STACK_IGNORE_QUANTITY.of(editData.itemStack.copy())).poll(editData.size);
 									editData.itemStack.setQuantity(editData.size);
 									plugin.getEconomy().addToPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getSellPrice(), editData.itemStack);
 								}
+								editData.size = 0;
 							}
-							player.closeInventory();
 						}).submit(plugin);
 					}
 					if(event instanceof ClickInventoryEvent.Primary) {

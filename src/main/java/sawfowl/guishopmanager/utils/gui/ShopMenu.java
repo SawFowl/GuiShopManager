@@ -2,7 +2,6 @@ package sawfowl.guishopmanager.utils.gui;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;

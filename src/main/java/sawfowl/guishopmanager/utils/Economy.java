@@ -46,7 +46,7 @@ public class Economy {
             Optional<UniqueAccount> uOpt = plugin.getEconomyService().getOrCreateAccount(player.getUniqueId());
             if (uOpt.isPresent()) {
             	money = money.multiply(BigDecimal.valueOf(itemStack.getQuantity()));
-                TransactionResult result = uOpt.get().deposit(currency, money, Cause.of(plugin.getEventContext(), plugin.getContainer()));
+                TransactionResult result = uOpt.get().deposit(currency, money, Cause.of(plugin.getEventContext(), plugin.getPluginContainer()));
                 if (result.getResult() == ResultType.SUCCESS) {
                 	if(plugin.getRootNode().getNode("PlayerTransactionMessage").getBoolean()) {
                     	player.sendMessage(plugin.getLocales().getLocalizedText(player.getLocale(), "Messages", "ItemSell")
@@ -78,7 +78,7 @@ public class Economy {
             Optional<UniqueAccount> uOpt = plugin.getEconomyService().getOrCreateAccount(player.getUniqueId());
             if (uOpt.isPresent()) {
             	money = money.multiply(BigDecimal.valueOf(itemStack.getQuantity()));
-                TransactionResult result = uOpt.get().withdraw(currency, money, Cause.of(plugin.getEventContext(), plugin.getContainer()));
+                TransactionResult result = uOpt.get().withdraw(currency, money, Cause.of(plugin.getEventContext(), plugin.getPluginContainer()));
                 if (result.getResult() == ResultType.SUCCESS) {
                 	if(plugin.getRootNode().getNode("PlayerTransactionMessage").getBoolean()) {
                     	player.sendMessage(plugin.getLocales().getLocalizedText(player.getLocale(), "Messages", "ItemBuy")

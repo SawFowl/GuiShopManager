@@ -98,7 +98,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 @Plugin(id = "guishopmanager",
 		name = "GuiShopManager",
-		version = "1.0.2-S7.3",
+		version = "1.0.3-S7.3",
 		dependencies = {
 				@Dependency(id = "localeapi@1.0.0")
 		},
@@ -177,9 +177,6 @@ public class GuiShopManager {
 	}
 	public EventContext getEventContext() {
 		return eventContext;
-	}
-	public PluginContainer getContainer() {
-		return container;
 	}
 	public LocaleAPI getLocaleAPI() {
 		return localeAPI;
@@ -371,6 +368,7 @@ public class GuiShopManager {
 	}
 
 	private void createMySQLConnect() {
+		if(mySQL == null) 
 		mySQL = new MySQL(
 				instance,
 				rootNode.getNode("MySQL", "Host").getString(),

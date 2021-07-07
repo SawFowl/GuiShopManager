@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
@@ -38,6 +37,7 @@ public class AuctionMenus {
 	public AuctionMenus(GuiShopManager instance) {
 		plugin = instance;
 		serverName = plugin.getRootNode().getNode("Auction", "Server").getString();
+		this.plugin = instance;
 	}
 
 	public void createInventory(Player player, int page) {
@@ -94,11 +94,13 @@ public class AuctionMenus {
 										return;
 									}
 									if(plugin.getEconomy().checkPlayerBalance(player.getUniqueId(), auctionItem.getPrices().get(editData.priceNumber).getCurrency(), auctionItem.getPrices().get(editData.priceNumber).getPrice())) {
+										if(calculateMaxBuyItems(player, editData.itemStack, auctionItem.getPrices().get(editData.priceNumber)) <= 0) return;
 										plugin.getEconomy().auctionTransaction(player.getUniqueId(), auctionItem, editData.priceNumber, false);
-										player.getInventory().offer(auctionItem.getSerializedItemStack().getItemStack());
+										ItemStack toOffer = auctionItem.getSerializedItemStack().getItemStack();
+										plugin.getAuctionWorkData().removeAuctionStack(auctionItem.getStackUUID());
+										plugin.getAuctionItems().remove(auctionItem);
+										player.getInventory().offer(toOffer);
 										Task.builder().delayTicks(5).execute(() -> {
-											plugin.getAuctionWorkData().removeAuctionStack(auctionItem.getStackUUID());
-											plugin.getAuctionItems().remove(auctionItem);
 											player.closeInventory();
 											createInventory(player, page);
 										}).submit(plugin);
