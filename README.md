@@ -6,17 +6,20 @@ Requires the LocaleAPI plugin.
 
 ##### Permissions
 ```makefile
-guishopmanager.reload : reboot plugin
-guishopmanager.create : creating a shop
-guishopmanager.delete : deleting a shop
-guishopmanager.edit : editing a shop
-guishopmanager.open.self : opening a shop yourself
-guishopmanager.open : opening a shop to others
-guishopmanager.auction.open : opening an auction to others
-guishopmanager.auction.open.self : opening an auction for yourself
-guishopmanager.auction.add : putting an item up for sale using the command
-guishopmanager.auction.currency.name : access to the currency at the auction
-guishopmanager.auction.currency : access to all currencies in the auction
+guishopmanager.user.help : access to the main command
+guishopmanager.staff.reload : reboot plugin
+guishopmanager.staff.shop.create : creating a shop
+guishopmanager.staff.shop.create : deleting a shop
+guishopmanager.staff.shop.edit : editing a shop
+guishopmanager.staff.shop.translate : add translateble shop name
+guishopmanager.staff.shop.open : opening a shop to others
+guishopmanager.user.shop.open : opening a shop yourself
+guishopmanager.staff.auction.blockitem : add item in hand to blacklist
+guishopmanager.staff.auction.open : opening an auction to others
+guishopmanager.user.auction.open : opening an auction for yourself
+guishopmanager.user.auction.add : putting an item up for sale using the command
+guishopmanager.currency.name : access to the currency at the auction
+guishopmanager.currency : access to all currencies in the auction
 ```
 
 ##### Features
@@ -25,7 +28,6 @@ guishopmanager.auction.currency : access to all currencies in the auction
 - An auction similar to what can be seen in various MMORPG games
 - Support MySQL. The auction data is updated automatically approximately once a minute.
 - Convenient stores that will fit a lot of items
-- Processes any items without errors
 
 
 
@@ -35,17 +37,20 @@ guishopmanager.auction.currency : access to all currencies in the auction
 
 ##### Пермишены
 ```makefile
-guishopmanager.reload : перезагрузка плагина
-guishopmanager.create : создание магазина
-guishopmanager.delete : удаление магазина
-guishopmanager.edit : редактирование магазина
-guishopmanager.open.self : открытие магазина себе
-guishopmanager.open : соткрытие магазина другим
-guishopmanager.auction.open : открытие аукциона другим
-guishopmanager.auction.open.self : открытие аукциона себе
-guishopmanager.auction.add : выставление предмета на продажу командой
-guishopmanager.auction.currency.name : доступ к валюте на аукционе
-guishopmanager.auction.currency : доступ ко всем валютам на аукционе
+guishopmanager.user.help : доступ к главной команде
+guishopmanager.staff.reload : перезагрузка плагина
+guishopmanager.staff.shop.create : создание магазина
+guishopmanager.staff.shop.create : удаление магазина
+guishopmanager.staff.shop.edit : редактирование магазина
+guishopmanager.staff.shop.translate : добавление локализованного имени магазина
+guishopmanager.staff.shop.open : открытие магазина другим
+guishopmanager.user.shop.open : открытие магазина себе
+guishopmanager.staff.auction.blockitem : добавление предмета в черный список
+guishopmanager.staff.auction.open : открытие аукциона другим
+guishopmanager.user.auction.open : открытие аукциона себе
+guishopmanager.user.auction.add : выставление предмета на продажу командой
+guishopmanager.currency.name : доступ к валюте на аукционе
+guishopmanager.currency : доступ ко всем валютам на аукционе
 ```
 
 ##### Функционал
@@ -54,8 +59,8 @@ guishopmanager.auction.currency : доступ ко всем валютам на
 - Аукцион по функционалу напоминает то, что можно увидеть в различных MMORPG играх
 - Поддерживает MySQL. Данные аукциона обновляются примерно раз в минуту.
 - Удобные магазины, в которые поместится много вещей
-- Обрабатываются любые предметы без ошибок
 
 
 ##### Demo video || Демонстрационное видео
 https://youtu.be/ZhcIxSsjKlc
+ 
