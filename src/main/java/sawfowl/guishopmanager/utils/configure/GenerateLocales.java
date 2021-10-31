@@ -88,6 +88,7 @@ public class GenerateLocales {
 		checkText(getRuNode("Messages", "ShopIDNotPresent"), serializeText("&cНе указан id магазина."));
 		checkText(getRuNode("Messages", "ShopIDAlreadyExists"), serializeText("&cМагазин с таким id уже существует."));
 		checkText(getRuNode("Messages", "ShopIDNotExists"), serializeText("&cМагазина с таким id не существует."));
+		checkText(getRuNode("Messages", "InvalidShopID"), serializeText("&cВведено не допустимое имя магазина."));
 		checkText(getRuNode("Messages", "MenuNotPresent"), serializeText("&cНе указан номер меню."));
 		checkText(getRuNode("Messages", "InvalidMenuId"), serializeText("&cМеню с таким номером не существует, создайте его через GUI."));
 		checkText(getRuNode("Messages", "SlotNotPresent"), serializeText("&cНе указан слот для размещения товара."));
@@ -198,6 +199,7 @@ public class GenerateLocales {
 		checkText(getDefaultNode("Messages", "ShopIDNotPresent"), serializeText("&cShop id not specified."));
 		checkText(getDefaultNode("Messages", "ShopIDAlreadyExists"), serializeText("&cA shop with this id already exists."));
 		checkText(getDefaultNode("Messages", "ShopIDNotExists"), serializeText("&cThere is no shop with this id."));
+		checkText(getDefaultNode("Messages", "InvalidShopID"), serializeText("&cThe specified shop name is not permissible."));
 		checkText(getDefaultNode("Messages", "MenuNotPresent"), serializeText("&cMenu number not specified."));
 		checkText(getDefaultNode("Messages", "InvalidMenuId"), serializeText("&cMenu with this number does not exist, create it via GUI."));
 		checkText(getDefaultNode("Messages", "SlotNotPresent"), serializeText("&cThe slot for placing the item is not specified."));

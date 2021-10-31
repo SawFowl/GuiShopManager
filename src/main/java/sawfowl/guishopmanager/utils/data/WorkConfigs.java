@@ -70,12 +70,23 @@ public class WorkConfigs extends WorkData {
 		Task.builder().async().execute(() -> {
 			if(!plugin.getRootNode().getNode("ShopList").isEmpty()) {
 				try {
+					List<String> remove = new ArrayList<String>();
 					List<String> enabledShops = plugin.getRootNode().getNode("ShopList").getValue(new TypeToken<List<String>>() {
 						private static final long serialVersionUID = 01;});
 					for(String shopId : enabledShops) {
-						ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().setPath(plugin.getConfigDir().resolve(plugin.getRootNode().getNode("StorageFolder").getString() + File.separator + shopId + ".conf")).build();
-						CommentedConfigurationNode shopNode = shopConfigLoader.load();
-						plugin.addShop(shopId, shopNode.getNode("ShopData").getValue(TypeToken.of(SerializedShop.class)).deserialize());
+						if((plugin.getConfigDir().resolve(plugin.getRootNode().getNode("StorageFolder").getString() + File.separator + shopId + ".conf")).toFile().exists()) {
+							ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().setPath(plugin.getConfigDir().resolve(plugin.getRootNode().getNode("StorageFolder").getString() + File.separator + shopId + ".conf")).build();
+							CommentedConfigurationNode shopNode = shopConfigLoader.load();
+							plugin.addShop(shopId, shopNode.getNode("ShopData").getValue(TypeToken.of(SerializedShop.class)).deserialize());
+						} else {
+							remove.add(shopId);
+						}
+					}
+					if(!remove.isEmpty()) {
+						enabledShops.removeAll(remove);
+						plugin.getRootNode().getNode("ShopList").setValue(new TypeToken<List<String>>() {
+							private static final long serialVersionUID = 01;}, enabledShops);
+						plugin.updateConfigs();
 					}
 				} catch (IOException | ObjectMappingException e) {
 					plugin.getLogger().error(e.getLocalizedMessage());
