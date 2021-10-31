@@ -98,7 +98,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 @Plugin(id = "guishopmanager",
 		name = "GuiShopManager",
-		version = "1.0.3-S7.3",
+		version = "1.0.4-S7.3",
 		dependencies = {
 				@Dependency(id = "localeapi@1.0.0")
 		},
@@ -397,7 +397,7 @@ public class GuiShopManager {
 			}
 			updateAuctionTask = Task.builder().async().interval(55, TimeUnit.SECONDS).execute(() -> {
 				workAuctionData.loadAuction();
-				Task.builder().async().interval(5, TimeUnit.SECONDS).execute(() -> {
+				Task.builder().async().delay(5, TimeUnit.SECONDS).execute(() -> {
 					if(!auctionItems.isEmpty()) {
 						List<SerializedAuctionStack> items = new ArrayList<SerializedAuctionStack>();
 						items.addAll(auctionItems);
@@ -790,8 +790,8 @@ public class GuiShopManager {
 						if(!messages.isEmpty()) {
 							PaginationList.builder()
 							.contents(messages)
-							.title(locales.getLocalizedText(src.getLocale(), "Hover", "CommandsTitle"))
-							.padding(locales.getLocalizedText(src.getLocale(), "Hover", "CommandsPadding"))
+							.title(locales.getLocalizedText(src.getLocale(), "Messages", "CommandsTitle"))
+							.padding(locales.getLocalizedText(src.getLocale(), "Messages", "CommandsPadding"))
 							.linesPerPage(10)
 							.sendTo(src);
 						}
