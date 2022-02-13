@@ -41,7 +41,7 @@ public class ShopMenus {
 
 	public void createInventoryToEditor(ShopMenuData shopMenu, ServerPlayer player, String shopId, int menuId) {
 		Component menuTitle = menuId == 1 ? plugin.getShop(shopId).getOrDefaultTitle(player.locale()) : plugin.getShop(shopId).getOrDefaultTitle(player.locale()).append(Component.text(" || " + menuId));
-		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6).completeStructure().carrier(player).build();
+		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6).completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
 		InventoryMenu menu = viewableInventory.asMenu();
 		menu.setReadOnly(true);
 		menu.setTitle(menuTitle);
@@ -140,7 +140,7 @@ public class ShopMenus {
 	public void createInventoryToPlayer(ShopMenuData shopMenu, ServerPlayer player, String shopId, int menuId) {
 		Component menuTitle = menuId == 1 ? plugin.getShop(shopId).getOrDefaultTitle(player.locale()) : plugin.getShop(shopId).getOrDefaultTitle(player.locale()).append(Component.text(" || " + menuId));
 		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6)
-				.completeStructure().carrier(player).build();
+				.completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
 		InventoryMenu menu = viewableInventory.asMenu();
 		menu.setReadOnly(true);
 		menu.setTitle(menuTitle);
@@ -251,7 +251,7 @@ public class ShopMenus {
 			menuTitle = plugin.getLocales().getComponent(player.locale(), "Gui", "EditSellItem");
 		}
 		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X3)
-				.completeStructure().carrier(player).build();
+				.completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
 		InventoryMenu menu = viewableInventory.asMenu();
 		menu.setReadOnly(true);
 		menu.setTitle(menuTitle);
@@ -428,7 +428,7 @@ public class ShopMenus {
 		} else {
 			menuTitle = plugin.getLocales().getComponent(player.locale(), "Gui", "EditSellTransaction");
 		}
-		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X3).completeStructure().carrier(player).build();
+		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X3).completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
 		InventoryMenu menu = viewableInventory.asMenu();
 		menu.setTitle(menuTitle);
 		menu.setReadOnly(true);

@@ -24,7 +24,7 @@
             },
             {
                 "id": "localeapi",
-                "version": "2.0.0-API8",
+                "version": "2.0.0",
                 "load-order": "after",
                 "optional": false
             }

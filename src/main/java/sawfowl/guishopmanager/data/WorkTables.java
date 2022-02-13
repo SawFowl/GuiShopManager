@@ -39,7 +39,7 @@ public class WorkTables extends WorkData {
 	}
 
 	private void createTables() {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			String createShopsTable = "CREATE TABLE IF NOT EXISTS " + prefix  + "shops(shop_id VARCHAR(128) UNIQUE, shop_data LONGTEXT, PRIMARY KEY(shop_id));";
 			String createAuctionTable = "CREATE TABLE IF NOT EXISTS " + prefix + "auction(stack_uuid CHAR(36) UNIQUE, auction_stack LONGTEXT, PRIMARY KEY(stack_uuid));";
 			String createAuctionExpiredTable = "CREATE TABLE IF NOT EXISTS " + prefix + "auction_expired(stack_uuid CHAR(36) UNIQUE, auction_stack LONGTEXT, PRIMARY KEY(stack_uuid));";
@@ -75,7 +75,7 @@ public class WorkTables extends WorkData {
 
 	@Override
 	public void saveShop(String shopId) {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			SerializedShop serializableShop = plugin.getShop(shopId).serialize();
 	        try {
 	            StringWriter sink = new StringWriter();
@@ -110,7 +110,7 @@ public class WorkTables extends WorkData {
 
 	@Override
 	public void loadShops() {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			if(!plugin.getRootNode().node("ShopList").empty()) {
 				try {
 					Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
@@ -145,7 +145,7 @@ public class WorkTables extends WorkData {
 
 	@Override
 	public void deleteShop(String shopId) {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			if(!plugin.getRootNode().node("ShopList").empty()) {
 				List<String> enabledShops = new ArrayList<String>();
 				try {
@@ -175,7 +175,7 @@ public class WorkTables extends WorkData {
 
 	@Override
 	public void loadAuction() {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			if(lastLoad >= (System.currentTimeMillis() / 1000) - 20) {
 				return;
 			}
@@ -188,7 +188,7 @@ public class WorkTables extends WorkData {
 
 	@Override
 	public void saveAuctionStack(SerializedAuctionStack serializedAuctionStack) {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			String sql = "REPLACE INTO " + prefix + "auction(stack_uuid, auction_stack) VALUES(?, ?);";
 	        StringWriter sink = new StringWriter();
 	        HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).sink(() -> new BufferedWriter(sink)).build();
@@ -212,7 +212,7 @@ public class WorkTables extends WorkData {
 
 	@Override
 	public void removeAuctionStack(UUID stackUUID) {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			try {
 				Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
 				statement.execute("DELETE FROM `" + prefix + "auction` WHERE `" + prefix + "auction`.`stack_uuid` = \'" + stackUUID +"\'");
@@ -225,7 +225,7 @@ public class WorkTables extends WorkData {
 
 	@Override
 	public void saveExpireAuctionData(SerializedAuctionStack serializedAuctionStack) {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			String sql = "REPLACE INTO " + prefix + "auction_expired(stack_uuid, auction_stack) VALUES(?, ?);";
 	        StringWriter sink = new StringWriter();
 	        HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).sink(() -> new BufferedWriter(sink)).build();
@@ -250,7 +250,7 @@ public class WorkTables extends WorkData {
 	@Override
 	public void removeExpireAuctionData(SerializedAuctionStack serializedAuctionStack) {
 		UUID stackUUID = serializedAuctionStack.getStackUUID();
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			try {
 				Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
 				statement.execute("DELETE FROM `" + prefix + "auction_expired` WHERE `" + prefix + "auction_expired`.`stack_uuid` = \'" + stackUUID +"\'");
@@ -263,7 +263,7 @@ public class WorkTables extends WorkData {
 
 	@Override
 	public void saveExpireBetAuctionData(SerializedAuctionStack serializedAuctionStack) {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			String sql = "REPLACE INTO " + prefix + "auction_expired_bet(stack_uuid, auction_stack) VALUES(?, ?);";
 	        StringWriter sink = new StringWriter();
 	        HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).sink(() -> new BufferedWriter(sink)).build();
@@ -288,7 +288,7 @@ public class WorkTables extends WorkData {
 	@Override
 	public void removeExpireBetAuctionData(SerializedAuctionStack serializedAuctionStack) {
 		UUID stackUUID = serializedAuctionStack.getStackUUID();
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			try {
 				Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
 				statement.execute("DELETE FROM `" + prefix + "auction_expired_bet` WHERE `" + prefix + "auction_expired_bet`.`stack_uuid` = \'" + stackUUID +"\'");

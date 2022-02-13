@@ -45,7 +45,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
@@ -93,8 +92,8 @@ import sawfowl.guishopmanager.data.shop.Shop;
 import sawfowl.guishopmanager.gui.AuctionMenus;
 import sawfowl.guishopmanager.gui.ShopMenus;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
-import sawfowl.localeapi.LocaleAPIMain;
 import sawfowl.localeapi.api.LocaleService;
+import sawfowl.localeapi.event.LocaleServiseEvent;
 import sawfowl.localeapi.serializetools.SerializedItemStack;
 
 @Plugin("guishopmanager")
@@ -269,18 +268,13 @@ public class GuiShopManager {
 	}
 
 	@Listener
-	public void onConstruct(ConstructPluginEvent event) {
+	public void onConstruct(LocaleServiseEvent.Construct event) {
 		instance = this;
 		logger = LogManager.getLogger("GuiShopManager");
 		eventContext = EventContext.builder().add(EventContextKeys.PLUGIN, container).build();
-		if(Sponge.pluginManager().plugin("localeapi").isPresent()) {
-			localeAPI = ((LocaleAPIMain) Sponge.pluginManager().plugin("localeapi").get().instance()).getAPI();
-			locales = new Locales(instance);
-			new GenerateLocales(instance);
-		} else {
-			logger.fatal("LocaleAPI not found!");
-			return;
-		}
+		localeAPI = event.getLocaleService();
+		locales = new Locales(instance);
+		new GenerateLocales(instance);
 		configLoader = HoconConfigurationLoader.builder().defaultOptions(localeAPI.getConfigurationOptions()).path(configDir.resolve("Config.conf")).build();
 		configLoaderBlackLists = HoconConfigurationLoader.builder().defaultOptions(localeAPI.getConfigurationOptions()).path(configDir.resolve("AuctionBlackList.conf")).build();
 		loadConfigs();
@@ -384,9 +378,11 @@ public class GuiShopManager {
 
 	private void updateAuctionData() {
 		if(rootNode.node("Auction", "Enable").getBoolean()) {
-			Task updateAuctionTask = Task.builder().interval(55, TimeUnit.SECONDS).execute(() -> {
-				workAuctionData.loadAuction();
-				Sponge.game().asyncScheduler().submit(Task.builder().delay(5, TimeUnit.SECONDS).execute(() -> {
+			Task updateAuctionTask = Task.builder().interval(50, TimeUnit.SECONDS).execute(() -> {
+				if(rootNode.node("MySQLStorage").getBoolean() || rootNode.node("SplitStorage", "Auction").getBoolean()) {
+					workAuctionData.loadAuction();
+				}
+				Sponge.game().asyncScheduler().submit(Task.builder().delay(10, TimeUnit.SECONDS).execute(() -> {
 					if(!auctionItems.isEmpty()) {
 						Map<UUID, SerializedAuctionStack> items = new HashMap<UUID, SerializedAuctionStack>();
 						items.putAll(auctionItems);
@@ -627,7 +623,7 @@ public class GuiShopManager {
 				.executor(new CommandExecutor() {
 					@Override
 					public CommandResult execute(CommandContext context) throws CommandException {
-						if(!context.associatedObject().isPresent() || context.associatedObject().isEmpty()) return CommandResult.success();
+						if(!context.associatedObject().isPresent()) return CommandResult.success();
 						reload();
 						((Audience) context.associatedObject().get()).sendMessage(getLocales().getComponent(((LocaleSource) context.associatedObject().get()).locale(), "Messages", "Reload"));
 						return CommandResult.success();

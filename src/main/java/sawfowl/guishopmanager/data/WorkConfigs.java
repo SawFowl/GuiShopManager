@@ -40,7 +40,7 @@ public class WorkConfigs extends WorkData {
 
 	@Override
 	public void saveShop(String shopId) {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			SerializedShop serializableShop = plugin.getShop(shopId).serialize();
 			ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).path(plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolder").getString() + File.separator + shopId + ".conf")).build();
 			try {
@@ -72,7 +72,7 @@ public class WorkConfigs extends WorkData {
 
 	@Override
 	public void loadShops() {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			if(!plugin.getRootNode().node("ShopList").empty()) {
 				try {
 					List<String> enabledShops = plugin.getRootNode().node("ShopList").get(TypeTokens.LIST_STRINGS_TOKEN);
@@ -100,7 +100,7 @@ public class WorkConfigs extends WorkData {
 
 	@Override
 	public void deleteShop(String shopId) {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			if(!plugin.getRootNode().node("ShopList").empty()) {
 				List<String> enabledShops = new ArrayList<String>();
 				try {
@@ -127,7 +127,7 @@ public class WorkConfigs extends WorkData {
 
 	@Override
 	public void loadAuction() {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			if(isLoaded) {
 				return;
 			}
@@ -183,7 +183,7 @@ public class WorkConfigs extends WorkData {
 
 	@Override
 	public void saveAuctionStack(SerializedAuctionStack serializedAuctionStack) {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			try {
 				auctionNode.node("ActualData", serializedAuctionStack.getStackUUID().toString()).set(TypeTokens.AUCTIONSTACK_TOKEN, serializedAuctionStack);
 			} catch (SerializationException e) {
@@ -211,7 +211,7 @@ public class WorkConfigs extends WorkData {
 
 	@Override
 	public void saveExpireAuctionData(SerializedAuctionStack serializedAuctionStack) {
-		Sponge.asyncScheduler().createExecutor(plugin.getPluginContainer()).execute(() -> {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			try {
 				auctionNode.node("ExpiredData", serializedAuctionStack.getOwnerUUID().toString()).set(TypeTokens.LIST_AUCTIONSTACK_TOKEN, plugin.getExpiredAuctionItems().get(serializedAuctionStack.getOwnerUUID()));
 				auctionConfigLoader.save(auctionNode);

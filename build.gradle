@@ -8,8 +8,8 @@ group = "sawfowl.guishopmanager"
 version = "${major}.${minor}.${patch}-${api}-${suffix}"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_16
-    targetCompatibility = JavaVersion.VERSION_16
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 repositories {
@@ -38,8 +38,8 @@ minecraft {
 }
 
 dependencies {
-    implementation "org.spongepowered:spongeapi:8.0.0-SNAPSHOT"
-    implementation 'org.spongepowered:spongevanilla:1.16.5-8.0.0-RC885:universal@jar'
+    implementation "org.spongepowered:spongeapi:8.0.0"
+    implementation 'org.spongepowered:spongevanilla:1.16.5-8.0.0-RC1072:universal@jar'
+	implementation 'com.github.SawFowl:LocaleAPI:2.1.0'
 	//implementation fileTree(dir: 'libs', include: '*.jar')
-	implementation 'com.github.SawFowl:LocaleAPI:API8-SNAPSHOT'
 }

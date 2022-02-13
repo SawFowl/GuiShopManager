@@ -63,13 +63,14 @@ public class AuctionMenus {
 			}
 		}
 		EditData editData = new EditData();
-		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6).completeStructure().carrier(player).build();
+		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6).completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
 		InventoryMenu menu = viewableInventory.asMenu();
 		menu.setTitle(menuTitle);
 		menu.setReadOnly(true);
 		for(Slot slot : menu.inventory().slots()) {
 			int id = slot.get(Keys.SLOT_INDEX).get();
 			if(id < 45) {
+				while(currentItem < plugin.getAuctionItems().size() && auctionStacks.get(currentItem).isExpired()) currentItem++;
 				if(plugin.getAuctionItems().isEmpty() || currentItem >= plugin.getAuctionItems().size()) {
 					slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 				} else {
@@ -254,7 +255,7 @@ public class AuctionMenus {
 		SerializedBetData oldBetData = plugin.getAuctionItems().get(idAuctionItem).getBetData();
 		BigDecimal minimalBet = oldBetData == null ? plugin.getAuctionItems().get(idAuctionItem).getPrices().get(0).getBet() : oldBetData.getMoney().add(BigDecimal.valueOf(0.01));
 		SerializedBetData betData = new SerializedBetData(serverName, player.uniqueId(), player.name(), minimalBet, currency);
-		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X3).completeStructure().carrier(player).build();
+		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X3).completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
 		InventoryMenu menu = viewableInventory.asMenu();
 		menu.setTitle(menuTitle);
 		menu.setReadOnly(true);
@@ -379,7 +380,7 @@ public class AuctionMenus {
 			}
 		}
 		SerializedAuctionStack auctionStack = new SerializedAuctionStack(editData.itemStack.copy(), prices, player.uniqueId(), player.name(), System.currentTimeMillis() + plugin.getExpire(editData.expire).getTime(), serverName);
-		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X3).completeStructure().carrier(player).build();
+		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X3).completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
 		InventoryMenu menu = viewableInventory.asMenu();
 		menu.setTitle(menuTitle);
 		menu.setReadOnly(true);
@@ -566,7 +567,7 @@ public class AuctionMenus {
 	private void returnItems(ServerPlayer player) {
 		Component menuTitle = Component.text("Return items");
 		menuTitle = plugin.getLocales().getComponent(player.locale(), "Gui", "AuctionReturn");
-		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6).completeStructure().carrier(player).build();
+		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6).completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
 		InventoryMenu menu = viewableInventory.asMenu();
 		menu.setTitle(menuTitle);
 		menu.setReadOnly(true);
