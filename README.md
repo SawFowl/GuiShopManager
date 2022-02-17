@@ -9,7 +9,7 @@ Requires the LocaleAPI plugin.
 guishopmanager.user.help : access to the main command
 guishopmanager.staff.reload : reboot plugin
 guishopmanager.staff.shop.create : creating a shop
-guishopmanager.staff.shop.create : deleting a shop
+guishopmanager.staff.shop.delete : deleting a shop
 guishopmanager.staff.shop.edit : editing a shop
 guishopmanager.staff.shop.translate : add translateble shop name
 guishopmanager.staff.shop.open : opening a shop to others
@@ -40,7 +40,7 @@ guishopmanager.currency : access to all currencies in the auction
 guishopmanager.user.help : доступ к главной команде
 guishopmanager.staff.reload : перезагрузка плагина
 guishopmanager.staff.shop.create : создание магазина
-guishopmanager.staff.shop.create : удаление магазина
+guishopmanager.staff.shop.delete : удаление магазина
 guishopmanager.staff.shop.edit : редактирование магазина
 guishopmanager.staff.shop.translate : добавление локализованного имени магазина
 guishopmanager.staff.shop.open : открытие магазина другим
