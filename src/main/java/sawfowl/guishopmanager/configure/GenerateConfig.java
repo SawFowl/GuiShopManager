@@ -1,6 +1,5 @@
 package sawfowl.guishopmanager.configure;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -26,18 +25,20 @@ public class GenerateConfig {
 		check(getNode("SplitStorage"), "Data storage methods. MySQL used if true.", null, null);
 		check(getNode("SplitStorage", "Auction"), null, false, TypeTokens.BOOLEAN_TOKEN);
 		check(getNode("SplitStorage", "Shops"), null, false, TypeTokens.BOOLEAN_TOKEN);
-		check(getNode("MySQLStorage"), "Data storage method.", false, TypeTokens.BOOLEAN_TOKEN);
-		check(getNode("StorageFolder"), "This is used if \"MySQLStorage\" != \"true\"", "shops", TypeTokens.STRING_TOKEN);
+		check(getNode("SplitStorage", "CommandsShops"), null, false, TypeTokens.BOOLEAN_TOKEN);
+		check(getNode("SplitStorage", "Enable"), null, false, TypeTokens.BOOLEAN_TOKEN);
+		check(getNode("StorageFolders"), "This is used if you do not have MySQL enabled.", null, null);
+		check(getNode("StorageFolders", "Shops"), null, "shops", TypeTokens.STRING_TOKEN);
+		check(getNode("StorageFolders", "CommandsShops"), null, "commands", TypeTokens.STRING_TOKEN);
 		check(getNode("Debug"), "Debug messages.", false, TypeTokens.BOOLEAN_TOKEN);
 		check(getNode("PlayerTransactionMessage"), "Message to players on successful purchase/sale.", true, TypeTokens.BOOLEAN_TOKEN);
-		check(getNode("ShopList"), "List of active shops.", new ArrayList<String>(), TypeTokens.LIST_STRINGS_TOKEN);
 		check(getNode("Aliases", "ShopOpen"), "Aliases for the \"/gsm open\" command.", null, null);
 		check(getNode("Aliases", "ShopOpen", "Enable"), null, true, TypeTokens.BOOLEAN_TOKEN);
 		check(getNode("Aliases", "ShopOpen", "List"), null, Arrays.asList("shop"), TypeTokens.LIST_STRINGS_TOKEN);
 		check(getNode("Aliases", "Auction"), "Aliases for the \"/gsm auction\" command.", null, null);
 		check(getNode("Aliases", "Auction", "Enable"), null, true, TypeTokens.BOOLEAN_TOKEN);
 		check(getNode("Aliases", "Auction", "List"), null, Arrays.asList("auction", "market"), TypeTokens.LIST_STRINGS_TOKEN);
-		check(getNode("MySQL"), "This is used if \"MySQLStorage\" == \"true\"", null, null);
+		check(getNode("MySQL"), "", null, null);
 		check(getNode("MySQL", "Host"), null, "localhost", TypeTokens.STRING_TOKEN);
 		check(getNode("MySQL", "Port"), null, "3306", TypeTokens.STRING_TOKEN);
 		check(getNode("MySQL", "DataBase"), null, "guishopmanager", TypeTokens.STRING_TOKEN);
@@ -45,6 +46,7 @@ public class GenerateConfig {
 		check(getNode("MySQL", "User"), null, "user", TypeTokens.STRING_TOKEN);
 		check(getNode("MySQL", "Password"), null, "UNSET", TypeTokens.STRING_TOKEN);
 		check(getNode("MySQL", "SSL"), null, "false", TypeTokens.STRING_TOKEN);
+		check(getNode("MySQL", "Enable"), null, false, TypeTokens.BOOLEAN_TOKEN);
 		check(getNode("Auction", "Enable"), null, true, TypeTokens.BOOLEAN_TOKEN);
 		check(getNode("Auction", "NbtLimit"), "Limit characters in NBT tag.", 1000, TypeTokens.INTEGER_TOKEN);
 		check(getNode("Auction", "Server"), "The name of the server on which the return of the item to the player will be available. Use different names on different servers.", "ServerNumberOne", TypeTokens.STRING_TOKEN);

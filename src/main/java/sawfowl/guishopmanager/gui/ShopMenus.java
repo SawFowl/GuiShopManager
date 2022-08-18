@@ -196,19 +196,19 @@ public class ShopMenus {
 							createInventoryToPlayer(plugin.getShop(shopId).getShopMenuData(menuId + 1), player, shopId, menuId + 1);
 						}).build());
 					} else if(slotIndex < 45) {
+						if(!shopMenu.containsShopItem(slotIndex)) return false;
 						if(clickType == ClickTypes.CLICK_LEFT.get()) {
-							if(shopMenu.containsShopItem(slotIndex)) {
-								Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
-									transactionItem(shopMenu, player, shopId, menuId, slotIndex, shopMenu.getShopItem(slotIndex).getItemStack(), true);
-								}).build());
-							}
+							if(!shopMenu.getShopItem(slotIndex).isBuy()) return false;
+							player.closeInventory();
+							Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
+								transactionItem(shopMenu, player, shopId, menuId, slotIndex, shopMenu.getShopItem(slotIndex).getItemStack(), true);
+							}).build());
 						} else if(clickType == ClickTypes.CLICK_RIGHT.get()) {
-							if(shopMenu.containsShopItem(slotIndex)) {
-								player.closeInventory();
-								Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
-									transactionItem(shopMenu, player, shopId, menuId, slotIndex, shopMenu.getShopItem(slotIndex).getItemStack(), false);
-								}).build());
-							}
+							if(!shopMenu.getShopItem(slotIndex).isSell()) return false;
+							player.closeInventory();
+							Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
+								transactionItem(shopMenu, player, shopId, menuId, slotIndex, shopMenu.getShopItem(slotIndex).getItemStack(), false);
+							}).build());
 						}
 					}
 					return false;
@@ -690,12 +690,9 @@ public class ShopMenus {
 		return true;
 	}
 
-	// Из-за бага в Sponge придется юзать это. Sponge не отправляет пакет закрытия инвентаря.
 	private void closePlayerInventory(ServerPlayer player) {
-		net.minecraft.server.level.ServerPlayer p = (net.minecraft.server.level.ServerPlayer) ((Object) player);
 		Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(4)).plugin(plugin.getPluginContainer()).execute(() -> {
 			player.closeInventory();
-			p.closeContainer();
 		}).build());
 	}
 

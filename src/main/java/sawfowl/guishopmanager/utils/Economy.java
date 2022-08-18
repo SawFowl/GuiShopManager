@@ -41,7 +41,7 @@ public class Economy {
             if (uOpt.isPresent()) {
                 return uOpt.get().balance(currency);
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
         }
         return BigDecimal.ZERO;
 	}
@@ -78,10 +78,27 @@ public class Economy {
                 } else {
                 }
             	}
-        	} catch (Exception ignored) {
-        		ignored.printStackTrace();
+        	} catch (Exception e) {
+        		e.printStackTrace();
         }
 	}
+
+	public void buyCommands(Player player, Currency currency, BigDecimal money) {
+        try {
+            Optional<UniqueAccount> uOpt = plugin.getEconomyService().findOrCreateAccount(player.uniqueId());
+            if (uOpt.isPresent()) {
+                TransactionResult result = uOpt.get().withdraw(currency, money);
+                if (result.result() == ResultType.SUCCESS) {
+                } else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getRootNode().node("Debug").getBoolean()) {
+                	plugin.getLogger().error(plugin.getLocales().getComponent(player.locale(), "Messages", "BuyCommands")
+            				.replaceText(TextReplacementConfig.builder().match("%player%").replacement(player.name()).build()));
+                } else {
+                }
+            	}
+        	} catch (Exception e) {
+        		e.printStackTrace();
+        	}
+        }
 
 	public void removeFromPlayerBalance(Player player, Currency currency, BigDecimal money, ItemStack itemStack) {
         try {
@@ -111,8 +128,8 @@ public class Economy {
                 } else {
                 }
             	}
-        	} catch (Exception ignored) {
-        		ignored.printStackTrace();
+        	} catch (Exception e) {
+        		e.printStackTrace();
         }
 	}
 
@@ -185,7 +202,7 @@ public class Economy {
         				.replaceText(TextReplacementConfig.builder().match("%added%").replacement(Component.text().append(currency.symbol()).append(Component.text(money.doubleValue()))).build())
         				.replaceText(TextReplacementConfig.builder().match("%balance%").replacement(Component.text().append(currency.symbol()).append(Component.text(getPlayerBalance(buyerUUID, currency).doubleValue()))).build()));
         	}
-        } catch (Exception ignored) {
+        } catch (Exception e) {
         }
 	}
 
@@ -201,7 +218,7 @@ public class Economy {
 		                uOpt.get().withdraw(currency, money, Cause.of(plugin.getEventContext(), plugin.getPluginContainer()));
 		                return true;
 		            }
-		        } catch (Exception ignored) {
+		        } catch (Exception e) {
 				}
 			}
 		} else {

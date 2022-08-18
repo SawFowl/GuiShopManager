@@ -49,11 +49,14 @@ public class GenerateLocales {
 		updateSave(getRuLocale().checkString("&eВыбранный объем: &a%size%", "", "Lore", "CurrentSize"));
 		updateSave(getRuLocale().checkString("&eИтого: &a%size%", "", "Lore", "CurrentSum"));
 		updateSave(getRuLocale().checkString("&eВалюта: &a%currency%&e. Покупка: &a%buyprice%&e. Продажа: &a%sellprice%", "", "Lore", "Price"));
+		updateSave(getRuLocale().checkString("&eВалюта: &a%currency%&e. Покупка: &a%buyprice%&e.", "", "Lore", "CommandPrice"));
 		updateSave(getRuLocale().checkString("&eВалюта: &a%currency%&e. Цена за штуку: &a%price%&e. Итого: &a%total%", "", "Lore", "AuctionPrice"));
 		updateSave(getRuLocale().checkString("&eВалюта: &a%currency%&e. Ставка штуку: &a%price%&e. Итого: &a%total%", "", "Lore", "AuctionBet"));
 		updateSave(getRuLocale().checkString("&eВаша ставка: &a%size%. Итого: &a%total%", "", "Lore", "YourBet"));
 		updateSave(getRuLocale().checkString("&eНалог на прибыль: &a%size%", "", "Lore", "Tax"));
 		updateSave(getRuLocale().checkString("&eПошлина: &a%size%", "", "Lore", "Fee"));
+		updateSave(getRuLocale().checkString("&eВключить/выключить бесплатное использование", "", "Lore", "SwitchFree"));
+		updateSave(getRuLocale().checkString("&eДоступно бесплатно", "", "Lore", "AllowFree"));
 		updateSave(getRuLocale().checkListStrings(Arrays.asList("&eЛевый клик переключит тип цены", "&eПравый клик переключит время и комиссии"), "", "Lore", "AuctionSwitchMode"));
 		updateSave(getRuLocale().checkString("&eПродавец: &b%seller%&e.", "", "Lore", "Seller"));
 		updateSave(getRuLocale().checkString("&eСнимется с продажи через: &a%expired%&e.", "", "Lore", "Expired"));
@@ -65,6 +68,7 @@ public class GenerateLocales {
 		updateSave(getRuLocale().checkString("&cУ вас недостаточно предметов.", "", "Messages", "NoItems"));
 		updateSave(getRuLocale().checkString("&aВы продали &7[&r%item%&7]&ax%amount% за %added%. Ваш баланс %balance%.", "", "Messages", "ItemSell"));
 		updateSave(getRuLocale().checkString("&aВы купили &7[&r%item%&7]&ax%amount% за %removed%. Ваш баланс %balance%.", "", "Messages", "ItemBuy"));
+		updateSave(getRuLocale().checkString("&aВы купили выполнение комманд консолью за %removed%. Ваш баланс %balance%.", "", "Messages", "BuyCommands"));
 		updateSave(getRuLocale().checkString("&cЭта команда может выполняться только игроком.", "", "Messages", "OnlyPlayer"));
 		updateSave(getRuLocale().checkString("&cНе указан id магазина.", "", "Messages", "ShopIDNotPresent"));
 		updateSave(getRuLocale().checkString("&cМагазин с таким id уже существует.", "", "Messages", "ShopIDAlreadyExists"));
@@ -127,6 +131,7 @@ public class GenerateLocales {
 		updateSave(getRuLocale().checkString("&2Возврат предметов", "", "Gui", "AuctionReturn"));
 		updateSave(getRuLocale().checkString("&2Настройка покупки товара", "", "Gui", "EditBuyItem"));
 		updateSave(getRuLocale().checkString("&2Настройка продажи товара", "", "Gui", "EditSellItem"));
+		updateSave(getRuLocale().checkString("&2Настройка покупки комманд", "", "Gui", "EditBuyCommandItem"));
 		updateSave(getRuLocale().checkString("&2Настройка товара", "", "Gui", "EditAuctionItem"));
 		updateSave(getRuLocale().checkString("&2Покупка", "", "Gui", "EditBuyTransaction"));
 		updateSave(getRuLocale().checkString("&2Продажа", "", "Gui", "EditSellTransaction"));
@@ -164,11 +169,14 @@ public class GenerateLocales {
 		updateSave(getDefaultLocale().checkString("&eSelected size: &a%size%", "", "Lore", "CurrentSize"));
 		updateSave(getDefaultLocale().checkString("&eTotal: &a%size%", "", "Lore", "CurrentSum"));
 		updateSave(getDefaultLocale().checkString("&eCurrency: &a%currency%&e. Buy: &a%buyprice%&e. Sell: &a%sellprice%", "", "Lore", "Price"));
+		updateSave(getDefaultLocale().checkString("&eCurrency: &a%currency%&e. Buy: &a%buyprice%&e.", "", "Lore", "CommandPrice"));
 		updateSave(getDefaultLocale().checkString("&eCurrency: &a%currency%&e. Price for one: &a%price%&e. Total: &a%total%", "", "Lore", "AuctionPrice"));
 		updateSave(getDefaultLocale().checkString("&eCurrency: &a%currency%&e. Bet for one: &a%price%&e. Total: &a%total%", "", "Lore", "AuctionBet"));
 		updateSave(getDefaultLocale().checkString("&eYour bet: &a%size%. Total: &a%total%", "", "Lore", "YourBet"));
 		updateSave(getDefaultLocale().checkString("&eTax: &a%size%", "", "Lore", "Tax"));
 		updateSave(getDefaultLocale().checkString("&eFee: &a%size%", "", "Lore", "Fee"));
+		updateSave(getDefaultLocale().checkString("&eEnable/disable free use", "", "Lore", "SwitchFree"));
+		updateSave(getDefaultLocale().checkString("&eAvailable for free", "", "Lore", "AllowFree"));
 		updateSave(getDefaultLocale().checkListStrings(Arrays.asList("&eLeft click to switch the price type", "&eRight click to switch time and commissions"), "", "Lore", "AuctionSwitchMode"));
 		updateSave(getDefaultLocale().checkString("&eSeller: &b%seller%&e.", "", "Lore", "Seller"));
 		updateSave(getDefaultLocale().checkString("&eExpired: &a%expired%&e.", "", "Lore", "Expired"));
@@ -180,6 +188,7 @@ public class GenerateLocales {
 		updateSave(getDefaultLocale().checkString("&cYou don't have enough items.", "", "Messages", "NoItems"));
 		updateSave(getDefaultLocale().checkString("&aYou have successfully sold &7[&r%item%&7]&ax%amount% for %added%. Your balance %balance%.", "", "Messages", "ItemSell"));
 		updateSave(getDefaultLocale().checkString("&aYou have successfully purchased &7[&r%item%&7]&ax%amount% for %removed%. Your balance %balance%.", "", "Messages", "ItemBuy"));
+		updateSave(getDefaultLocale().checkString("&aYou paid %removed% to execute console commands. Your balance %balance%.", "", "Messages", "BuyCommands"));
 		updateSave(getDefaultLocale().checkString("&cThis command can only be executed by the player.", "", "Messages", "OnlyPlayer"));
 		updateSave(getDefaultLocale().checkString("&cShop id not specified.", "", "Messages", "ShopIDNotPresent"));
 		updateSave(getDefaultLocale().checkString("&cA shop with this id already exists.", "", "Messages", "ShopIDAlreadyExists"));
@@ -243,6 +252,7 @@ public class GenerateLocales {
 		updateSave(getDefaultLocale().checkString("&2Return items", "", "Gui", "AuctionReturn"));
 		updateSave(getDefaultLocale().checkString("&2Setting of purchase item", "", "Gui", "EditBuyItem"));
 		updateSave(getDefaultLocale().checkString("&2Setting of sell item", "", "Gui", "EditSellItem"));
+		updateSave(getDefaultLocale().checkString("&2Setting of purchase commands", "", "Gui", "EditBuyCommandItem"));
 		updateSave(getDefaultLocale().checkString("&2Setting an item", "", "Gui", "EditAuctionItem"));
 		updateSave(getDefaultLocale().checkString("&2Buy", "", "Gui", "EditBuyTransaction"));
 		updateSave(getDefaultLocale().checkString("&2Sell", "", "Gui", "EditSellTransaction"));

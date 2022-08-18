@@ -1,4 +1,4 @@
-package sawfowl.guishopmanager.serialization.shop;
+package sawfowl.guishopmanager.serialization.commandsshop;
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
@@ -10,10 +10,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 @ConfigSerializable
-public class SerializedShopPrice implements Serializable {
+public class SerializedCommandShopPrice implements Serializable {
 
-	SerializedShopPrice(){}
-	public SerializedShopPrice(Currency currency) {
+	SerializedCommandShopPrice(){}
+	public SerializedCommandShopPrice(Currency currency) {
 		currencyName = LegacyComponentSerializer.legacyAmpersand().serialize(currency.displayName());
 		this.currency = currency;
 	}
@@ -22,10 +22,10 @@ public class SerializedShopPrice implements Serializable {
 
 	@Setting("Currency")
 	private String currencyName;
-	@Setting("BuyPrice")
+	@Setting("Price")
 	private double buyPrice = 0;
-	@Setting("SellPrice")
-	private double sellPrice = 0;
+	@Setting("AllowFree")
+	private boolean allowFree = false;
 
 	private Currency currency;
 
@@ -45,34 +45,35 @@ public class SerializedShopPrice implements Serializable {
 		return BigDecimal.valueOf(buyPrice);
 	}
 
-	public BigDecimal getSellPrice() {
-		return BigDecimal.valueOf(sellPrice);
-	}
-
-	public void setBuyOrSellPrice(BigDecimal value, boolean isBuy, boolean increase) {
-		if(isBuy) {
-			buyPrice = increase ? BigDecimal.valueOf(buyPrice).add(value).doubleValue() : BigDecimal.valueOf(buyPrice).subtract(value).doubleValue();
-			if(buyPrice <= 0) buyPrice = 0;
-		} else {
-			sellPrice = increase ? BigDecimal.valueOf(sellPrice).add(value).doubleValue() : BigDecimal.valueOf(sellPrice).subtract(value).doubleValue();
-			if(sellPrice <= 0) sellPrice = 0;
-		}
+	public void setPrice(BigDecimal value, boolean increase) {
+		buyPrice = increase ? BigDecimal.valueOf(buyPrice).add(value).doubleValue() : BigDecimal.valueOf(buyPrice).subtract(value).doubleValue();
+		if(buyPrice <= 0) buyPrice = 0;
 	}
 
 	public void setZero() {
 		buyPrice = 0;
-		sellPrice = 0;
+	}
+
+	public boolean isAllowFree() {
+		return allowFree;
+	}
+
+	public void switchFree() {
+		setAllowFree(!allowFree);
+	}
+
+	public void setAllowFree(boolean allowFree) {
+		this.allowFree = allowFree;
 	}
 
 	public boolean isZero() {
-		return buyPrice <= 0 && sellPrice <= 0;
+		return buyPrice <= 0;
 	}
 
 	@Override
 	public String toString() {
 		return  "Currency: " + LegacyComponentSerializer.legacyAmpersand().serialize(currency.displayName()) +
-				", BuyPrice: " + buyPrice +
-				", SellPrice: " + sellPrice;
+				", Price: " + buyPrice;
 	}
 
 }

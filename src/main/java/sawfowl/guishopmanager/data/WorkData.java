@@ -12,6 +12,12 @@ public abstract class WorkData {
 
 	public abstract void deleteShop(String shopId);
 
+	public abstract void saveCommandsShop(String shopId);
+
+	public abstract void loadCommandsShops();
+
+	public abstract void deleteCommandsShop(String shopId);
+
 	public abstract void loadAuction();
 	
 	public abstract void saveAuctionStack(SerializedAuctionStack serializedAuctionStack);

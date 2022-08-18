@@ -18,13 +18,15 @@ import java.util.UUID;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.utils.TypeTokens;
+import sawfowl.guishopmanager.data.commandshop.CommandItemData;
+import sawfowl.guishopmanager.data.commandshop.CommandShopMenuData;
 import sawfowl.guishopmanager.data.shop.ShopItem;
 import sawfowl.guishopmanager.data.shop.ShopMenuData;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
+import sawfowl.guishopmanager.serialization.commandsshop.SerializedCommandShop;
 import sawfowl.guishopmanager.serialization.shop.SerializedShop;
 
 public class WorkTables extends WorkData {
@@ -41,6 +43,7 @@ public class WorkTables extends WorkData {
 	private void createTables() {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			String createShopsTable = "CREATE TABLE IF NOT EXISTS " + prefix  + "shops(shop_id VARCHAR(128) UNIQUE, shop_data LONGTEXT, PRIMARY KEY(shop_id));";
+			String createCommandsShopsTable = "CREATE TABLE IF NOT EXISTS " + prefix  + "commands(shop_id VARCHAR(128) UNIQUE, shop_data LONGTEXT, PRIMARY KEY(shop_id));";
 			String createAuctionTable = "CREATE TABLE IF NOT EXISTS " + prefix + "auction(stack_uuid CHAR(36) UNIQUE, auction_stack LONGTEXT, PRIMARY KEY(stack_uuid));";
 			String createAuctionExpiredTable = "CREATE TABLE IF NOT EXISTS " + prefix + "auction_expired(stack_uuid CHAR(36) UNIQUE, auction_stack LONGTEXT, PRIMARY KEY(stack_uuid));";
 			String createAuctionExpiredBetTable = "CREATE TABLE IF NOT EXISTS " + prefix + "auction_expired_bet(stack_uuid CHAR(36) UNIQUE, auction_stack LONGTEXT, PRIMARY KEY(stack_uuid));";
@@ -52,6 +55,16 @@ public class WorkTables extends WorkData {
 			catch (SQLException e) {
 				plugin.getLogger().error("Create shop table...");
 				plugin.getLogger().error(createShopsTable);
+				plugin.getLogger().error(e.getLocalizedMessage());
+			}
+			try {
+				Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
+				statement.execute(createCommandsShopsTable);
+				statement.close();
+			}
+			catch (SQLException e) {
+				plugin.getLogger().error("Create commands shop table...");
+				plugin.getLogger().error(createCommandsShopsTable);
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
 			if(plugin.getRootNode().node("Auction", "Enable").getBoolean()) {
@@ -95,50 +108,35 @@ public class WorkTables extends WorkData {
 	        } catch (Exception e) {
     			plugin.getLogger().error(e.getLocalizedMessage());
 	        }
-			try {
-				List<String> enabledShops = plugin.getRootNode().node("ShopList").get(TypeTokens.LIST_STRINGS_TOKEN);
-				if(!enabledShops.contains(shopId)) {
-					enabledShops.add(shopId);
-				}
-				plugin.getRootNode().node("ShopList").set(TypeTokens.LIST_STRINGS_TOKEN, enabledShops);
-				plugin.updateConfigs();
-			} catch (SerializationException e) {
-    			plugin.getLogger().error(e.getLocalizedMessage());
-			}
 		});
 	}
 
 	@Override
 	public void loadShops() {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			if(!plugin.getRootNode().node("ShopList").empty()) {
-				try {
-					Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
-					ResultSet results = statement.executeQuery("SELECT * FROM " + prefix + "shops;");
-					List<String> enabledShops = plugin.getRootNode().node("ShopList").get(TypeTokens.LIST_STRINGS_TOKEN);
-					while(results.next()) {
-						String shopId = results.getString("shop_id");
-						if(enabledShops.contains(shopId)) {
-							String shopData = results.getString("shop_data");
-				            StringReader source = new StringReader(shopData);
-				            HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).source(() -> new BufferedReader(source)).build();
-				            ConfigurationNode node = loader.load();
-							plugin.addShop(shopId, node.node("Content").get(TypeTokens.SHOP_TOKEN).deserialize());
-							for(ShopMenuData shopMenuData : plugin.getShop(shopId).getMenus().values()) {
-								for(ShopItem shopItem : shopMenuData.getItems().values()) {
-									shopItem.getPrices().forEach(price -> {
-										price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-									});
-								}
-							}
+			try {
+				Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
+				ResultSet results = statement.executeQuery("SELECT * FROM " + prefix + "shops;");
+				while(results.next()) {
+					String shopId = results.getString("shop_id");
+					String shopData = results.getString("shop_data");
+		            StringReader source = new StringReader(shopData);
+		            HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).source(() -> new BufferedReader(source)).build();
+		            ConfigurationNode node = loader.load();
+					plugin.addShop(shopId, node.node("Content").get(TypeTokens.SHOP_TOKEN).deserialize());
+					for(ShopMenuData shopMenuData : plugin.getShop(shopId).getMenus().values()) {
+						for(ShopItem shopItem : shopMenuData.getItems().values()) {
+							shopItem.getPrices().forEach(price -> {
+								price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
+							});
 						}
 					}
-					statement.close();
 				}
-				catch (SQLException | IOException e) {
-					plugin.getLogger().error("Get shops data");
-					plugin.getLogger().error(e.getLocalizedMessage());
-				}
+				statement.close();
+			}
+			catch (SQLException | IOException e) {
+				plugin.getLogger().error("Get shops data");
+				plugin.getLogger().error(e.getLocalizedMessage());
 			}
 		});
 	}
@@ -146,28 +144,79 @@ public class WorkTables extends WorkData {
 	@Override
 	public void deleteShop(String shopId) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			if(!plugin.getRootNode().node("ShopList").empty()) {
-				List<String> enabledShops = new ArrayList<String>();
-				try {
-					enabledShops.addAll(plugin.getRootNode().node("ShopList").get(TypeTokens.LIST_STRINGS_TOKEN));
-				} catch (SerializationException e) {
-					plugin.getLogger().error(e.getLocalizedMessage());
-				}
-				if(enabledShops.contains(shopId)) {
-					enabledShops.remove(shopId);
-					try {
-						plugin.getRootNode().node("ShopList").set(TypeTokens.LIST_STRINGS_TOKEN, enabledShops);
-						plugin.updateConfigs();
-					} catch (SerializationException e) {
-						plugin.getLogger().error(e.getLocalizedMessage());
-					}
-				}
-			}
 			try {
 				Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
 				statement.executeUpdate("DELETE FROM `" + prefix + "shops` WHERE `" + prefix + "shops`.`shop_id` = \'" + shopId + "\'");
 			} catch (SQLException e) {
 				plugin.getLogger().error("Delete shop data");
+				plugin.getLogger().error(e.getLocalizedMessage());
+			}
+		});
+	}
+
+	@Override
+	public void saveCommandsShop(String shopId) {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
+			SerializedCommandShop serializableShop = plugin.getCommandShopData(shopId).serialize();
+	        try {
+	            StringWriter sink = new StringWriter();
+	            HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).sink(() -> new BufferedWriter(sink)).build();
+	            ConfigurationNode node = loader.createNode();
+	            node.node("Content").set(TypeTokens.COMMANDS_SHOP_TOKEN, serializableShop);
+	            loader.save(node);
+	    		String sql = "REPLACE INTO " + prefix + "commands(shop_id, shop_data) VALUES(?, ?);";
+	    		try(PreparedStatement statement = plugin.getMySQL().getOrOpenConnection().prepareStatement(sql)) {
+	    			statement.setString(1, shopId);
+	    		    statement.setString(2, sink.toString());
+	    		    statement.execute();
+	    		} catch (SQLException e) {
+	    			plugin.getLogger().error("Write commands shop data to database");
+	    			plugin.getLogger().error(e.getLocalizedMessage());
+	    		}
+	        } catch (Exception e) {
+    			plugin.getLogger().error(e.getLocalizedMessage());
+	        }
+		});
+	}
+
+	@Override
+	public void loadCommandsShops() {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
+			try {
+				Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
+				ResultSet results = statement.executeQuery("SELECT * FROM " + prefix + "commands;");
+				while(results.next()) {
+					String shopId = results.getString("shop_id");
+					String shopData = results.getString("shop_data");
+		            StringReader source = new StringReader(shopData);
+		            HoconConfigurationLoader loader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).source(() -> new BufferedReader(source)).build();
+		            ConfigurationNode node = loader.load();
+					plugin.addCommandShopData(shopId, node.node("Content").get(TypeTokens.COMMANDS_SHOP_TOKEN).deserialize());
+					for(CommandShopMenuData shopMenuData : plugin.getCommandShopData(shopId).getMenus().values()) {
+						for(CommandItemData shopItem : shopMenuData.getItems().values()) {
+							shopItem.getPrices().forEach(price -> {
+								price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
+							});
+						}
+					}
+				}
+				statement.close();
+			}
+			catch (SQLException | IOException e) {
+				plugin.getLogger().error("Get shops data");
+				plugin.getLogger().error(e.getLocalizedMessage());
+			}
+		});
+	}
+
+	@Override
+	public void deleteCommandsShop(String shopId) {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
+			try {
+				Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
+				statement.executeUpdate("DELETE FROM `" + prefix + "commands` WHERE `" + prefix + "commands`.`shop_id` = \'" + shopId + "\'");
+			} catch (SQLException e) {
+				plugin.getLogger().error("Delete commands shop data");
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
 		});

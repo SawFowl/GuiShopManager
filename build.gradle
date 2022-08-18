@@ -1,45 +1,67 @@
 plugins {
-    id("java")
-    id("java-library")
-    id("org.spongepowered.gradle.vanilla") version "0.2"
+	id("java")
+	id("org.spongepowered.gradle.plugin") version "2.0.2"
+	id("eclipse")
 }
 
 group = "sawfowl.guishopmanager"
 version = "${major}.${minor}.${patch}-${api}-${suffix}"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+	sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 repositories {
-    mavenCentral()
-    maven {
-        name = "Sponge"
-        url = "https://repo.spongepowered.org/maven"
-    }
-    maven { 
-        name = "JitPack"
-        url 'https://jitpack.io' 
-    }
+	mavenCentral()
+	maven {
+		name = "Sponge"
+		url = "https://repo.spongepowered.org/repository/maven-public"
+	}
+	maven { 
+		name = "JitPack"
+		url 'https://jitpack.io' 
+	}
 }
 
 tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-}
-
-minecraft {
-    version("1.16.5")
-
-    runs {
-        server()
-        client()
-    }
+	options.encoding = 'UTF-8'
 }
 
 dependencies {
-    implementation "org.spongepowered:spongeapi:8.0.0"
-    implementation 'org.spongepowered:spongevanilla:1.16.5-8.0.0-RC1072:universal@jar'
-	implementation 'com.github.SawFowl:LocaleAPI:2.1.0'
+	implementation "org.spongepowered:spongeapi:8.0.0"
+	implementation "com.github.SawFowl:LocaleAPI:2.2.0"
 	//implementation fileTree(dir: 'libs', include: '*.jar')
+}
+
+sponge {
+	apiVersion("8.0.0")
+	loader {
+		name("java_plain")
+		version("1.0")
+	}
+	license("GPL-3.0")
+	plugin("guishopmanager") {
+		displayName(project.name.capitalize())
+		version("${project.version}")
+		entrypoint("${project.group}.${rootProject.name}")
+		description("Plugin for create chest shops.")
+		contributor("SawFowl") {
+			description("Lead Developer")
+		}
+		links {
+			homepage("https://ore.spongepowered.org/Semenkovsky_Ivan/GuiShopManager")
+			source("https://github.com/SawFowl/GuiShopManager")
+			issues("https://github.com/SawFowl/GuiShopManager/issues")
+		}
+		dependency("spongeapi") {
+			optional(false)
+			loadOrder("after")
+			version("8.0.0")
+		}
+		dependency("localeapi") {
+			optional(false)
+			loadOrder("after")
+			version("2.2.0")
+		}
+	}
 }

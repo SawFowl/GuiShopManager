@@ -27,11 +27,9 @@ import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.util.Ticks;
-import org.spongepowered.common.item.util.ItemStackUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
-import net.minecraft.nbt.CompoundTag;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.configure.FillItems;
@@ -75,22 +73,18 @@ public class AuctionMenus {
 					slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 				} else {
 					SerializedAuctionStack auctionItem = auctionStacks.get(currentItem);
-					ItemStack itemStack = auctionItem.getSerializedItemStack().getItemStack();
-					net.minecraft.world.item.ItemStack nmsStack = ItemStackUtil.toNative(itemStack);
-					CompoundTag nbt = nmsStack.hasTag() ? nmsStack.getTag() : new CompoundTag();
-					nbt.putUUID("uuid", auctionItem.getStackUUID());
-					nmsStack.setTag(nbt);
-					itemStack = ItemStackUtil.fromNative(nmsStack);
-					List<Component> itemLore = itemStack.get(Keys.LORE).orElse(new ArrayList<Component>());
-					if(itemStack.get(Keys.LORE).isPresent()) {
-						itemStack.remove(Keys.LORE);
+					SerializedItemStack configuredStack = new SerializedItemStack(auctionItem.getSerializedItemStack().getItemStack());
+					configuredStack.getOrCreateTag().putUUID("uuid", auctionItem.getStackUUID());
+					List<Component> itemLore = configuredStack.getItemStack().get(Keys.LORE).orElse(new ArrayList<Component>());
+					if(configuredStack.getItemStack().get(Keys.LORE).isPresent()) {
+						configuredStack.getItemStack().remove(Keys.LORE);
 					}
 					itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "TransactionVariants"));
 					if(auctionItem.getPrices().get(0).getBet().doubleValue() > 0) {
 						itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "AuctionBet")
 								.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(auctionItem.getPrices().get(0).getCurrency().displayName()).build())
 								.replaceText(TextReplacementConfig.builder().match("%price%").replacement(Component.text(auctionItem.getPrices().get(0).getBet().doubleValue())).build())
-								.replaceText(TextReplacementConfig.builder().match("%total%").replacement(Component.text(auctionItem.getPrices().get(0).getBet().doubleValue() * itemStack.quantity())).build()));
+								.replaceText(TextReplacementConfig.builder().match("%total%").replacement(Component.text(auctionItem.getPrices().get(0).getBet().doubleValue() * configuredStack.getItemStack().quantity())).build()));
 						boolean addEmpty = false;
 						for(SerializedAuctionPrice price : auctionItem.getPrices()) {
 							if(price.getPrice().doubleValue() > 0) {
@@ -106,7 +100,7 @@ public class AuctionMenus {
 							itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "AuctionPrice")
 									.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(price.getCurrency().displayName()).build())
 									.replaceText(TextReplacementConfig.builder().match("%price%").replacement(Component.text(price.getPrice().doubleValue())).build())
-									.replaceText(TextReplacementConfig.builder().match("%total%").replacement(Component.text(price.getPrice().doubleValue() * itemStack.quantity())).build()));
+									.replaceText(TextReplacementConfig.builder().match("%total%").replacement(Component.text(price.getPrice().doubleValue() * configuredStack.getItemStack().quantity())).build()));
 						}
 					}
 					itemLore.add(Component.empty());
@@ -123,11 +117,12 @@ public class AuctionMenus {
 									.replaceText(TextReplacementConfig.builder().match("%bet%").replacement(Component.text().append(auctionItem.getPrices().get(0).getCurrency().symbol()).append(Component.text(auctionItem.getBetData().getMoney().doubleValue()))).build()));
 						}
 					}
-					itemStack.offer(Keys.LORE, itemLore);
+					ItemStack displayStack = configuredStack.getItemStack();
+					displayStack.offer(Keys.LORE, itemLore);
 					if(!auctionItem.isExpired()) {
 						currentItem++;
 					}
-					slot.offer(itemStack);
+					slot.offer(displayStack);
 				}
 			} else if(id >= 45 && id <= 53) {
 				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
@@ -199,15 +194,15 @@ public class AuctionMenus {
 							createInventory(player, page + 1, plugin.getAuctionItems().values().stream().collect(Collectors.toList()));
 						}).build());
 					} else if(slotIndex <= 44) {
-						net.minecraft.world.item.ItemStack nmsStack = ItemStackUtil.toNative(slot.peek());
-						if(!nmsStack.hasTag() || nmsStack.getTag() == null || !nmsStack.getTag().contains("uuid")) return true;
-						if(!plugin.getAuctionItems().containsKey(nmsStack.getTag().getUUID("uuid"))) {
+						SerializedItemStack itemStack = new SerializedItemStack(slot.peek());
+						if(!itemStack.getOrCreateTag().containsTag("uuid")) return true;
+						if(!plugin.getAuctionItems().containsKey(itemStack.getOrCreateTag().getUUID("uuid").get())) {
 							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionItemNotFound"));
 							Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
 								slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 							}).build());
 						}
-						UUID stackUUID = nmsStack.getTag().getUUID("uuid");
+						UUID stackUUID = itemStack.getOrCreateTag().getUUID("uuid").get();
 						if(plugin.getAuctionItems().get(stackUUID).getOwnerUUID().equals(player.uniqueId())) {
 							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionCancelBuy"));
 							return false;
@@ -224,10 +219,10 @@ public class AuctionMenus {
 							if(plugin.getEconomy().checkPlayerBalance(player.uniqueId(), auctionItem.getPrices().get(editData.priceNumber).getCurrency(), auctionItem.getPrices().get(editData.priceNumber).getPrice())) {
 								slot.set(plugin.getFillItems().getItemStack(FillItems.BASIC));
 								plugin.getEconomy().auctionTransaction(player.uniqueId(), auctionItem, editData.priceNumber, false);
-								ItemStack itemStack = auctionItem.getSerializedItemStack().getItemStack();
+								ItemStack toOffer = auctionItem.getSerializedItemStack().getItemStack();
 								plugin.getAuctionWorkData().removeAuctionStack(auctionItem.getStackUUID());
 								plugin.getAuctionItems().remove(stackUUID);
-								player.inventory().query(QueryTypes.INVENTORY_TYPE.get().of(PrimaryPlayerInventory.class)).offer(itemStack);
+								player.inventory().query(QueryTypes.INVENTORY_TYPE.get().of(PrimaryPlayerInventory.class)).offer(toOffer);
 							} else {
 								player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "NoMoney"));
 							}
@@ -573,25 +568,24 @@ public class AuctionMenus {
 		menu.setReadOnly(true);
 		for(SerializedAuctionStack auctionItem : plugin.getAuctionItems().values()) {
 			if(auctionItem.getServerName().equals(serverName) && auctionItem.getOwnerUUID().equals(player.uniqueId())) {
-				net.minecraft.world.item.ItemStack nmsStack = ItemStackUtil.toNative(auctionItem.getSerializedItemStack().getItemStack());
-				CompoundTag nbt = nmsStack.hasTag() ? nmsStack.getTag() : new CompoundTag();
-				nbt.putUUID("uuid", auctionItem.getStackUUID());
-				nmsStack.setTag(nbt);
-				menu.inventory().offer(ItemStackUtil.fromNative(nmsStack));
+				SerializedItemStack itemStack = new SerializedItemStack(auctionItem.getSerializedItemStack().getItemStack());
+				itemStack.getOrCreateTag().putUUID("uuid", auctionItem.getStackUUID());
+				menu.inventory().offer(itemStack.getItemStack());
 			}
 		}
 		menu.registerSlotClick(new SlotClickHandler() {
 			@Override
 			public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
-				if(menu.inventory().containsChild(slot) && slotIndex <= 53) {
-					if(slot.totalQuantity() > 0 && ItemStackUtil.toNative(slot.peek()).hasTag() && ItemStackUtil.toNative(slot.peek()).getTag().contains("uuid")) {
-						UUID uuid = ItemStackUtil.toNative(slot.peek()).getTag().getUUID("uuid");
+				if(menu.inventory().containsChild(slot) && slotIndex <= 53 && slot.totalQuantity() > 0) {
+					SerializedItemStack itemStack = new SerializedItemStack(slot.peek());
+					if(itemStack.getOrCreateTag().containsTag("uuid")) {
+						UUID uuid = itemStack.getOrCreateTag().getUUID("uuid").get();
 						if(plugin.getAuctionItems().containsKey(uuid) && player.inventory().query(QueryTypes.INVENTORY_TYPE.get().of(PrimaryPlayerInventory.class)).freeCapacity() > 0) {
 							slot.clear();
-							ItemStack itemStack = plugin.getAuctionItems().get(uuid).getSerializedItemStack().getItemStack();
+							ItemStack toOffer = plugin.getAuctionItems().get(uuid).getSerializedItemStack().getItemStack();
 							plugin.getAuctionItems().remove(uuid);
 							plugin.getAuctionWorkData().removeAuctionStack(uuid);
-							player.inventory().offer(itemStack);
+							player.inventory().offer(toOffer);
 						}
 					}
 				}
@@ -704,23 +698,9 @@ public class AuctionMenus {
 		return BigDecimal.valueOf(serializedPrice.getPrice().doubleValue()).pow(itemStack.quantity());
 	}
 
-	/*private double calculateTax(SerializedAuctionStack auctionStack, EditData editData, double money) {
-		if(plugin.getExpire(editData.expire).isTax()) {
-			if(editData.bet) {
-				return BigDecimal.valueOf(((money * auctionStack.getSerializedItemStack().getQuantity()) / 100) * plugin.getExpire(editData.expire).getTax()).setScale(2, RoundingMode.HALF_UP).doubleValue();
-			}
-			auctionStack.getPrices().get(editData.priceNumber).setTax(plugin.getExpire(editData.expire).getTax(), auctionStack.getSerializedItemStack().getQuantity());
-			return auctionStack.getPrices().get(editData.priceNumber).getTax();
-		}
-		return 0;
-	}*/
-
-	// Из-за бага в Sponge придется юзать это. Sponge не отправляет пакет закрытия инвентаря.
 	private void closePlayerInventory(ServerPlayer player) {
-		net.minecraft.server.level.ServerPlayer p = (net.minecraft.server.level.ServerPlayer) ((Object) player);
 		Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(4)).plugin(plugin.getPluginContainer()).execute(() -> {
 			player.closeInventory();
-			p.closeContainer();
 		}).build());
 	}
 

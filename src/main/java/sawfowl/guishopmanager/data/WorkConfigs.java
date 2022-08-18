@@ -2,11 +2,13 @@ package sawfowl.guishopmanager.data;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
@@ -16,9 +18,14 @@ import org.spongepowered.configurate.serialize.SerializationException;
 
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.utils.TypeTokens;
+import sawfowl.guishopmanager.data.commandshop.CommandItemData;
+import sawfowl.guishopmanager.data.commandshop.CommandShopData;
+import sawfowl.guishopmanager.data.commandshop.CommandShopMenuData;
+import sawfowl.guishopmanager.data.shop.Shop;
 import sawfowl.guishopmanager.data.shop.ShopItem;
 import sawfowl.guishopmanager.data.shop.ShopMenuData;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
+import sawfowl.guishopmanager.serialization.commandsshop.SerializedCommandShop;
 import sawfowl.guishopmanager.serialization.shop.SerializedShop;
 
 public class WorkConfigs extends WorkData {
@@ -42,7 +49,7 @@ public class WorkConfigs extends WorkData {
 	public void saveShop(String shopId) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			SerializedShop serializableShop = plugin.getShop(shopId).serialize();
-			ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).path(plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolder").getString() + File.separator + shopId + ".conf")).build();
+			ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).path(plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "Shops").getString() + File.separator + shopId + ".conf")).build();
 			try {
 				CommentedConfigurationNode shopNode = shopConfigLoader.load();
 				shopNode.node("ShopData").set(TypeTokens.SHOP_TOKEN, serializableShop);
@@ -50,49 +57,30 @@ public class WorkConfigs extends WorkData {
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
-			List<String> enabledShops = new ArrayList<String>();
-			if(!plugin.getRootNode().node("ShopList").empty()) {
-				try {
-					enabledShops.addAll(plugin.getRootNode().node("ShopList").get(TypeTokens.LIST_STRINGS_TOKEN));
-				} catch (SerializationException e) {
-					plugin.getLogger().error(e.getLocalizedMessage());
-				}
-			}
-			if(!enabledShops.contains(shopId)) {
-				enabledShops.add(shopId);
-			}
-			try {
-				plugin.getRootNode().node("ShopList").set(TypeTokens.LIST_STRINGS_TOKEN, enabledShops);
-			} catch (SerializationException e) {
-				plugin.getLogger().error(e.getLocalizedMessage());
-			}
-			plugin.updateConfigs();
 		});
 	}
 
 	@Override
 	public void loadShops() {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			if(!plugin.getRootNode().node("ShopList").empty()) {
+			File shopsFolder = plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "Shops").getString()).toFile();
+			if(!shopsFolder.exists()) return;
+			for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().contains(".conf"))).collect(Collectors.toList())) {
+				ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).file(shopFile).build();
 				try {
-					List<String> enabledShops = plugin.getRootNode().node("ShopList").get(TypeTokens.LIST_STRINGS_TOKEN);
-					for(String shopId : enabledShops) {
-						if((plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolder").getString() + File.separator + shopId + ".conf")).toFile().exists()) {
-							ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).path(plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolder").getString() + File.separator + shopId + ".conf")).build();
-							CommentedConfigurationNode shopNode = shopConfigLoader.load();
-							plugin.addShop(shopId, shopNode.node("ShopData").get(TypeTokens.SHOP_TOKEN).deserialize());
-							for(ShopMenuData shopMenuData : plugin.getShop(shopId).getMenus().values()) {
-								for(ShopItem shopItem : shopMenuData.getItems().values()) {
-									shopItem.getPrices().forEach(price -> {
-										price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-									});
-								}
-							}
+					CommentedConfigurationNode shopNode = shopConfigLoader.load();
+					Shop shop = shopNode.node("ShopData").get(TypeTokens.SHOP_TOKEN).deserialize();
+					String shopId = shop.getID();
+					plugin.addShop(shopId, shop);
+					for(ShopMenuData shopMenuData : plugin.getShop(shopId).getMenus().values()) {
+						for(ShopItem shopItem : shopMenuData.getItems().values()) {
+							shopItem.getPrices().forEach(price -> {
+								price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
+							});
 						}
 					}
 				} catch (ConfigurateException e) {
 					plugin.getLogger().error(e.getLocalizedMessage());
-					e.printStackTrace();
 				}
 			}
 		});
@@ -101,27 +89,63 @@ public class WorkConfigs extends WorkData {
 	@Override
 	public void deleteShop(String shopId) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			if(!plugin.getRootNode().node("ShopList").empty()) {
-				List<String> enabledShops = new ArrayList<String>();
+			File shopsFolder = plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "Shops").getString()).toFile();
+			if(!shopsFolder.exists()) return;
+			Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().equals(shopId + ".conf"))).findFirst().ifPresent(file -> {
+				file.delete();
+			});
+		});
+	}
+
+	@Override
+	public void saveCommandsShop(String shopId) {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
+			SerializedCommandShop serializableShop = plugin.getCommandShopData(shopId).serialize();
+			ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).path(plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "CommandsShops").getString() + File.separator + shopId + ".conf")).build();
+			try {
+				CommentedConfigurationNode shopNode = shopConfigLoader.load();
+				shopNode.node("ShopData").set(TypeTokens.COMMANDS_SHOP_TOKEN, serializableShop);
+				shopConfigLoader.save(shopNode);
+			} catch (ConfigurateException e) {
+				plugin.getLogger().error(e.getLocalizedMessage());
+			}
+		});
+	}
+
+	@Override
+	public void loadCommandsShops() {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
+			File shopsFolder = plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "CommandsShops").getString()).toFile();
+			if(!shopsFolder.exists()) return;
+			for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().contains(".conf"))).collect(Collectors.toList())) {
+				ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).file(shopFile).build();
 				try {
-					enabledShops.addAll(plugin.getRootNode().node("ShopList").get(TypeTokens.LIST_STRINGS_TOKEN));
-				} catch (SerializationException e) {
+					CommentedConfigurationNode shopNode = shopConfigLoader.load();
+					CommandShopData shop = shopNode.node("ShopData").get(TypeTokens.COMMANDS_SHOP_TOKEN).deserialize();
+					String shopId = shop.getID();
+					plugin.addCommandShopData(shopId, shop);
+					for(CommandShopMenuData shopMenuData : plugin.getCommandShopData(shopId).getMenus().values()) {
+						for(CommandItemData shopItem : shopMenuData.getItems().values()) {
+							shopItem.getPrices().forEach(price -> {
+								price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
+							});
+						}
+					}
+				} catch (ConfigurateException e) {
 					plugin.getLogger().error(e.getLocalizedMessage());
 				}
-				if(enabledShops.contains(shopId)) {
-					enabledShops.remove(shopId);
-					try {
-						plugin.getRootNode().node("ShopList").set(TypeTokens.LIST_STRINGS_TOKEN, enabledShops);
-					} catch (SerializationException e) {
-						plugin.getLogger().error(e.getLocalizedMessage());
-					}
-					plugin.updateConfigs();
-				}
 			}
-			File shopConfigFile = new File(plugin.getConfigDir() + File.separator + plugin.getRootNode().node("StorageFolder").getString() + File.separator + shopId + ".conf");
-			if(shopConfigFile.exists()) {
-				shopConfigFile.delete();
-			}
+		});
+	}
+
+	@Override
+	public void deleteCommandsShop(String shopId) {
+		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
+			File shopsFolder = plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "CommandsShops").getString()).toFile();
+			if(!shopsFolder.exists()) return;
+			Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().equals(shopId + ".conf"))).findFirst().ifPresent(file -> {
+				file.delete();
+			});
 		});
 	}
 

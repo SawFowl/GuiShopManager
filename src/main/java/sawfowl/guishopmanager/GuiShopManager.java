@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -71,9 +70,15 @@ import sawfowl.guishopmanager.utils.CommandParameters;
 import sawfowl.guishopmanager.utils.Economy;
 import sawfowl.guishopmanager.utils.Locales;
 import sawfowl.guishopmanager.commands.AddBlackList;
+import sawfowl.guishopmanager.commands.AddCommand;
 import sawfowl.guishopmanager.commands.AuctionAddItem;
 import sawfowl.guishopmanager.commands.AuctionOpen;
+import sawfowl.guishopmanager.commands.CommandsShopCreate;
+import sawfowl.guishopmanager.commands.CommandsShopDelete;
+import sawfowl.guishopmanager.commands.CommandsShopEdit;
 import sawfowl.guishopmanager.commands.MainCommand;
+import sawfowl.guishopmanager.commands.CommandsShopOpen;
+import sawfowl.guishopmanager.commands.CommandsShopTranslate;
 import sawfowl.guishopmanager.commands.ShopCreate;
 import sawfowl.guishopmanager.commands.ShopDelete;
 import sawfowl.guishopmanager.commands.ShopEdit;
@@ -88,8 +93,10 @@ import sawfowl.guishopmanager.data.MySQL;
 import sawfowl.guishopmanager.data.WorkConfigs;
 import sawfowl.guishopmanager.data.WorkData;
 import sawfowl.guishopmanager.data.WorkTables;
+import sawfowl.guishopmanager.data.commandshop.CommandShopData;
 import sawfowl.guishopmanager.data.shop.Shop;
 import sawfowl.guishopmanager.gui.AuctionMenus;
+import sawfowl.guishopmanager.gui.CommandShopMenus;
 import sawfowl.guishopmanager.gui.ShopMenus;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 import sawfowl.localeapi.api.LocaleService;
@@ -114,11 +121,13 @@ public class GuiShopManager {
 	private static EventContext eventContext;
 	private LocaleService localeAPI;
 
-	private GuiShopManager instance;
+	private static GuiShopManager instance;
 	private GeneratedFillItems fillItems;
 	private ShopMenus shopMenus;
+	private CommandShopMenus commandShopMenus;
 	private AuctionMenus auctionMenus;
 	private WorkData workShopData;
+	private WorkData workCommandsShopData;
 	private WorkData workAuctionData;
 	private MySQL mySQL;
 	private Economy economy;
@@ -126,6 +135,7 @@ public class GuiShopManager {
 	private GenerateConfig generateConfig;
 
 	private Map<String, Shop> shops = new HashMap<String, Shop>();
+	private Map<String, CommandShopData> commandShops = new HashMap<String, CommandShopData>();
 	private LinkedHashMap<UUID, SerializedAuctionStack> auctionItems = new LinkedHashMap<UUID, SerializedAuctionStack>();
 	private Map<UUID, List<SerializedAuctionStack>> expiredAuctionItems = new HashMap<UUID, List<SerializedAuctionStack>>();
 	private Map<UUID, List<SerializedAuctionStack>> expiredBetAuctionItems = new HashMap<UUID, List<SerializedAuctionStack>>();
@@ -145,7 +155,7 @@ public class GuiShopManager {
 	public Logger getLogger() {
 		return logger;
 	}
-	public GuiShopManager getInstance() {
+	public static GuiShopManager getInstance() {
 		return instance;
 	}
 	public File getConfigFile() {
@@ -178,11 +188,18 @@ public class GuiShopManager {
 	public ShopMenus getShopMenu() {
 		return shopMenus;
 	}
+	public CommandShopMenus getCommandShopMenu() {
+		return commandShopMenus;
+	}
+
 	public AuctionMenus getAuctionMenus() {
 		return auctionMenus;
 	}
 	public WorkData getWorkShopData() {
 		return workShopData;
+	}
+	public WorkData getWorkCommandsShopData() {
+		return workCommandsShopData;
 	}
 	public WorkData getAuctionWorkData() {
 		return workAuctionData;
@@ -216,10 +233,29 @@ public class GuiShopManager {
 		workShopData.deleteShop(shopId);
 		shops.remove(shopId);
 	}
+	public void addCommandShopData(String id, CommandShopData shop) {
+		commandShops.put(id, shop);
+		workCommandsShopData.saveCommandsShop(id);
+	}
+	public CommandShopData getCommandShopData(String id) {
+		return commandShops.get(id);
+	}
+	public List<CommandShopData> getAllCommandShops() {
+		return commandShops.values().stream().collect(Collectors.toList());
+	}
+	public boolean commandShopsEmpty() {
+		return commandShops.isEmpty();
+	}
+	public boolean commandShopExists(String id) {
+		return commandShops.containsKey(id);
+	}
+	public void removeCommandShopData(String shopId) {
+		workCommandsShopData.deleteCommandsShop(shopId);
+		commandShops.remove(shopId);
+	}
 	public Map<UUID, SerializedAuctionStack> getAuctionItems() {
 		return auctionItems;
 	}
-
 	public void updateAuctionItems(Map<UUID, SerializedAuctionStack> items) {
 		auctionItems.clear();
 		auctionItems.putAll(items);
@@ -279,6 +315,7 @@ public class GuiShopManager {
 		configLoaderBlackLists = HoconConfigurationLoader.builder().defaultOptions(localeAPI.getConfigurationOptions()).path(configDir.resolve("AuctionBlackList.conf")).build();
 		loadConfigs();
 		generateConfig = new GenerateConfig(instance);
+		setWorkDataClasses();
 	}
 
 	@Listener
@@ -297,8 +334,11 @@ public class GuiShopManager {
 		economy = new Economy(instance);
 		setWorkDataClasses();
 		shopMenus = new ShopMenus(instance);
+		commandShopMenus = new CommandShopMenus(instance);
 		auctionMenus = new AuctionMenus(instance);
 		workShopData.loadShops();
+		workCommandsShopData.loadCommandsShops();
+		workAuctionData.loadAuction();
 		updateAuctionData();
 	}
 
@@ -316,42 +356,51 @@ public class GuiShopManager {
 		loadExpires();
 		shops.clear();
 		workShopData.loadShops();
+		workCommandsShopData.loadCommandsShops();
+		workAuctionData.loadAuction();
 		updateAuctionData();
 	}
 
 	private void setWorkDataClasses() {
-		workShopData = workAuctionData = null;
+		workShopData = workCommandsShopData = workAuctionData = null;
 		if(mySQL != null) {
 			mySQL = null;
 		}
-		if(rootNode.node("SplitStorage", "Auction").getBoolean() || rootNode.node("SplitStorage", "Shops").getBoolean()) {
-			if(rootNode.node("SplitStorage", "Auction").getBoolean()) {
-				createMySQLConnect();
-				workAuctionData = new WorkTables(instance);
-			} else {
-				workAuctionData = new WorkConfigs(instance);
-			}
-			if(rootNode.node("SplitStorage", "Shops").getBoolean()) {
-				createMySQLConnect();
-				workShopData = new WorkTables(instance);
-			} else {
-				File shopsDir = Paths.get(configDir + File.separator + rootNode.node("StorageFolder").getString()).toFile();
-				if(!shopsDir.exists() || !shopsDir.isDirectory()) {
-					shopsDir.mkdir();
+		if(rootNode.node("MySQL", "Enable").getBoolean()) {
+			createMySQLConnect();
+			if(rootNode.node("SplitStorage", "Enable").getBoolean()) {
+				if(rootNode.node("SplitStorage", "Auction").getBoolean() && rootNode.node("SplitStorage", "Shops").getBoolean() && rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
+					workShopData = workCommandsShopData = workAuctionData = new WorkTables(instance);
+				} else if(!rootNode.node("SplitStorage", "Auction").getBoolean() && rootNode.node("SplitStorage", "Shops").getBoolean() && rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
+					workAuctionData = new WorkConfigs(instance);
+					workShopData = workCommandsShopData = new WorkTables(instance);
+				} else if(!rootNode.node("SplitStorage", "Auction").getBoolean() && !rootNode.node("SplitStorage", "Shops").getBoolean() && rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
+					workShopData = workAuctionData = new WorkConfigs(instance);
+					workCommandsShopData = new WorkTables(instance);
+				} else if(!rootNode.node("SplitStorage", "Auction").getBoolean() && !rootNode.node("SplitStorage", "Shops").getBoolean() && !rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
+					workCommandsShopData = workShopData = workAuctionData = new WorkConfigs(instance);
+				} else if(rootNode.node("SplitStorage", "Auction").getBoolean() && !rootNode.node("SplitStorage", "Shops").getBoolean() && !rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
+					workCommandsShopData = workShopData = new WorkConfigs(instance);
+					workAuctionData = new WorkTables(instance);
+				} else if(rootNode.node("SplitStorage", "Auction").getBoolean() && rootNode.node("SplitStorage", "Shops").getBoolean() && !rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
+					workCommandsShopData = new WorkConfigs(instance);
+					workShopData = workAuctionData = new WorkTables(instance);
+				} else if(!rootNode.node("SplitStorage", "Auction").getBoolean() && rootNode.node("SplitStorage", "Shops").getBoolean() && !rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
+					workAuctionData = workCommandsShopData = new WorkConfigs(instance);
+					workShopData = new WorkTables(instance);
+				} else if(rootNode.node("SplitStorage", "Auction").getBoolean() && !rootNode.node("SplitStorage", "Shops").getBoolean() && rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
+					workShopData = new WorkConfigs(instance);
+					workAuctionData = workCommandsShopData = new WorkTables(instance);
 				}
-				workShopData = new WorkConfigs(instance);
-			}
-		} else {
-			if(!rootNode.node("MySQLStorage").getBoolean()) {
-				File shopsDir = Paths.get(configDir + File.separator + rootNode.node("StorageFolder").getString()).toFile();
-				if(!shopsDir.exists() || !shopsDir.isDirectory()) {
-					shopsDir.mkdir();
-				}
-				workShopData = workAuctionData = new WorkConfigs(instance);
-			} else {
-				createMySQLConnect();
-				workShopData = workAuctionData = new WorkTables(instance);
-			}
+			} else workShopData = workCommandsShopData = workAuctionData = new WorkTables(instance);
+		} else workShopData = workCommandsShopData = workAuctionData = new WorkConfigs(instance);
+		if(workShopData instanceof WorkConfigs) {
+			File folder = configDir.resolve(rootNode.node("StorageFolders", "Shops").getString()).toFile();
+			if(!folder.exists() || !folder.isDirectory()) folder.mkdir();
+		}
+		if(workCommandsShopData instanceof WorkConfigs) {
+			File folder = configDir.resolve(rootNode.node("StorageFolders", "CommandsShops").getString()).toFile();
+			if(!folder.exists() || !folder.isDirectory()) folder.mkdir();
 		}
 	}
 
@@ -617,6 +666,71 @@ public class GuiShopManager {
 				.executor(new ShopOpen(instance))
 				.build();
 		
+		Command.Parameterized commandShop = Command.builder()
+				.shortDescription(Component.text("Open a shop"))
+				.permission(Permissions.HELP)
+				.executor(new ShopOpen(instance))
+				.addChild(commandShopCreate, "create")
+				.addChild(commandShopDelete, "delete")
+				.addChild(commandShopEdit, "edit")
+				.addChild(commandShopSetItem, "setitem", "add", "set")
+				.addChild(commandShopTranslate, "translate")
+				.addChild(commandShopOpen, "open")
+				.build();
+		
+		Command.Parameterized commandAddCommand = Command.builder()
+				.shortDescription(Component.text("Add command to item"))
+				.permission(Permissions.COMMANDSSHOP_ADD_COMMAND)
+				.addParameters(CommandParameters.COMMAND)
+				.executor(new AddCommand(instance))
+				.build();
+		
+		Command.Parameterized commandCreateCommandsShop = Command.builder()
+				.shortDescription(Component.text("Add command to item"))
+				.permission(Permissions.COMMANDSSHOP_CREATE)
+				.addParameter(CommandParameters.SHOP_ID)
+				.executor(new CommandsShopCreate(instance))
+				.build();
+		
+		Command.Parameterized commandEditCommandsShop = Command.builder()
+				.shortDescription(Component.text("Add command to item"))
+				.permission(Permissions.COMMANDSSHOP_EDIT)
+				.addParameter(CommandParameters.SHOP_ID)
+				.executor(new CommandsShopEdit(instance))
+				.build();
+		
+		Command.Parameterized commandDeleteCommandsShop = Command.builder()
+				.shortDescription(Component.text("Add command to item"))
+				.permission(Permissions.COMMANDSSHOP_DELETE)
+				.addParameter(CommandParameters.SHOP_ID)
+				.executor(new CommandsShopDelete(instance))
+				.build();
+		
+		Command.Parameterized commandTranslateCommandsShop = Command.builder()
+				.shortDescription(Component.text("Add command to item"))
+				.permission(Permissions.COMMANDSSHOP_CREATE)
+				.addParameters(CommandParameters.SHOP_ID, CommandParameters.LOCALE, CommandParameters.TRANSLATE)
+				.executor(new CommandsShopTranslate(instance))
+				.build();
+		
+		Command.Parameterized commandOpenCommandsShop = Command.builder()
+				.shortDescription(Component.text("Add command to item"))
+				.permission(Permissions.COMMANDSSHOP_OPEN_SELF)
+				.addParameters(CommandParameters.SHOP_ID, CommandParameters.PLAYER)
+				.executor(new CommandsShopOpen(instance))
+				.build();
+		
+		Command.Parameterized commandsShop = Command.builder()
+				.shortDescription(Component.text("Commands shop"))
+				.permission(Permissions.COMMANDSSHOP_OPEN_SELF)
+				.addChild(commandAddCommand, "addcommand")
+				.addChild(commandCreateCommandsShop, "create")
+				.addChild(commandEditCommandsShop, "edit")
+				.addChild(commandDeleteCommandsShop, "delete")
+				.addChild(commandTranslateCommandsShop, "translate")
+				.addChild(commandOpenCommandsShop, "open")
+				.build();
+		
 		Command.Parameterized commandReload = Command.builder()
 				.shortDescription(Component.text("Reload plugin"))
 				.permission(Permissions.RELOAD)
@@ -631,35 +745,26 @@ public class GuiShopManager {
 				})
 				.build();
 		
-		Command.Parameterized mainCommand;
-		if(rootNode.node("Auction", "Enable").getBoolean()) {
-			mainCommand = Command.builder()
+		Command.Parameterized mainCommand = rootNode.node("Auction", "Enable").getBoolean()
+				? 
+				Command.builder()
 					.shortDescription(Component.text("Reload plugin"))
 					.permission(Permissions.HELP)
 					.addChild(commandAuction, "auction", "market")
-					.addChild(commandShopCreate, "create")
-					.addChild(commandShopDelete, "delete")
-					.addChild(commandShopEdit, "edit")
-					.addChild(commandShopSetItem, "setitem", "add", "set")
-					.addChild(commandShopTranslate, "translate")
-					.addChild(commandShopOpen, "open")
+					.addChild(commandShop, "shop")
+					.addChild(commandsShop, "commandsshop", "cshop")
 					.addChild(commandReload, "reload")
 					.executor(new MainCommand(instance))
-					.build();
-		} else {
-			mainCommand = Command.builder()
+					.build() 
+				:
+				Command.builder()
 					.shortDescription(Component.text("Reload plugin"))
 					.permission(Permissions.HELP)
-					.addChild(commandShopCreate, "create")
-					.addChild(commandShopDelete, "delete")
-					.addChild(commandShopEdit, "edit")
-					.addChild(commandShopSetItem, "setitem", "add", "set")
-					.addChild(commandShopTranslate, "translate")
-					.addChild(commandShopOpen, "open")
+					.addChild(commandShop, "shop")
+					.addChild(commandsShop, "commandsshop", "cshop")
 					.addChild(commandReload, "reload")
 					.executor(new MainCommand(instance))
 					.build();
-		}
 		
 		event.register(container, mainCommand, "guishopmanager", "gsm");
 		

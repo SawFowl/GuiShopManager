@@ -1,18 +1,19 @@
-package sawfowl.guishopmanager.serialization.shop;
+package sawfowl.guishopmanager.serialization.commandsshop;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
+import sawfowl.localeapi.serializetools.CompoundTag;
 import sawfowl.localeapi.serializetools.SerializedItemStack;
 
 import java.io.Serializable;
 import java.util.List;
 
 @ConfigSerializable
-public class SerializedShopStack implements Serializable {
+public class SerializedCommandShopStack implements Serializable {
 
-	SerializedShopStack(){}
-	public SerializedShopStack(int slot, SerializedItemStack serializableItemStack, List<SerializedShopPrice> serializedShopPrices) {
+	SerializedCommandShopStack(){}
+	public SerializedCommandShopStack(int slot, SerializedItemStack serializableItemStack, List<SerializedCommandShopPrice> serializedShopPrices) {
 		this.slot = slot;
 		this.serializedItemStack = serializableItemStack;
 		this.serializedShopPrices = serializedShopPrices;
@@ -23,7 +24,7 @@ public class SerializedShopStack implements Serializable {
 	@Setting("Slot")
 	private int slot;
 	@Setting("Prices")
-	private List<SerializedShopPrice> serializedShopPrices;
+	private List<SerializedCommandShopPrice> serializedShopPrices;
 	@Setting("ItemStack")
 	private SerializedItemStack serializedItemStack;
 
@@ -31,12 +32,16 @@ public class SerializedShopStack implements Serializable {
 		return serializedItemStack;
 	}
 
-	public List<SerializedShopPrice> getSerializedShopPrices() {
+	public List<SerializedCommandShopPrice> getSerializedShopPrices() {
 		return serializedShopPrices;
 	}
 
 	public int getSlot() {
 		return slot;
+	}
+
+	public SerializedCommandsList getCommands() {
+		return serializedItemStack.getOrCreateTag().containsTag("guishopmanager") ? (SerializedCommandsList) serializedItemStack.getOrCreateTag().getTag("guishopmanager", CompoundTag.getClass(SerializedCommandsList.class)).get() : new SerializedCommandsList();
 	}
 
 	@Override
