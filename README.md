@@ -8,6 +8,13 @@ Requires the LocaleAPI plugin.
 ```makefile
 guishopmanager.user.help : access to the main command
 guishopmanager.staff.reload : reboot plugin
+guishopmanager.staff.commandshop.create : creating a command shop
+guishopmanager.staff.commandshop.addcommand : adding a command to an item in hand
+guishopmanager.staff.commandshop.delete : deleting the command shop
+guishopmanager.staff.commandshop.edit : editing a command shop
+guishopmanager.staff.commandshop.translate : adding a localized name to the command shop 
+guishopmanager.staff.commandshop.open : opening a command shop to others
+guishopmanager.user.commandshop.open : opening a command shop
 guishopmanager.staff.shop.create : creating a shop
 guishopmanager.staff.shop.delete : deleting a shop
 guishopmanager.staff.shop.edit : editing a shop
@@ -39,10 +46,17 @@ guishopmanager.currency : access to all currencies in the auction
 ```makefile
 guishopmanager.user.help : доступ к главной команде
 guishopmanager.staff.reload : перезагрузка плагина
+guishopmanager.staff.commandshop.create : создание магазина команд
+guishopmanager.staff.commandshop.addcommand : добавление команды на предмет в руках
+guishopmanager.staff.commandshop.delete : удаление магазина команд
+guishopmanager.staff.commandshop.edit : редактирование магазина команд
+guishopmanager.staff.commandshop.translate : добавление магазину команд локализованного имени 
+guishopmanager.staff.commandshop.open : открытие магазина команд другим
+guishopmanager.user.commandshop.open : открытие магазина команд себе
 guishopmanager.staff.shop.create : создание магазина
 guishopmanager.staff.shop.delete : удаление магазина
 guishopmanager.staff.shop.edit : редактирование магазина
-guishopmanager.staff.shop.translate : добавление локализованного имени магазина
+guishopmanager.staff.shop.translate : добавление магазину локализованного имени
 guishopmanager.staff.shop.open : открытие магазина другим
 guishopmanager.user.shop.open : открытие магазина себе
 guishopmanager.staff.auction.blockitem : добавление предмета в черный список
