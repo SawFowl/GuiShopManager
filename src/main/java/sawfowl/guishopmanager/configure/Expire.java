@@ -2,7 +2,7 @@ package sawfowl.guishopmanager.configure;
 
 public class Expire {
 
-	public Expire(int time, double tax, double fee, boolean isTax, boolean isFee) {
+	public Expire(long time, double tax, double fee, boolean isTax, boolean isFee) {
 		this.time = time * 60000;
 		this.tax = tax;
 		this.fee = fee;
