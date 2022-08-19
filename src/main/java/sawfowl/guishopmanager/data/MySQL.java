@@ -2,9 +2,7 @@ package sawfowl.guishopmanager.data;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Properties;
 
 import sawfowl.guishopmanager.GuiShopManager;
@@ -73,46 +71,6 @@ public class MySQL {
 				plugin.getLogger().error(e.getMessage());
 			}
 		}
-	}
-
-	public ResultSet querySQL(String query) {
-		Connection c = null;
-		if (checkConnection()) {
-			c = getConnection();
-		} else {
-			c = openConnection();
-		}
-		Statement s = null;
-		try {
-			s = c.createStatement();
-		} catch (SQLException e1) {
-			plugin.getLogger().error(e1.getMessage());
-		}
-		ResultSet ret = null;
-		try {
-			ret = s.executeQuery(query);
-		} catch (SQLException e) {
-			plugin.getLogger().error(e.getMessage());
-		}
-		closeConnection();
-		return ret;
-	}
-
-	public void updateSQL(String update) {
-		Connection c = null;
-		if (checkConnection()) {
-			c = getConnection();
-		} else {
-			c = openConnection();
-		}
-		Statement s = null;
-		try {
-			s = c.createStatement();
-			s.executeUpdate(update);
-		} catch (SQLException e1) {
-			plugin.getLogger().error(e1.getMessage());
-		}
-		closeConnection();
 	}
 
 }

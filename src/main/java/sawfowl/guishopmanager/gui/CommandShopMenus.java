@@ -81,7 +81,7 @@ public class CommandShopMenus {
 				} else {
 					slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 				}
-			} else if(id >= 45 && id <= 53) {
+			} else if(id <= 53) {
 				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
 				if(id == 45 && plugin.getCommandShopData(shopId).hasPreviousExist(menuId)) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.BACK);
@@ -172,7 +172,7 @@ public class CommandShopMenus {
 				} else {
 					slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 				}
-			} else if(id >= 45 && id <= 53) {
+			} else if(id <= 53) {
 				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
 				if(id == 45 && plugin.getCommandShopData(shopId).hasPreviousExist(menuId)) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.BACK);

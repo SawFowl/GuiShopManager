@@ -124,7 +124,7 @@ public class AuctionMenus {
 					}
 					slot.offer(displayStack);
 				}
-			} else if(id >= 45 && id <= 53) {
+			} else if(id <= 53) {
 				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
 				if(id == 45 && page >= 2) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.BACK);

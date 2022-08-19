@@ -147,6 +147,7 @@ public class WorkTables extends WorkData {
 			try {
 				Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
 				statement.executeUpdate("DELETE FROM `" + prefix + "shops` WHERE `" + prefix + "shops`.`shop_id` = \'" + shopId + "\'");
+				statement.close();
 			} catch (SQLException e) {
 				plugin.getLogger().error("Delete shop data");
 				plugin.getLogger().error(e.getLocalizedMessage());
@@ -215,6 +216,7 @@ public class WorkTables extends WorkData {
 			try {
 				Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
 				statement.executeUpdate("DELETE FROM `" + prefix + "commands` WHERE `" + prefix + "commands`.`shop_id` = \'" + shopId + "\'");
+				statement.close();
 			} catch (SQLException e) {
 				plugin.getLogger().error("Delete commands shop data");
 				plugin.getLogger().error(e.getLocalizedMessage());

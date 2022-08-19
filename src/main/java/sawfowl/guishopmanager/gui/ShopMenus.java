@@ -70,7 +70,7 @@ public class ShopMenus {
 				} else {
 					slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 				}
-			} else if(id >= 45 && id <= 53) {
+			} else if(id <= 53) {
 				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
 				if(id == 45 && plugin.getShop(shopId).hasPreviousExist(menuId)) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.BACK);
@@ -168,7 +168,7 @@ public class ShopMenus {
 				} else {
 					slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 				}
-			} else if(id >= 45 && id <= 53) {
+			} else if(id <= 53) {
 				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
 				if(id == 45 && plugin.getShop(shopId).hasPreviousExist(menuId)) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.BACK);

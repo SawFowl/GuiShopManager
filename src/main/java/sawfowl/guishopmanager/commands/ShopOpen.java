@@ -28,27 +28,27 @@ public class ShopOpen implements CommandExecutor {
 
 	@Override
 	public CommandResult execute(CommandContext context) throws CommandException {
-		Object src = context.cause().root();
+		Audience src = context.cause().audience();
 		if(plugin.shopsEmpty()) {
-			((Audience) src).sendMessage(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "ShopListEmpty"));
+			src.sendMessage(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "ShopListEmpty"));
 		} else {
 			if(context.one(CommandParameters.SHOP_ID).isPresent()) {
 				String shopID = context.one(CommandParameters.SHOP_ID).get();
 				ServerPlayer srcPlayer = (src instanceof ServerPlayer) ? (ServerPlayer) src : null;
 				if(!plugin.shopExists(shopID)) {
-					((Audience) src).sendMessage(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "ShopIDNotExists"));
+					src.sendMessage(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "ShopIDNotExists"));
 				} else {
 					if(context.one(CommandParameters.PLAYER).isPresent()) {
 						if(context.cause().hasPermission(Permissions.SHOP_OPEN_OTHER) || context.one(CommandParameters.PLAYER).get().uniqueId().equals((src instanceof ServerPlayer) ? ((ServerPlayer) src).uniqueId() : null)) {
 							run(context.one(CommandParameters.PLAYER).get(), shopID);
 						} else {
-							((Audience) src).sendMessage(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "DontOpenOther"));
+							src.sendMessage(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "DontOpenOther"));
 						}
 					} else {
 						if(srcPlayer != null) {
 							run(srcPlayer, shopID);
 						} else {
-							((Audience) src).sendMessage(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "PlayerIsNotPresent"));
+							src.sendMessage(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "PlayerIsNotPresent"));
 						}
 					}
 				}
@@ -57,7 +57,7 @@ public class ShopOpen implements CommandExecutor {
 				ServerPlayer srcPlayer = (src instanceof ServerPlayer) ? (ServerPlayer) src : null;
 				ServerPlayer player = null;
 				if(srcPlayer == null && !context.one(CommandParameters.PLAYER).isPresent()) {
-					((Audience) src).sendMessage(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "PlayerIsNotPresent"));
+					src.sendMessage(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "PlayerIsNotPresent"));
 					return CommandResult.success();
 				} else if(srcPlayer != null) {
 					if(!context.one(CommandParameters.PLAYER).isPresent()) {
@@ -74,27 +74,27 @@ public class ShopOpen implements CommandExecutor {
 				} else if(srcPlayer == null && context.one(CommandParameters.PLAYER).isPresent()) {
 					player = context.one(CommandParameters.PLAYER).get();
 				}
-				Component hover = plugin.getLocales().getComponent(player.locale(), "Hover", "OpenShop");
+				Component hover = plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Hover", "OpenShop");
 				for(Shop shop : plugin.getAllShops()) {
 					final ServerPlayer fPlayer = player;
-					Component message = shop.getOrDefaultTitle(player.locale()).clickEvent(SpongeComponents.executeCallback(cause -> {
+					Component message = shop.getOrDefaultTitle(((LocaleSource) src).locale()).clickEvent(SpongeComponents.executeCallback(cause -> {
 						run(fPlayer, shop.getID());
 					})).hoverEvent(HoverEvent.showText(hover));
 					messages.add(message);
 				}
 		        PaginationList.builder()
-				.title(plugin.getLocales().getComponent(player.locale(), "Messages", "ShopListTitle"))
-				.padding(plugin.getLocales().getComponent(player.locale(), "Messages", "ShopListPadding"))
+				.title(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "ShopListTitle"))
+				.padding(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "ShopListPadding"))
 				.contents(messages)
 				.linesPerPage(10)
-				.sendTo(player);
+				.sendTo(src);
 			}
 		}
 		return CommandResult.success();
 	}
 
 	private void run(ServerPlayer player, String shopID) {
-		plugin.getShopMenu().createInventoryToPlayer(plugin.getShop(shopID).getShopMenuData(1), player, shopID, 1);
+		if(player != null) plugin.getShopMenu().createInventoryToPlayer(plugin.getShop(shopID).getShopMenuData(1), player, shopID, 1);
 	}
 
 }
