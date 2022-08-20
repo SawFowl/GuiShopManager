@@ -30,11 +30,14 @@ guishopmanager.currency : access to all currencies in the auction
 ```
 
 ##### Features
-- Multicurrency support
-- Support for all languages of the game using them without restarting
-- An auction similar to what can be seen in various MMORPG games
+- Multicurrency support.
+- Support for all languages of the game using them without restarting.
+- Admin shop.
+- An auction similar to what can be seen in various MMORPG games.
+- Console commands shop.
 - Support MySQL. The auction data is updated automatically approximately once a minute.
-- Convenient stores that will fit a lot of items
+- Convenient shops that will fit a lot of items.
+- Processes any items without errors.
 
 
 
@@ -68,11 +71,13 @@ guishopmanager.currency : доступ ко всем валютам на аук�
 ```
 
 ##### Функционал
-- Поддержка мультивалютности
-- Поддерживает все имеющиеся в игре языки и не требует перезапуска для их использования
-- Аукцион по функционалу напоминает то, что можно увидеть в различных MMORPG играх
+- Поддержка мультивалютности.
+- Поддерживает все имеющиеся в игре языки и не требует перезапуска для их использования.
+- Административный магазин.
+- Магазин консольных комманд.
+- Аукцион по функционалу напоминает то, что можно увидеть в различных MMORPG играх.
 - Поддерживает MySQL. Данные аукциона обновляются примерно раз в минуту.
-- Удобные магазины, в которые поместится много вещей
+- Удобные магазины, в которые поместится много вещей.
 
 
 ##### Demo video || Демонстрационное видео
