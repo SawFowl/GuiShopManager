@@ -41,7 +41,7 @@ public class AddCommand implements CommandExecutor {
 				itemStack = player.itemInHand(HandTypes.OFF_HAND);
 				main = false;
 			}
-			if(itemStack == null || itemStack.type() == ItemTypes.AIR) {
+			if(itemStack == null || itemStack.type().equals(ItemTypes.AIR.get())) {
 				player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ItemNotPresent"));
 			} else {
 				if(context.one(CommandParameters.COMMAND).isPresent()) {
