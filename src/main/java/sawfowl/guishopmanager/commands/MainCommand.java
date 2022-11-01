@@ -79,7 +79,7 @@ public class MainCommand implements CommandExecutor {
 			}
 			if(player.hasPermission(Permissions.COMMANDSSHOP_EDIT)) {
 				messages.add(deserialize("&a/guishopmanager cshop edit &c<Shop>").clickEvent(ClickEvent.runCommand("/guishopmanager cshop edit")).hoverEvent(HoverEvent.showText(plugin.getLocales().getComponent(locale, "Hover", "RunCommand"))));
-				messages.add(deserialize("&a/guishopmanager cshop setitem &c<Shop> <Menu> <Slot> <BuyPrice> <SellPrice> &e<Currency>").clickEvent(ClickEvent.suggestCommand("/guishopmanager setitem ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getComponent(locale, "Hover", "RunCommand"))));
+				messages.add(deserialize("&a/guishopmanager cshop addcommand &c<Args>").clickEvent(ClickEvent.suggestCommand("/guishopmanager setitem ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getComponent(locale, "Hover", "RunCommand"))));
 			}
 			if(player.hasPermission(Permissions.COMMANDSSHOP_TRANSLATE)) {
 				messages.add(deserialize("&a/guishopmanager cshop translate &c<Shop>").clickEvent(ClickEvent.suggestCommand("/guishopmanager cshop translate ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getComponent(locale, "Hover", "RunCommand"))));
@@ -115,6 +115,7 @@ public class MainCommand implements CommandExecutor {
 			messages.add(deserialize("&a/guishopmanager cshop create &c<Shop>"));
 			messages.add(deserialize("&a/guishopmanager cshop delete &c<Shop>"));
 			messages.add(deserialize("&a/guishopmanager cshop edit &c<Shop>"));
+			messages.add(deserialize("&a/guishopmanager cshop addcommand &c<Args>"));
 			messages.add(deserialize("&a/guishopmanager cshop translate &c<Shop>"));
 			messages.add(deserialize("&a/guishopmanager cshop open &c<Shop> &e<Player>"));
 			messages.add(deserialize("&a/guishopmanager reload"));
