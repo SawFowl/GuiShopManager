@@ -208,8 +208,16 @@ public class AuctionAddItem implements CommandExecutor {
 	}
 
 	private String toPlain(Component component) {
-		component.decorations().clear();
-		return LegacyComponentSerializer.legacyAmpersand().serialize(component);
+		return removeCodes(LegacyComponentSerializer.legacyAmpersand().serialize(component));
+	}
+
+	private String removeCodes(String string) {
+		while(string.indexOf('&') != -1 && !string.endsWith("&") && isStyleChar(string.charAt(string.indexOf("&") + 1))) string = string.replaceAll("&" + string.charAt(string.indexOf("&") + 1), "");
+		return string;
+	}
+
+	private boolean isStyleChar(char ch) {
+		return "0123456789abcdefklmnor".indexOf(ch) != -1;
 	}
 
 }

@@ -9,7 +9,6 @@ import org.spongepowered.api.util.locale.LocaleSource;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.data.commandshop.CommandShopData;
@@ -30,14 +29,11 @@ public class CommandsShopCreate implements CommandExecutor {
 		} else {
 			ServerPlayer player = (ServerPlayer) src;
 			if(context.one(CommandParameters.SHOP_ID).isPresent()) {
-				String shopID = context.one(CommandParameters.SHOP_ID).get().toLowerCase();
+				String shopID = removeCodes(context.one(CommandParameters.SHOP_ID).get().toLowerCase());
 				if(plugin.commandShopExists(shopID)) {
 					player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ShopIDAlreadyExists"));
 				} else {
-					Component defaultName = LegacyComponentSerializer.legacyAmpersand().deserialize(shopID);
-					defaultName.decorations().clear();
-					shopID = LegacyComponentSerializer.legacyAmpersand().serialize(defaultName);
-					CommandShopData shop = new CommandShopData(defaultName);
+					CommandShopData shop = new CommandShopData(Component.text(shopID));
 					shop.addMenu(1, new CommandShopMenuData());
 					plugin.addCommandShopData(shopID, shop);
 					plugin.getCommandShopMenu().createInventoryToEditor(plugin.getCommandShopData(shopID).getCommandShopMenuData(1), player, shopID, 1);
@@ -47,6 +43,15 @@ public class CommandsShopCreate implements CommandExecutor {
 			}
 		}
 		return CommandResult.success();
+	}
+
+	private String removeCodes(String string) {
+		while(string.indexOf('&') != -1 && !string.endsWith("&") && isStyleChar(string.charAt(string.indexOf("&") + 1))) string = string.replaceAll("&" + string.charAt(string.indexOf("&") + 1), "");
+		return string;
+	}
+
+	private boolean isStyleChar(char ch) {
+		return "0123456789abcdefklmnor".indexOf(ch) != -1;
 	}
 
 }

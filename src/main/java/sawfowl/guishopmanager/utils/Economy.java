@@ -246,12 +246,17 @@ public class Economy {
 	}
 
 	private String toPlain(Component component) {
-		component.decorations().clear();
-		return LegacyComponentSerializer.legacyAmpersand().serialize(component);
+		String toReturn = LegacyComponentSerializer.legacyAmpersand().serialize(component);
+		while(toReturn.indexOf('&') != -1 && !toReturn.endsWith("&") && isStyleChar(toReturn.charAt(toReturn.indexOf("&") + 1))) toReturn = toReturn.replaceAll("&" + toReturn.charAt(toReturn.indexOf("&") + 1), "");
+		return toReturn;
 	}
 
 	private Component getStackComponent(ItemStack itemStack) {
 		return itemStack.type().asComponent().hoverEvent(HoverEvent.showItem((new SerializedItemStack(itemStack)).getItemKey(), itemStack.quantity()));
+	}
+
+	private boolean isStyleChar(char ch) {
+		return "0123456789abcdefklmnor".indexOf(ch) != -1;
 	}
 
 }

@@ -12,7 +12,6 @@ import org.spongepowered.configurate.serialize.SerializationException;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.utils.CommandParameters;
 import sawfowl.guishopmanager.data.shop.Shop;
@@ -33,7 +32,7 @@ public class ShopCreate implements CommandExecutor  {
 		} else {
 			ServerPlayer player = (ServerPlayer) src;
 			if(context.one(CommandParameters.SHOP_ID).isPresent()) {
-				String shopID = context.one(CommandParameters.SHOP_ID).get().toLowerCase();
+				String shopID = removeCodes(context.one(CommandParameters.SHOP_ID).get().toLowerCase());
 				try {
 					if(!plugin.getRootNode().node("Aliases", "ShopOpen", "List").empty() && plugin.getRootNode().node("Aliases", "ShopOpen", "List").getList(String.class).stream().map(String::toLowerCase).collect(Collectors.toList()).contains(shopID)) {
 						player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "InvalidShopID"));
@@ -45,10 +44,7 @@ public class ShopCreate implements CommandExecutor  {
 				if(plugin.shopExists(shopID)) {
 					player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ShopIDAlreadyExists"));
 				} else {
-					Component defaultName = LegacyComponentSerializer.legacyAmpersand().deserialize(shopID);
-					defaultName.decorations().clear();
-					shopID = LegacyComponentSerializer.legacyAmpersand().serialize(defaultName);
-					Shop shop = new Shop(defaultName);
+					Shop shop = new Shop(Component.text(shopID));
 					shop.addMenu(1, new ShopMenuData());
 					plugin.addShop(shopID, shop);
 					plugin.getShopMenu().createInventoryToEditor(plugin.getShop(shopID).getShopMenuData(1), player, shopID, 1);
@@ -58,6 +54,15 @@ public class ShopCreate implements CommandExecutor  {
 			}
 		}
 		return CommandResult.success();
+	}
+
+	private String removeCodes(String string) {
+		while(string.indexOf('&') != -1 && !string.endsWith("&") && isStyleChar(string.charAt(string.indexOf("&") + 1))) string = string.replaceAll("&" + string.charAt(string.indexOf("&") + 1), "");
+		return string;
+	}
+
+	private boolean isStyleChar(char ch) {
+		return "0123456789abcdefklmnor".indexOf(ch) != -1;
 	}
 
 }
