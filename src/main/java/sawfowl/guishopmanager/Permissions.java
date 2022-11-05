@@ -24,15 +24,23 @@ public class Permissions {
 	public static final String AUCTION_OPEN_OTHER = "guishopmanager.staff.auction.open";
 	public static final String AUCTION_OPEN_SELF = "guishopmanager.user.auction.open";
 	public static final String AUCTION_ADD_ITEM = "guishopmanager.user.auction.add";
-	public static final String AUCTION_CURRENCIES = "guishopmanager.currency";
 
 	public static String currencyPermission(Component currency) {
-		currency.decorations().clear();
-		return AUCTION_CURRENCIES + "." + LegacyComponentSerializer.legacyAmpersand().serialize(currency);
+		return currencyPermission(removeComponents(currency));
 	}
 
 	public static String currencyPermission(String string) {
-		return AUCTION_CURRENCIES + "." + string;
+		return "guishopmanager.currency." + string;
+	}
+
+	private static String removeComponents(Component component) {
+		String toReturn = LegacyComponentSerializer.legacyAmpersand().serialize(component);
+		while(toReturn.indexOf('&') != -1 && !toReturn.endsWith("&") && isStyleChar(toReturn.charAt(toReturn.indexOf("&") + 1))) toReturn = toReturn.replaceAll("&" + toReturn.charAt(toReturn.indexOf("&") + 1), "");
+		return toReturn;
+	}
+
+	private static boolean isStyleChar(char ch) {
+		return "0123456789abcdefklmnor".indexOf(ch) != -1;
 	}
 
 }

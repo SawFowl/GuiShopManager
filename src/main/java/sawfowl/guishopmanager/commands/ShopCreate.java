@@ -14,6 +14,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.utils.CommandParameters;
+import sawfowl.localeapi.api.TextUtils;
 import sawfowl.guishopmanager.data.shop.Shop;
 import sawfowl.guishopmanager.data.shop.ShopMenuData;
 
@@ -32,7 +33,7 @@ public class ShopCreate implements CommandExecutor  {
 		} else {
 			ServerPlayer player = (ServerPlayer) src;
 			if(context.one(CommandParameters.SHOP_ID).isPresent()) {
-				String shopID = removeCodes(context.one(CommandParameters.SHOP_ID).get().toLowerCase());
+				String shopID = TextUtils.clearDecorations(context.one(CommandParameters.SHOP_ID).get().toLowerCase());
 				try {
 					if(!plugin.getRootNode().node("Aliases", "ShopOpen", "List").empty() && plugin.getRootNode().node("Aliases", "ShopOpen", "List").getList(String.class).stream().map(String::toLowerCase).collect(Collectors.toList()).contains(shopID)) {
 						player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "InvalidShopID"));
@@ -54,15 +55,6 @@ public class ShopCreate implements CommandExecutor  {
 			}
 		}
 		return CommandResult.success();
-	}
-
-	private String removeCodes(String string) {
-		while(string.indexOf('&') != -1 && !string.endsWith("&") && isStyleChar(string.charAt(string.indexOf("&") + 1))) string = string.replaceAll("&" + string.charAt(string.indexOf("&") + 1), "");
-		return string;
-	}
-
-	private boolean isStyleChar(char ch) {
-		return "0123456789abcdefklmnor".indexOf(ch) != -1;
 	}
 
 }

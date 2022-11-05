@@ -22,10 +22,10 @@ import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionPrice;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
+import sawfowl.localeapi.api.TextUtils;
 import sawfowl.localeapi.serializetools.SerializedItemStack;
 
 public class Economy {
@@ -229,7 +229,7 @@ public class Economy {
 	public Currency checkCurrency(String check) {
 		Currency result = plugin.getEconomyService().defaultCurrency();
 		for(Currency currency : getCurrencies()) {
-			if(toPlain(currency.displayName()).equalsIgnoreCase(check) || toPlain(currency.symbol()).equalsIgnoreCase(check)) {
+			if(TextUtils.clearDecorations(currency.displayName()).equalsIgnoreCase(check) || TextUtils.clearDecorations(currency.symbol()).equalsIgnoreCase(check)) {
 				result = currency;
 				break;
 			}
@@ -245,18 +245,8 @@ public class Economy {
 		return !currencies.isEmpty() ? currencies : Arrays.asList(plugin.getEconomyService().defaultCurrency());
 	}
 
-	private String toPlain(Component component) {
-		String toReturn = LegacyComponentSerializer.legacyAmpersand().serialize(component);
-		while(toReturn.indexOf('&') != -1 && !toReturn.endsWith("&") && isStyleChar(toReturn.charAt(toReturn.indexOf("&") + 1))) toReturn = toReturn.replaceAll("&" + toReturn.charAt(toReturn.indexOf("&") + 1), "");
-		return toReturn;
-	}
-
 	private Component getStackComponent(ItemStack itemStack) {
 		return itemStack.type().asComponent().hoverEvent(HoverEvent.showItem((new SerializedItemStack(itemStack)).getItemKey(), itemStack.quantity()));
-	}
-
-	private boolean isStyleChar(char ch) {
-		return "0123456789abcdefklmnor".indexOf(ch) != -1;
 	}
 
 }
