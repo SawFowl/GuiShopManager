@@ -83,7 +83,7 @@ public class CommandsShopOpen implements CommandExecutor {
 					})).hoverEvent(HoverEvent.showText(hover));
 					messages.add(message);
 				}
-		        PaginationList.builder()
+				PaginationList.builder()
 				.title(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "ShopListTitle"))
 				.padding(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "ShopListPadding"))
 				.contents(messages)

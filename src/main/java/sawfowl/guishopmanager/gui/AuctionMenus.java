@@ -51,8 +51,8 @@ public class AuctionMenus {
 	public void createInventory(ServerPlayer player, int page, List<SerializedAuctionStack> auctionStacks) {
 		Component menuTitle = page == 1 ? Component.text("Auction") : Component.text("Auction" + page);
 		menuTitle = page == 1 ? plugin.getLocales().getComponent(player.locale(), "Gui", "Auction") : Component.text(plugin.getLocales().getComponent(player.locale(), "Gui", "Auction") + " || " + page);
-        int firstItem = (page * 45) - 45;
-        int currentItem = firstItem;
+		int firstItem = (page * 45) - 45;
+		int currentItem = firstItem;
 		List<Currency> currencies = new ArrayList<Currency>();
 		currencies.add(plugin.getEconomyService().defaultCurrency());
 		for(Currency currency : plugin.getEconomy().getCurrencies()) {
@@ -217,8 +217,11 @@ public class AuctionMenus {
 								return false;
 							}
 							if(plugin.getEconomy().checkPlayerBalance(player.uniqueId(), auctionItem.getPrices().get(editData.priceNumber).getCurrency(), auctionItem.getPrices().get(editData.priceNumber).getPrice())) {
+								if(!plugin.getEconomy().auctionTransaction(player.uniqueId(), auctionItem, editData.priceNumber, false)) {
+									player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "NoMoney"));
+									return false;
+								}
 								slot.set(plugin.getFillItems().getItemStack(FillItems.BASIC));
-								plugin.getEconomy().auctionTransaction(player.uniqueId(), auctionItem, editData.priceNumber, false);
 								ItemStack toOffer = auctionItem.getSerializedItemStack().getItemStack();
 								plugin.getAuctionWorkData().removeAuctionStack(auctionItem.getStackUUID());
 								plugin.getAuctionItems().remove(stackUUID);

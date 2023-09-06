@@ -552,13 +552,16 @@ public class ShopMenus {
 					} else if(slotIndex == 18) {
 						if(editData.size > 0) {
 							if(buy) {
+								if(!plugin.getEconomy().checkPlayerBalance(player.uniqueId(), prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice().multiply(BigDecimal.valueOf(editData.itemStack.quantity()))) || !plugin.getEconomy().removeFromPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice(), editData.itemStack)) {
+									player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "NoMoney"));
+									return false;
+								}
 								editData.itemStack.setQuantity(editData.size);
 								player.inventory().offer(editData.itemStack.copy());
-								plugin.getEconomy().removeFromPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice(), editData.itemStack);
 							} else {
+								if(!plugin.getEconomy().addToPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getSellPrice(), editData.itemStack)) return false;
 								player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(editData.itemStack.copy())).poll(editData.size);
 								editData.itemStack.setQuantity(editData.size);
-								plugin.getEconomy().addToPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getSellPrice(), editData.itemStack);
 							}
 							editData.size = 0;
 						}
@@ -585,11 +588,11 @@ public class ShopMenus {
 							editData.size = 0;
 							closePlayerInventory(player);
 							if(buy) {
-								player.inventory().offer(editData.itemStack.copy());
-								plugin.getEconomy().removeFromPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice(), editData.itemStack);
+								if(plugin.getEconomy().checkPlayerBalance(player.uniqueId(), prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice().multiply(BigDecimal.valueOf(editData.itemStack.quantity()))) && plugin.getEconomy().removeFromPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice(), editData.itemStack)) {
+									player.inventory().offer(editData.itemStack.copy());
+								} else player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "NoMoney"));
 							} else {
-								player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(editData.itemStack)).poll(editData.itemStack.quantity());
-								plugin.getEconomy().addToPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getSellPrice(), editData.itemStack);
+								if(plugin.getEconomy().addToPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getSellPrice(), editData.itemStack)) player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(editData.itemStack)).poll(editData.itemStack.quantity());
 							}
 						}
 					}

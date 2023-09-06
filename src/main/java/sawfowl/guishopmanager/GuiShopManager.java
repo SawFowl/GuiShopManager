@@ -370,27 +370,27 @@ public class GuiShopManager {
 			createMySQLConnect();
 			if(rootNode.node("SplitStorage", "Enable").getBoolean()) {
 				if(rootNode.node("SplitStorage", "Auction").getBoolean() && rootNode.node("SplitStorage", "Shops").getBoolean() && rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
-					workShopData = workCommandsShopData = workAuctionData = new WorkTables(instance);
+					workShopData = workCommandsShopData = workAuctionData = mySQL == null ? new WorkConfigs(instance) : new WorkTables(instance);
 				} else if(!rootNode.node("SplitStorage", "Auction").getBoolean() && rootNode.node("SplitStorage", "Shops").getBoolean() && rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
 					workAuctionData = new WorkConfigs(instance);
-					workShopData = workCommandsShopData = new WorkTables(instance);
+					workShopData = workCommandsShopData = mySQL == null ? workAuctionData : new WorkTables(instance);
 				} else if(!rootNode.node("SplitStorage", "Auction").getBoolean() && !rootNode.node("SplitStorage", "Shops").getBoolean() && rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
 					workShopData = workAuctionData = new WorkConfigs(instance);
-					workCommandsShopData = new WorkTables(instance);
+					workCommandsShopData = mySQL == null ? workShopData : new WorkTables(instance);
 				} else if(!rootNode.node("SplitStorage", "Auction").getBoolean() && !rootNode.node("SplitStorage", "Shops").getBoolean() && !rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
 					workCommandsShopData = workShopData = workAuctionData = new WorkConfigs(instance);
 				} else if(rootNode.node("SplitStorage", "Auction").getBoolean() && !rootNode.node("SplitStorage", "Shops").getBoolean() && !rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
 					workCommandsShopData = workShopData = new WorkConfigs(instance);
-					workAuctionData = new WorkTables(instance);
+					workAuctionData = mySQL == null ? workCommandsShopData : new WorkTables(instance);
 				} else if(rootNode.node("SplitStorage", "Auction").getBoolean() && rootNode.node("SplitStorage", "Shops").getBoolean() && !rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
 					workCommandsShopData = new WorkConfigs(instance);
-					workShopData = workAuctionData = new WorkTables(instance);
+					workShopData = workAuctionData = mySQL == null ? workCommandsShopData : new WorkTables(instance);
 				} else if(!rootNode.node("SplitStorage", "Auction").getBoolean() && rootNode.node("SplitStorage", "Shops").getBoolean() && !rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
 					workAuctionData = workCommandsShopData = new WorkConfigs(instance);
-					workShopData = new WorkTables(instance);
+					workShopData = mySQL == null ? workAuctionData : new WorkTables(instance);
 				} else if(rootNode.node("SplitStorage", "Auction").getBoolean() && !rootNode.node("SplitStorage", "Shops").getBoolean() && rootNode.node("SplitStorage", "CommandsShops").getBoolean()) {
 					workShopData = new WorkConfigs(instance);
-					workAuctionData = workCommandsShopData = new WorkTables(instance);
+					workAuctionData = workCommandsShopData = mySQL == null ? workShopData : new WorkTables(instance);
 				}
 			} else workShopData = workCommandsShopData = workAuctionData = new WorkTables(instance);
 		} else workShopData = workCommandsShopData = workAuctionData = new WorkConfigs(instance);
@@ -413,6 +413,7 @@ public class GuiShopManager {
 				rootNode.node("MySQL", "User").getString(),
 				rootNode.node("MySQL", "Password").getString(),
 				rootNode.node("MySQL", "SSL").getString());
+		if(mySQL.getOrOpenConnection() == null) mySQL = null;
 	}
 
 	private void loadExpires() {

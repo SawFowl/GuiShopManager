@@ -15,7 +15,6 @@ public class Locales {
 		plugin = instance;
 	}
 
-	// ЛОКАЛИЗАЦИЯ
 	public Map<Locale, AbstractLocaleUtil> getLocales() {
 		return plugin.getLocaleAPI().getPluginLocales("guishopmanager");
 	}

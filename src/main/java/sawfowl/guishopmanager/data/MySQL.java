@@ -31,14 +31,14 @@ public class MySQL {
 
 	public Connection openConnection() {
 		String url = "jdbc:mysql://" + this.hostname + ":" + this.port + "/" + this.database;
-        Properties properties = new Properties();
-        properties.setProperty("user", this.user);
-        properties.setProperty("password", this.password);
-        properties.setProperty("useSSL", this.ssl);
+		Properties properties = new Properties();
+		properties.setProperty("user", this.user);
+		properties.setProperty("password", this.password);
+		properties.setProperty("useSSL", this.ssl);
 		try {
 			this.connection = DriverManager.getConnection(url, properties);
 		} catch (SQLException e) {
-			plugin.getLogger().error("JDBC Driver not found!");
+			plugin.getLogger().error("JDBC Driver not found! Install the `MySQLDriver` plugin - https://ore.spongepowered.org/Semenkovsky_Ivan/MySQLDriver");
 			plugin.getLogger().error(e.getMessage());
 		}
 		return this.connection;

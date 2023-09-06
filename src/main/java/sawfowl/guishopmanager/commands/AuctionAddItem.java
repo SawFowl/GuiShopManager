@@ -22,10 +22,10 @@ import org.spongepowered.api.util.locale.LocaleSource;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.utils.CommandParameters;
+import sawfowl.localeapi.api.TextUtils;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionPrice;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 
@@ -55,7 +55,7 @@ public class AuctionAddItem implements CommandExecutor {
 			boolean currencyPresent = context.one(CommandParameters.CURRENCY).isPresent();
 			if(currencyPresent) {
 				for(Currency currency : plugin.getEconomy().getCurrencies()) {
-					if(toPlain(currency.displayName()).equalsIgnoreCase(context.one(CommandParameters.CURRENCY).get()) || toPlain(currency.displayName()).equalsIgnoreCase(context.one(CommandParameters.CURRENCY).get()) || toPlain(currency.symbol()).equalsIgnoreCase(context.one(CommandParameters.CURRENCY).get())) {
+					if(TextUtils.clearDecorations(currency.displayName()).equalsIgnoreCase(context.one(CommandParameters.CURRENCY).get()) || TextUtils.clearDecorations(currency.displayName()).equalsIgnoreCase(context.one(CommandParameters.CURRENCY).get()) || TextUtils.clearDecorations(currency.symbol()).equalsIgnoreCase(context.one(CommandParameters.CURRENCY).get())) {
 						currencyPresent = true;
 						break;
 					} else {
@@ -205,19 +205,6 @@ public class AuctionAddItem implements CommandExecutor {
 
 	private long time() {
 		return plugin.getExpire(0).getTime() + System.currentTimeMillis();
-	}
-
-	private String toPlain(Component component) {
-		return removeCodes(LegacyComponentSerializer.legacyAmpersand().serialize(component));
-	}
-
-	private String removeCodes(String string) {
-		while(string.indexOf('&') != -1 && !string.endsWith("&") && isStyleChar(string.charAt(string.indexOf("&") + 1))) string = string.replaceAll("&" + string.charAt(string.indexOf("&") + 1), "");
-		return string;
-	}
-
-	private boolean isStyleChar(char ch) {
-		return "0123456789abcdefklmnor".indexOf(ch) != -1;
 	}
 
 }

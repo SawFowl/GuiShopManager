@@ -94,35 +94,35 @@ public class GenerateConfig {
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void check(CommentedConfigurationNode node, String comment, Object value, TypeToken typeToken) {
-        if (node.virtual()) {
-        	save = true;
-        	if(comment != null) {
-            	node.comment(comment);
-        	}
-        	if(value != null) {
-    			try {
+		if (node.virtual()) {
+			save = true;
+			if(comment != null) {
+				node.comment(comment);
+			}
+			if(value != null) {
+				try {
 					node.set(typeToken, value);
 				} catch (SerializationException e) {
-    				plugin.getLogger().error(e.getLocalizedMessage());
+					plugin.getLogger().error(e.getLocalizedMessage());
 				}
-        	}
-        }
-    }
+			}
+		}
+	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void checkBlackList(CommentedConfigurationNode node, String comment, Object value, TypeToken typeToken) {
-        if (node.virtual()) {
-        	saveBlackList = true;
-        	if(comment != null) {
-            	node.comment(comment);
-        	}
-        	if(value != null) {
-    			try {
+		if (node.virtual()) {
+			saveBlackList = true;
+			if(comment != null) {
+				node.comment(comment);
+			}
+			if(value != null) {
+				try {
 					node.set(typeToken, value);
 				} catch (SerializationException e) {
-    				plugin.getLogger().error(e.getLocalizedMessage());
+					plugin.getLogger().error(e.getLocalizedMessage());
 				}
-        	}
-        }
-    }
+			}
+		}
+	}
 
 }

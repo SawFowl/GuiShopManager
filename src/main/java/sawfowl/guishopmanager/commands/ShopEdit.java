@@ -52,7 +52,7 @@ public class ShopEdit implements CommandExecutor {
 						})).hoverEvent(HoverEvent.showText(hover));
 						messages.add(message);
 					}
-			        PaginationList.builder()
+					PaginationList.builder()
 					.title(plugin.getLocales().getComponent(player.locale(), "Messages", "ShopListTitle"))
 					.padding(plugin.getLocales().getComponent(player.locale(), "Messages", "ShopListPadding"))
 					.contents(messages)

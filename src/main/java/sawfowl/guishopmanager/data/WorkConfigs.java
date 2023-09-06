@@ -162,7 +162,7 @@ public class WorkConfigs extends WorkData {
 						SerializedAuctionStack auctionStack = node.get(TypeTokens.AUCTIONSTACK_TOKEN);
 						auctionStack.getPrices().forEach(price -> {
 							price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-				    	});
+						});
 						auctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(auctionStack.getBetData().getCurrencyName()));
 						toAdd.put(auctionStack.getStackUUID(), auctionStack);
 					} catch (SerializationException e) {

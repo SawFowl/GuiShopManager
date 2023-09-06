@@ -19,9 +19,9 @@ public abstract class WorkData {
 	public abstract void deleteCommandsShop(String shopId);
 
 	public abstract void loadAuction();
-	
+
 	public abstract void saveAuctionStack(SerializedAuctionStack serializedAuctionStack);
-	
+
 	public abstract void removeAuctionStack(UUID stackUUID);
 
 	public abstract void saveExpireAuctionData(SerializedAuctionStack serializedAuctionStack);

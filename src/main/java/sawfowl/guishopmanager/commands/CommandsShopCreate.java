@@ -14,6 +14,7 @@ import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.data.commandshop.CommandShopData;
 import sawfowl.guishopmanager.data.commandshop.CommandShopMenuData;
 import sawfowl.guishopmanager.utils.CommandParameters;
+import sawfowl.localeapi.api.TextUtils;
 
 public class CommandsShopCreate implements CommandExecutor {
 
@@ -29,7 +30,7 @@ public class CommandsShopCreate implements CommandExecutor {
 		} else {
 			ServerPlayer player = (ServerPlayer) src;
 			if(context.one(CommandParameters.SHOP_ID).isPresent()) {
-				String shopID = removeCodes(context.one(CommandParameters.SHOP_ID).get().toLowerCase());
+				String shopID = TextUtils.clearDecorations(context.one(CommandParameters.SHOP_ID).get().toLowerCase());
 				if(plugin.commandShopExists(shopID)) {
 					player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ShopIDAlreadyExists"));
 				} else {
@@ -43,15 +44,6 @@ public class CommandsShopCreate implements CommandExecutor {
 			}
 		}
 		return CommandResult.success();
-	}
-
-	private String removeCodes(String string) {
-		while(string.indexOf('&') != -1 && !string.endsWith("&") && isStyleChar(string.charAt(string.indexOf("&") + 1))) string = string.replaceAll("&" + string.charAt(string.indexOf("&") + 1), "");
-		return string;
-	}
-
-	private boolean isStyleChar(char ch) {
-		return "0123456789abcdefklmnor".indexOf(ch) != -1;
 	}
 
 }

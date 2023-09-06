@@ -1,7 +1,7 @@
 package sawfowl.guishopmanager;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import sawfowl.localeapi.api.TextUtils;
 
 public class Permissions {
 
@@ -24,15 +24,13 @@ public class Permissions {
 	public static final String AUCTION_OPEN_OTHER = "guishopmanager.staff.auction.open";
 	public static final String AUCTION_OPEN_SELF = "guishopmanager.user.auction.open";
 	public static final String AUCTION_ADD_ITEM = "guishopmanager.user.auction.add";
-	public static final String AUCTION_CURRENCIES = "guishopmanager.currency";
 
 	public static String currencyPermission(Component currency) {
-		currency.decorations().clear();
-		return AUCTION_CURRENCIES + "." + LegacyComponentSerializer.legacyAmpersand().serialize(currency);
+		return currencyPermission(TextUtils.clearDecorations(currency));
 	}
 
 	public static String currencyPermission(String string) {
-		return AUCTION_CURRENCIES + "." + string;
+		return "guishopmanager.currency." + string;
 	}
 
 }
