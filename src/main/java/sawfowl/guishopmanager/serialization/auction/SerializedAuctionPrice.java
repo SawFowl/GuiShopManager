@@ -29,6 +29,7 @@ public class SerializedAuctionPrice implements Serializable {
 	private double price;
 	@Setting("Tax")
 	private double tax;
+	private double betTax;
 
 	private Currency currency;
 
@@ -91,8 +92,13 @@ public class SerializedAuctionPrice implements Serializable {
 		return tax;
 	}
 
+	public double getBetTax() {
+		return betTax;
+	}
+
 	public void setTax(double taxPercent, double stackSize) {
 		tax = BigDecimal.valueOf(((price * stackSize) / 100) * taxPercent).setScale(2, RoundingMode.HALF_UP).doubleValue();
+		betTax = BigDecimal.valueOf(((bet * stackSize) / 100) * taxPercent).setScale(2, RoundingMode.HALF_UP).doubleValue();
 	}
 
 	public boolean isZero() {

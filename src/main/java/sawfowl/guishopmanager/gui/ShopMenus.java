@@ -364,6 +364,9 @@ public class ShopMenus {
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
 							editItem(shopMenu, player, shopId, menuID, shopSlot, editData.itemStack, !buy);
 						}).build());
+					} else if(slotIndex == 23) {
+						editData.nextPrice(prices);
+						menu.inventory().slot(13).get().set(updateDisplayItemEdit(player, prices, editData));
 					} else if(slotIndex == 26) {
 						if(!plugin.shopExists(shopId)) {
 							player.sendMessage(Component.text().append(plugin.getLocales().getComponent(player.locale(), "Messages", "ShopIDNotExists").append(Component.text(" " + shopId))));
@@ -539,11 +542,7 @@ public class ShopMenus {
 						editData.size = 0;
 						menu.inventory().slot(13).get().set(updateDisplayItemTransaction(player, prices, editData));
 					} else if(slotIndex == 23) {
-						if(editData.priceNumber >= prices.size() - 1) {
-							editData.priceNumber = 0;
-						} else {
-							editData.priceNumber++;
-						}
+						editData.nextPrice(prices);
 						if(buy) {
 							int check = calculateMaxBuyItems(player, itemStack, prices.get(editData.priceNumber));
 							if(editData.size > check) editData.size = check;
@@ -617,7 +616,7 @@ public class ShopMenus {
 			lore.add(Component.empty());
 		}
 		lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentCurrency")
-				.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(prices.get(editData.priceNumber).getCurrency().displayName()).build()));
+				.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(prices.get(editData.priceNumber).getCurrency().pluralDisplayName()).build()));
 		for(SerializedShopPrice price : prices) {
 			lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Price")
 					.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(price.getCurrency().displayName()).build())
@@ -705,5 +704,9 @@ public class ShopMenus {
 		ItemStack itemStack = ItemStack.of(ItemTypes.AIR);
 		boolean buy;
 		boolean remove = false;
+		void nextPrice(List<SerializedShopPrice> prices) {
+			priceNumber = priceNumber + 1;
+			if(prices.size() <= priceNumber) priceNumber = 0;
+		}
 	}
 }

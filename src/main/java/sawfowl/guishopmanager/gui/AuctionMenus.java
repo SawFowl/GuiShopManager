@@ -79,6 +79,10 @@ public class AuctionMenus {
 					if(configuredStack.getItemStack().get(Keys.LORE).isPresent()) {
 						configuredStack.getItemStack().remove(Keys.LORE);
 					}
+					if(!itemLore.isEmpty()) itemLore.add(Component.empty());
+					itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "BetClick"));
+					itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "BuyClick"));
+					itemLore.add(Component.empty());
 					itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "TransactionVariants"));
 					if(auctionItem.getPrices().get(0).getBet().doubleValue() > 0) {
 						itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "AuctionBet")
@@ -103,6 +107,7 @@ public class AuctionMenus {
 									.replaceText(TextReplacementConfig.builder().match("%total%").replacement(Component.text(price.getPrice().doubleValue() * configuredStack.getItemStack().quantity())).build()));
 						}
 					}
+					itemLore.add(Component.empty());
 					itemLore.add(Component.empty());
 					itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Expired")
 							.replaceText(TextReplacementConfig.builder().match("%expired%").replacement(auctionItem.getExpireTimeFromNow()).build()));
@@ -138,7 +143,7 @@ public class AuctionMenus {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.CHANGECURRENCY);
 					itemStack.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "ChangeCurrency"));
 					itemStack.offer(Keys.LORE, Arrays.asList(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentCurrency")
-							.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(currencies.get(editData.priceNumber).displayName()).build())));
+							.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(currencies.get(editData.priceNumber).pluralDisplayName()).build())));
 					slot.set(itemStack);
 				} else if(id == 51) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.RETURN);
@@ -178,12 +183,11 @@ public class AuctionMenus {
 							editItem(player, page);
 						}).build());
 					} else if(slotIndex == 49) {
-						editData.priceNumber++;
-						if(editData.priceNumber > currencies.size() - 1) editData.priceNumber = 0;
+						editData.nextPrice(currencies.size());
 						ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.CHANGECURRENCY);
 						itemStack.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "ChangeCurrency"));
 						itemStack.offer(Keys.LORE, Arrays.asList(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentCurrency")
-								.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(currencies.get(editData.priceNumber).displayName()).build())));
+								.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(currencies.get(editData.priceNumber).pluralDisplayName()).build())));
 						slot.set(itemStack);
 					} else if(slotIndex == 51) {
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
@@ -518,13 +522,8 @@ public class AuctionMenus {
 						menu.inventory().slot(13).get().set(getDisplayItem(player, auctionStack, editData));
 					}
 					if(slotIndex == 23) {
-						editData.priceNumber++;
-						if(editData.priceNumber > prices.size() - 1) {
-							editData.priceNumber = 0;
-						}
-						if(editData.priceNumber > 0) {
-							editData.bet = false;
-						}
+						editData.nextPrice(prices.size());
+						menu.inventory().slot(13).get().set(getDisplayItem(player, auctionStack, editData));
 					}
 					if(slotIndex == 26) {
 						closePlayerInventory(player);
@@ -615,9 +614,11 @@ public class AuctionMenus {
 			itemStack.remove(Keys.LORE);
 			lore.add(Component.empty());
 		}
+		auctionStack.getPrices().get(editData.priceNumber).setTax(plugin.getExpire(editData.expire).getTax(), auctionStack.getSerializedItemStack().getQuantity());
+		if(auctionStack.getBetData() != null)auctionStack.getBetData().setTax(plugin.getExpire(editData.expire).getTax(), auctionStack.getSerializedItemStack().getQuantity());
 		auctionStack.updateExpires(plugin.getExpire(editData.expire).getTime());
 		lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentCurrency")
-				.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(editData.bet ? auctionStack.getPrices().get(0).getCurrency().displayName() : auctionStack.getPrices().get(editData.priceNumber).getCurrency().displayName()).build()));
+				.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(editData.bet ? auctionStack.getPrices().get(0).getCurrency().pluralDisplayName() : auctionStack.getPrices().get(editData.priceNumber).getCurrency().pluralDisplayName()).build()));
 		if(auctionStack.getPrices().get(0).getBet().doubleValue() > 0) {
 			lore.add(Component.empty());
 			lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "AuctionBet")
@@ -642,7 +643,7 @@ public class AuctionMenus {
 				addEmpty = false;
 			}
 			if(editData.bet) {
-				lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Tax").replaceText(TextReplacementConfig.builder().match("%size%").replacement(auctionStack.getPrices().get(0).getCurrency().symbol().append(Component.text(":n/a"))).build()));
+				lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Tax").replaceText(TextReplacementConfig.builder().match("%size%").replacement(plugin.getEconomyService().defaultCurrency().symbol().append(Component.text(auctionStack.getBetData() == null ? auctionStack.getPrices().get(0).getBetTax() : auctionStack.getBetData().getTax()))).build()));
 			} else {
 				lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Tax").replaceText(TextReplacementConfig.builder().match("%size%").replacement(auctionStack.getPrices().get(editData.priceNumber).getCurrency().symbol().append(Component.text(auctionStack.getPrices().get(editData.priceNumber).getTax()))).build()));
 			}
@@ -721,7 +722,7 @@ public class AuctionMenus {
 			return;
 		}
 		if(plugin.getExpire(0).isFee()) {
-			if(!plugin.getEconomy().fee(player, auctionStack.getPrices().get(0).getCurrency(), BigDecimal.valueOf(plugin.getExpire(0).getFee()))) {
+			if(!plugin.getEconomy().fee(player, BigDecimal.valueOf(plugin.getExpire(0).getFee()))) {
 				return;
 			}
 		}
@@ -750,6 +751,10 @@ public class AuctionMenus {
 		int expire = 0;
 		int priceNumber = 0;
 		ItemStack itemStack = ItemStack.of(ItemTypes.AIR);
+		void nextPrice(int pricesSize) {
+			priceNumber = priceNumber + 1;
+			if(pricesSize <= priceNumber) priceNumber = 0;
+		}
 	}
 
 }

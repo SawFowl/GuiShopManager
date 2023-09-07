@@ -62,6 +62,8 @@ public class GenerateLocales {
 		updateSave(getRuLocale().checkString("&eСнимется с продажи через: &a%expired%&e.", "", "Lore", "Expired"));
 		updateSave(getRuLocale().checkString("&eТекущий покупатель по ставке: &b%buyer%&e.", "", "Lore", "CurrentBuyer"));
 		updateSave(getRuLocale().checkString("&eТекущая ставка: &a%bet%&e.", "", "Lore", "CurrentBet"));
+		updateSave(getRuLocale().checkString("&dЛКМ &f- &dназначить ставку", "", "Lore", "BetClick"));
+		updateSave(getRuLocale().checkString("&dПКМ &f- &dкупить предмет", "", "Lore", "BuyClick"));
 		
 		updateSave(getRuLocale().checkString("&cУ вас недостаточно денег.", "", "Messages", "NoMoney"));
 		updateSave(getRuLocale().checkString("&cУ вас недостаточно денег для выставления предмета на аукцион.", "", "Messages", "NoMoneyForFee"));
@@ -182,6 +184,8 @@ public class GenerateLocales {
 		updateSave(getDefaultLocale().checkString("&eExpired: &a%expired%&e.", "", "Lore", "Expired"));
 		updateSave(getDefaultLocale().checkString("&eCurrent buyer at the bet: &b%buyer%&e.", "", "Lore", "CurrentBuyer"));
 		updateSave(getDefaultLocale().checkString("&eCurrent bet: &a%bet%&e.", "", "Lore", "CurrentBet"));
+		updateSave(getDefaultLocale().checkString("&dLeft click &f- &dplace your bet", "", "Lore", "BetClick"));
+		updateSave(getDefaultLocale().checkString("&dRight click &f- &dbuy an item", "", "Lore", "BuyClick"));
 		
 		updateSave(getDefaultLocale().checkString("&cYou don't have enough money.", "", "Messages", "NoMoney"));
 		updateSave(getDefaultLocale().checkString("&cYou do not have enough money to list the item for sale at the auction.", "", "Messages", "NoMoneyForFee"));

@@ -92,7 +92,7 @@ public class CommandShopMenus {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.CHANGECURRENCY);
 					itemStack.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "ChangeCurrency"));
 					itemStack.offer(Keys.LORE, Arrays.asList(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentCurrency")
-							.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(currencies.get(editData.priceNumber).displayName()).build())));
+							.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(currencies.get(editData.priceNumber).pluralDisplayName()).build())));
 					slot.set(itemStack);
 				}
 				if(id == 53 && plugin.getCommandShopData(shopId).hasNextExist(menuId) && !plugin.getCommandShopData(shopId).getCommandShopMenuData(menuId + 1).isEmpty()) {
@@ -120,12 +120,11 @@ public class CommandShopMenus {
 							if(price.isAllowFree() || !price.isZero()) transactionItem(player, price, shopMenu.getCommandItem(slotIndex).getCommands());
 						});
 					} else if(slotIndex == 49) {
-						editData.priceNumber++;
-						if(editData.priceNumber > currencies.size() - 1) editData.priceNumber = 0;
+						editData.nextPrice(currencies.size());
 						ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.CHANGECURRENCY);
 						itemStack.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "ChangeCurrency"));
 						itemStack.offer(Keys.LORE, Arrays.asList(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentCurrency")
-								.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(currencies.get(editData.priceNumber).displayName()).build())));
+								.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(currencies.get(editData.priceNumber).pluralDisplayName()).build())));
 						slot.set(itemStack);
 					}
 					return false;
@@ -360,6 +359,9 @@ public class CommandShopMenus {
 					} else if(slotIndex == 22) {
 						prices.get(editData.priceNumber).switchFree();
 						menu.inventory().slot(13).get().set(updateDisplayItemEdit(player, prices, editData));
+					} else if(slotIndex == 23) {
+						editData.nextPrice(prices.size());
+						menu.inventory().slot(13).get().set(updateDisplayItemEdit(player, prices, editData));
 					}
 					else if(slotIndex == 26) {
 						if(!plugin.commandShopExists(shopId)) {
@@ -438,6 +440,10 @@ public class CommandShopMenus {
 		int priceNumber = 0;
 		ItemStack itemStack = ItemStack.of(ItemTypes.AIR);
 		boolean remove = false;
+		void nextPrice(int pricesSize) {
+			priceNumber = priceNumber + 1;
+			if(pricesSize <= priceNumber) priceNumber = 0;
+		}
 	}
 
 }

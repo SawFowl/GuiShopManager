@@ -180,7 +180,7 @@ public class AuctionAddItem implements CommandExecutor {
 			return;
 		}
 		if(plugin.getExpire(0).isFee()) {
-			if(!plugin.getEconomy().fee(player, auctionStack.getPrices().get(0).getCurrency(), BigDecimal.valueOf(plugin.getExpire(0).getFee()))) {
+			if(!plugin.getEconomy().fee(player, BigDecimal.valueOf(plugin.getExpire(0).getFee()))) {
 				return;
 			}
 		}

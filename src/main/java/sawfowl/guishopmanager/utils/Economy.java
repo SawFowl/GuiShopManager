@@ -199,16 +199,16 @@ public class Economy {
 		return false;
 	}
 
-	public boolean fee(Player player, Currency currency, BigDecimal money) {
+	public boolean fee(Player player, BigDecimal money) {
 		if(money.doubleValue() > 0) {
-			if(money.doubleValue() > getPlayerBalance(player.uniqueId(), currency).doubleValue()) {
+			if(money.doubleValue() > getPlayerBalance(player.uniqueId(), plugin.getEconomyService().defaultCurrency()).doubleValue()) {
 				player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "NoMoneyForFee"));
 				return false;
 			} else {
 				try {
 					Optional<UniqueAccount> uOpt = plugin.getEconomyService().findOrCreateAccount(player.uniqueId());
 					if (uOpt.isPresent()) {
-						uOpt.get().withdraw(currency, money, Cause.of(plugin.getEventContext(), plugin.getPluginContainer()));
+						uOpt.get().withdraw(plugin.getEconomyService().defaultCurrency(), money, Cause.of(plugin.getEventContext(), plugin.getPluginContainer()));
 						return true;
 					}
 				} catch (Exception e) {
@@ -222,7 +222,7 @@ public class Economy {
 	public Currency checkCurrency(String check) {
 		Currency result = plugin.getEconomyService().defaultCurrency();
 		for(Currency currency : getCurrencies()) {
-			if(TextUtils.clearDecorations(TextUtils.clearDecorations(currency.displayName())).equalsIgnoreCase(TextUtils.clearDecorations(check)) || TextUtils.clearDecorations(TextUtils.clearDecorations(currency.symbol())).equalsIgnoreCase(TextUtils.clearDecorations(check))) {
+			if(check != null && (TextUtils.clearDecorations(TextUtils.clearDecorations(currency.displayName())).equalsIgnoreCase(TextUtils.clearDecorations(check)) || TextUtils.clearDecorations(TextUtils.clearDecorations(currency.symbol())).equalsIgnoreCase(TextUtils.clearDecorations(check)))) {
 				result = currency;
 				break;
 			}
