@@ -29,6 +29,7 @@ public class SerializedAuctionPrice implements Serializable {
 	private double price;
 	@Setting("Tax")
 	private double tax;
+	@Setting("DefaultBetTax")
 	private double betTax;
 
 	private Currency currency;
