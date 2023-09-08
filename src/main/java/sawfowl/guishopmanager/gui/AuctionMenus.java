@@ -55,11 +55,7 @@ public class AuctionMenus {
 		int currentItem = firstItem;
 		List<Currency> currencies = new ArrayList<Currency>();
 		currencies.add(plugin.getEconomyService().defaultCurrency());
-		for(Currency currency : plugin.getEconomy().getCurrencies()) {
-			if(player.hasPermission(Permissions.currencyPermission(currency.displayName())) && !currency.equals(plugin.getEconomyService().defaultCurrency())) {
-				currencies.add(currency);
-			}
-		}
+		for(Currency currency : plugin.getEconomy().getCurrencies()) if(Permissions.auctionCurrencyPermission(player, currency, true) && !currency.equals(plugin.getEconomyService().defaultCurrency())) currencies.add(currency);
 		EditData editData = new EditData();
 		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6).completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
 		InventoryMenu menu = viewableInventory.asMenu();
@@ -376,11 +372,7 @@ public class AuctionMenus {
 		EditData editData = new EditData();
 		List<SerializedAuctionPrice> prices = new ArrayList<SerializedAuctionPrice>();
 		prices.add(new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency()));
-		for(Currency currency : plugin.getEconomy().getCurrencies()) {
-			if(player.hasPermission(Permissions.currencyPermission(currency.displayName())) && !currency.equals(plugin.getEconomyService().defaultCurrency())) {
-				prices.add(new SerializedAuctionPrice(currency));
-			}
-		}
+		for(Currency currency : plugin.getEconomy().getCurrencies()) if(Permissions.auctionCurrencyPermission(player, currency, false) && !currency.equals(plugin.getEconomyService().defaultCurrency())) prices.add(new SerializedAuctionPrice(currency));;
 		SerializedAuctionStack auctionStack = new SerializedAuctionStack(editData.itemStack.copy(), prices, player.uniqueId(), player.name(), System.currentTimeMillis() + plugin.getExpire(editData.expire).getTime(), serverName);
 		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X3).completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
 		InventoryMenu menu = viewableInventory.asMenu();

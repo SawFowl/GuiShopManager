@@ -52,11 +52,7 @@ public class CommandShopMenus {
 		List<Currency> currencies = new ArrayList<Currency>();
 		currencies.add(plugin.getEconomyService().defaultCurrency());
 		EditData editData = new EditData();
-		for(Currency currency : plugin.getEconomy().getCurrencies()) {
-			if(player.hasPermission(Permissions.currencyPermission(currency.displayName())) && !currency.equals(plugin.getEconomyService().defaultCurrency())) {
-				currencies.add(currency);
-			}
-		}
+		for(Currency currency : plugin.getEconomy().getCurrencies()) if(Permissions.commandShopCurrencyPermission(player, shopId, currency) && !currency.equals(plugin.getEconomyService().defaultCurrency())) currencies.add(currency);
 		for(Slot slot : menu.inventory().slots()) {
 			int id = slot.get(Keys.SLOT_INDEX).get();
 			if(id < 45) {
@@ -74,13 +70,11 @@ public class CommandShopMenus {
 						itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "CommandPrice")
 								.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(serializablePrice.getCurrency().displayName()).build())
 								.replaceText(TextReplacementConfig.builder().match("%buyprice%").replacement(Component.text(serializablePrice.getBuyPrice().doubleValue())).build()));
-						itemLore.add(Component.empty());
 					}
+					itemLore.add(Component.empty());
 					itemStack.offer(Keys.LORE, itemLore);
 					slot.offer(itemStack);
-				} else {
-					slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
-				}
+				} else slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 			} else if(id <= 53) {
 				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
 				if(id == 45 && plugin.getCommandShopData(shopId).hasPreviousExist(menuId)) {

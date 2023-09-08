@@ -1,5 +1,8 @@
 package sawfowl.guishopmanager;
 
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.service.economy.Currency;
+
 import net.kyori.adventure.text.Component;
 import sawfowl.localeapi.api.TextUtils;
 
@@ -25,12 +28,28 @@ public class Permissions {
 	public static final String AUCTION_OPEN_SELF = "guishopmanager.user.auction.open";
 	public static final String AUCTION_ADD_ITEM = "guishopmanager.user.auction.add";
 
-	public static String currencyPermission(Component currency) {
-		return currencyPermission(TextUtils.clearDecorations(currency));
+	public static boolean auctionCurrencyPermission(ServerPlayer player, Currency currency, boolean buy) {
+		return player.hasPermission("guishopmanager.currency." + TextUtils.clearDecorations(currency.displayName())) || player.hasPermission(auctionCurrencyPermission(currency.symbol(), buy)) || player.hasPermission(auctionCurrencyPermission(currency.displayName(), buy)) || player.hasPermission(auctionCurrencyPermission(currency.pluralDisplayName(), buy));
 	}
 
-	public static String currencyPermission(String string) {
-		return "guishopmanager.currency." + string;
+	public static String auctionCurrencyPermission(Component currency, boolean buy) {
+		return "guishopmanager.currency." + TextUtils.clearDecorations(currency) + (buy ? ".auction.buy" : ".auction.sell");
+	}
+
+	public static boolean commandShopCurrencyPermission(ServerPlayer player, String shopId, Currency currency) {
+		return player.hasPermission("guishopmanager.currency." + TextUtils.clearDecorations(currency.displayName())) || player.hasPermission(commandShopCurrencyPermission(shopId, currency.symbol())) || player.hasPermission(commandShopCurrencyPermission(shopId, currency.displayName())) || player.hasPermission(commandShopCurrencyPermission(shopId, currency.pluralDisplayName()));
+	}
+
+	public static String commandShopCurrencyPermission(String shopId, Component currency) {
+		return "guishopmanager.currency."  + TextUtils.clearDecorations(currency) + ".commandshop." + shopId;
+	}
+
+	public static boolean shopCurrencyPermission(ServerPlayer player, String shopId, Currency currency, boolean buy) {
+		return player.hasPermission("guishopmanager.currency." + TextUtils.clearDecorations(currency.displayName())) || player.hasPermission(shopCurrencyPermission(shopId, currency.symbol(), buy)) || player.hasPermission(shopCurrencyPermission(shopId, currency.displayName(), buy)) || player.hasPermission(shopCurrencyPermission(shopId, currency.pluralDisplayName(), buy));
+	}
+
+	public static String shopCurrencyPermission(String shopId, Component currency, boolean buy) {
+		return "guishopmanager.currency." + TextUtils.clearDecorations(currency) + (buy ? ".shop.buy." : ".shop.sell.") + shopId;
 	}
 
 }

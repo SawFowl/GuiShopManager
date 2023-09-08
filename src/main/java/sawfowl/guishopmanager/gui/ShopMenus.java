@@ -27,6 +27,7 @@ import org.spongepowered.api.util.Ticks;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import sawfowl.guishopmanager.GuiShopManager;
+import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.configure.FillItems;
 import sawfowl.guishopmanager.data.shop.ShopItem;
 import sawfowl.guishopmanager.data.shop.ShopMenuData;
@@ -67,9 +68,7 @@ public class ShopMenus {
 					}
 					itemStack.offer(Keys.LORE, itemLore);
 					slot.offer(itemStack);
-				} else {
-					slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
-				}
+				} else slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 			} else if(id <= 53) {
 				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
 				if(id == 45 && plugin.getShop(shopId).hasPreviousExist(menuId)) {
@@ -161,13 +160,11 @@ public class ShopMenus {
 								.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(serializablePrice.getCurrency().displayName()).build())
 								.replaceText(TextReplacementConfig.builder().match("%buyprice%").replacement(Component.text(serializablePrice.getBuyPrice().doubleValue())).build())
 								.replaceText(TextReplacementConfig.builder().match("%sellprice%").replacement(Component.text(serializablePrice.getSellPrice().doubleValue())).build()));
-						itemLore.add(Component.empty());
 					}
+					itemLore.add(Component.empty());
 					itemStack.offer(Keys.LORE, itemLore);
 					slot.offer(itemStack);
-				} else {
-					slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
-				}
+				} else slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 			} else if(id <= 53) {
 				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
 				if(id == 45 && plugin.getShop(shopId).hasPreviousExist(menuId)) {
@@ -408,38 +405,29 @@ public class ShopMenus {
 		editData.buy = buy;
 		List<SerializedShopPrice> prices = new ArrayList<SerializedShopPrice>();
 		for(SerializedShopPrice serializedPrice : shopMenu.getShopItem(shopSlot).getPrices()) {
+			boolean isDefaultCurrency = serializedPrice.getCurrency().equals(plugin.getEconomyService().defaultCurrency());
 			if(buy) {
-				if(shopMenu.getShopItem(shopSlot).isBuyForPrice(serializedPrice)) {
-					if(serializedPrice.getCurrency().equals(plugin.getEconomyService().defaultCurrency())) {
+				if(shopMenu.getShopItem(shopSlot).isBuyForPrice(serializedPrice) && (Permissions.shopCurrencyPermission(player, shopId, serializedPrice.getCurrency(), buy) || isDefaultCurrency)) {
+					if(isDefaultCurrency) {
 						prices.add(0, serializedPrice);
-					} else {
-						prices.add(serializedPrice);
-					}
+					} else prices.add(serializedPrice);
 				}
 			} else {
-				if(shopMenu.getShopItem(shopSlot).isSellForPrice(serializedPrice)) {
-					if(serializedPrice.getCurrency().equals(plugin.getEconomyService().defaultCurrency())) {
+				if(shopMenu.getShopItem(shopSlot).isSellForPrice(serializedPrice) && (Permissions.shopCurrencyPermission(player, shopId, serializedPrice.getCurrency(), buy) || isDefaultCurrency)) {
+					if(isDefaultCurrency) {
 						prices.add(0, serializedPrice);
-					} else {
-						prices.add(serializedPrice);
-					}
+					} else prices.add(serializedPrice);
 				}
 			}
 		}
-		if(buy) {
-			menuTitle = plugin.getLocales().getComponent(player.locale(), "Gui", "EditBuyTransaction");
-		} else {
-			menuTitle = plugin.getLocales().getComponent(player.locale(), "Gui", "EditSellTransaction");
-		}
+		menuTitle = plugin.getLocales().getComponent(player.locale(), "Gui", (buy ? "EditBuyTransaction" : "EditSellTransaction"));
 		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X3).completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
 		InventoryMenu menu = viewableInventory.asMenu();
 		menu.setTitle(menuTitle);
 		menu.setReadOnly(true);
 		for(Slot slot : menu.inventory().slots()) {
 			int id = slot.get(Keys.SLOT_INDEX).get();
-			if(id != 13) {
-				slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
-			}
+			if(id != 13) slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 			if(id <= 8) {
 				Component size = Component.text(" 1");
 				if(id == 1) {
@@ -456,9 +444,7 @@ public class ShopMenus {
 					size = Component.text(" 64");
 				} else if(id == 7) {
 					size = Component.text(" 128");
-				} else if(id == 8) {
-					size = Component.text(" MAX");
-				}
+				} else if(id == 8) size = Component.text(" MAX");
 				ItemStack changeSize = plugin.getFillItems().getItemStack(FillItems.valueOf("CHANGESIZE" + id));
 				changeSize.offer(Keys.LORE, plugin.getLocales().getComponents(player.locale(), "Lore", "ChangeSize"));
 				changeSize.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Size").replaceText(TextReplacementConfig.builder().match("%value%").replacement(size).build()));
@@ -522,13 +508,7 @@ public class ShopMenus {
 							editData.size = increase ? editData.size + 64 : editData.size - 64;
 						} else if(slotIndex == 7) {
 							editData.size = increase ? editData.size + 128 : editData.size - 128;
-						} else if(slotIndex == 8) {
-							if(buy) {
-								editData.size = calculateMaxBuyItems(player, itemStack, prices.get(editData.priceNumber));
-							} else {
-								editData.size = totalItemsInPlayerInventory(player, itemStack);
-							}
-						}
+						} else if(slotIndex == 8) editData.size = buy ? calculateMaxBuyItems(player, itemStack, prices.get(editData.priceNumber)) : totalItemsInPlayerInventory(player, itemStack);
 						if(buy) {
 							int maxBuyItems = calculateMaxBuyItems(player, itemStack, prices.get(editData.priceNumber));
 							if(editData.size > maxBuyItems) editData.size = maxBuyItems;

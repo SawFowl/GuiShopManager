@@ -73,11 +73,9 @@ public class WorkConfigs extends WorkData {
 					String shopId = shop.getID();
 					plugin.addShop(shopId, shop);
 					for(ShopMenuData shopMenuData : plugin.getShop(shopId).getMenus().values()) {
-						for(ShopItem shopItem : shopMenuData.getItems().values()) {
-							shopItem.getPrices().forEach(price -> {
-								price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-							});
-						}
+						for(ShopItem shopItem : shopMenuData.getItems().values()) shopItem.getPrices().forEach(price -> {
+							price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
+						});
 					}
 				} catch (ConfigurateException e) {
 					plugin.getLogger().error(e.getLocalizedMessage());

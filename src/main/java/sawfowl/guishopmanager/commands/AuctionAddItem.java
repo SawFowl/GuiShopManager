@@ -64,10 +64,10 @@ public class AuctionAddItem implements CommandExecutor {
 				}
 			}
 			Component currenciesList = Component.text().append(plugin.getEconomyService().defaultCurrency().displayName()).build();
-			if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && player.hasPermission(Permissions.currencyPermission(context.one(CommandParameters.CURRENCY).get().toLowerCase())))) {
+			if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && Permissions.auctionCurrencyPermission(player, plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()), false))) {
 				int currentCurrency = 1;
 				for(Currency currency : plugin.getEconomy().getCurrencies()) {
-					if(player.hasPermission(Permissions.currencyPermission(currency.displayName())) && !currency.equals(plugin.getEconomyService().defaultCurrency())) {
+					if(Permissions.auctionCurrencyPermission(player, currency, false) && !currency.equals(plugin.getEconomyService().defaultCurrency())) {
 						if(currentCurrency < plugin.getEconomy().getCurrencies().size()) {
 							currenciesList = currenciesList.append(Component.text(", ")).append(currency.displayName());
 						} else {
@@ -84,7 +84,7 @@ public class AuctionAddItem implements CommandExecutor {
 					player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionZeroOrNullPrices"));
 				} else {
 					if(!betPresent && pricePresent && context.one(CommandParameters.AUCTION_PRICE).get() > 0) {
-						if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && !player.hasPermission(Permissions.currencyPermission(context.one(CommandParameters.CURRENCY).get().toLowerCase())))) {
+						if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && !Permissions.auctionCurrencyPermission(player, plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()), false))) {
 							Component message = plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionBetNotPresent").clickEvent(SpongeComponents.executeCallback(cause -> {
 								SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
 								auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
@@ -117,7 +117,7 @@ public class AuctionAddItem implements CommandExecutor {
 						}));
 						player.sendMessage(message);
 					} else if(context.one(CommandParameters.AUCTION_PRICE).get() > 0 && context.one(CommandParameters.AUCTION_BET).get() > 0) {
-						if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && !player.hasPermission(Permissions.currencyPermission(context.one(CommandParameters.CURRENCY).get().toLowerCase())))) {
+						if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && !Permissions.auctionCurrencyPermission(player, plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()), false))) {
 							Component message = plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionPriceNotPresent").clickEvent(SpongeComponents.executeCallback(cause -> {
 								SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
 								auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
@@ -139,7 +139,7 @@ public class AuctionAddItem implements CommandExecutor {
 							run(player, auctionStack);
 						}
 					} else if(context.one(CommandParameters.AUCTION_BET).get() <= 0 && context.one(CommandParameters.AUCTION_PRICE).get() > 0) {
-						if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && !player.hasPermission(Permissions.currencyPermission(context.one(CommandParameters.CURRENCY).get().toLowerCase())))) {
+						if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && !Permissions.auctionCurrencyPermission(player, plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()), false))) {
 							Component message = plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionCurrencyNotPresent").replaceText(TextReplacementConfig.builder().match("%currencies%").replacement(currenciesList).build()).clickEvent(SpongeComponents.executeCallback(cause -> {
 								SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
 								auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
