@@ -5,8 +5,7 @@ Plugin for creating in-game shops and auction on Sponge servers. \
 Requires the LocaleAPI plugin.
 
 ##### Permissions
-```makefile
-guishopmanager.user.help : access to the main command
+```makefileguishopmanager.user.help : access to the main command
 guishopmanager.staff.reload : reboot plugin
 guishopmanager.staff.commandshop.create : creating a command shop
 guishopmanager.staff.commandshop.addcommand : adding a command to an item in hand
@@ -25,8 +24,11 @@ guishopmanager.staff.auction.blockitem : add item in hand to blacklist
 guishopmanager.staff.auction.open : opening an auction to others
 guishopmanager.user.auction.open : opening an auction for yourself
 guishopmanager.user.auction.add : putting an item up for sale using the command
-guishopmanager.currency.name : access to the currency at the auction
-guishopmanager.currency : access to all currencies in the auction
+guishopmanager.currency.currency_name_or_symbol.auction.buy : access currency to purchase items at auction.
+guishopmanager.currency.currency_name_or_symbol.auction.sell : access currency to purchase items at auction.
+guishopmanager.currency.currency_name_or_symbol.shop.shop_id.buy : access currency to purchase items in shop.
+guishopmanager.currency.currency_name_or_symbol.shop.shop_id.sell : access currency to purchase items in shop.
+guishopmanager.currency.currency_name_or_symbol.commandshop.shop_id : access currency to purchase in commandshop.
 ```
 
 ##### Features
@@ -66,8 +68,11 @@ guishopmanager.staff.auction.blockitem : добавление предмета �
 guishopmanager.staff.auction.open : открытие аукциона другим
 guishopmanager.user.auction.open : открытие аукциона себе
 guishopmanager.user.auction.add : выставление предмета на продажу командой
-guishopmanager.currency.name : доступ к валюте на аукционе
-guishopmanager.currency : доступ ко всем валютам на аукционе
+guishopmanager.currency.currency_name_or_symbol.auction.buy : доступ к валюте для покупки товара на аукционе.
+guishopmanager.currency.currency_name_or_symbol.auction.sell : доступ к валюте для продажи товара на аукционе.
+guishopmanager.currency.currency_name_or_symbol.shop.shop_id.buy : доступ к валюте для покупки товара магазине.
+guishopmanager.currency.currency_name_or_symbol.shop.shop_id.sell : доступ к валюте для продажи товара магазине.
+guishopmanager.currency.currency_name_or_symbol.commandshop.shop_id : доступ к валюте для покупки магазине команд.
 ```
 
 ##### Функционал
