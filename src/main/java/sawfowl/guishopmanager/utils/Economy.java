@@ -23,11 +23,12 @@ import org.spongepowered.api.service.economy.transaction.TransferResult;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.HoverEvent;
+
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionPrice;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 import sawfowl.localeapi.api.TextUtils;
-import sawfowl.localeapi.serializetools.SerializedItemStack;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
 
 public class Economy {
 
@@ -239,7 +240,7 @@ public class Economy {
 	}
 
 	private Component getStackComponent(ItemStack itemStack) {
-		return itemStack.type().asComponent().hoverEvent(HoverEvent.showItem((new SerializedItemStack(itemStack)).getItemKey(), itemStack.quantity()));
+		return itemStack.type().asComponent().hoverEvent(HoverEvent.showItem((new SerializedItemStackJsonNbt(itemStack)).getItemKey(), itemStack.quantity()));
 	}
 
 }

@@ -27,14 +27,15 @@ import org.spongepowered.api.util.Ticks;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.configure.FillItems;
 import sawfowl.guishopmanager.data.commandshop.CommandItemData;
 import sawfowl.guishopmanager.data.commandshop.CommandShopMenuData;
-import sawfowl.guishopmanager.serialization.commandsshop.SerializedCommandsList;
+import sawfowl.guishopmanager.serialization.commandsshop.CommandsList;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
 import sawfowl.guishopmanager.serialization.commandsshop.SerializedCommandShopPrice;
-import sawfowl.localeapi.serializetools.SerializedItemStack;
 
 public class CommandShopMenus {
 
@@ -336,10 +337,10 @@ public class CommandShopMenus {
 							plugin.getCommandShopData(shopId).getCommandShopMenuData(menuID).removeItem(shopSlot);
 						} else {
 							if(editData.itemStack.type() != ItemTypes.AIR) {
-								plugin.getCommandShopData(shopId).getCommandShopMenuData(menuID).addOrUpdateItem(shopSlot, new CommandItemData(new SerializedItemStack(editData.itemStack), prices));
+								plugin.getCommandShopData(shopId).getCommandShopMenuData(menuID).addOrUpdateItem(shopSlot, new CommandItemData(new SerializedItemStackJsonNbt(editData.itemStack), prices));
 							}
 						}
-						plugin.getWorkCommandsShopData().saveCommandsShop(shopId);
+						plugin.getCommandsShopStorage().saveCommandsShop(shopId);
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
 							createInventoryToEditor(shopMenu, player, shopId, menuID);
 						}).build());
@@ -367,10 +368,10 @@ public class CommandShopMenus {
 							plugin.getCommandShopData(shopId).getCommandShopMenuData(menuID).removeItem(shopSlot);
 						} else {
 							if(editData.itemStack.type() != ItemTypes.AIR) {
-								plugin.getCommandShopData(shopId).getCommandShopMenuData(menuID).addOrUpdateItem(shopSlot, new CommandItemData(new SerializedItemStack(editData.itemStack), prices));
+								plugin.getCommandShopData(shopId).getCommandShopMenuData(menuID).addOrUpdateItem(shopSlot, new CommandItemData(new SerializedItemStackJsonNbt(editData.itemStack), prices));
 							}
 						}
-						plugin.getWorkCommandsShopData().saveCommandsShop(shopId);
+						plugin.getCommandsShopStorage().saveCommandsShop(shopId);
 						closePlayerInventory(player);
 					}
 				} else {
@@ -417,8 +418,8 @@ public class CommandShopMenus {
 		}).build());
 	}
 
-	private void transactionItem(ServerPlayer player, SerializedCommandShopPrice serializedCommandShopPrice, SerializedCommandsList serializedCommandsList) {
-		if(!plugin.getEconomy().checkPlayerBalance(player.uniqueId(), serializedCommandShopPrice.getCurrency(), serializedCommandShopPrice.getBuyPrice())) {
+	private void transactionItem(ServerPlayer player, SerializedCommandShopPrice serializedCommandShopPrice, CommandsList serializedCommandsList) {
+		if(!serializedCommandShopPrice.isAllowFree() && !plugin.getEconomy().checkPlayerBalance(player.uniqueId(), serializedCommandShopPrice.getCurrency(), serializedCommandShopPrice.getBuyPrice())) {
 			player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "NoMoney"));
 			return;
 		}

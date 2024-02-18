@@ -1,23 +1,30 @@
-package sawfowl.guishopmanager.data;
+package sawfowl.guishopmanager.storage;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.BasicConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 
+import com.google.common.io.Files;
+
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.utils.TypeTokens;
+import sawfowl.localeapi.api.ConfigTypes;
+import sawfowl.localeapi.api.serializetools.SerializeOptions;
 import sawfowl.guishopmanager.data.commandshop.CommandItemData;
 import sawfowl.guishopmanager.data.commandshop.CommandShopData;
 import sawfowl.guishopmanager.data.commandshop.CommandShopMenuData;
@@ -28,17 +35,29 @@ import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 import sawfowl.guishopmanager.serialization.commandsshop.SerializedCommandShop;
 import sawfowl.guishopmanager.serialization.shop.SerializedShop;
 
-public class WorkConfigs extends WorkData {
+public class ConfigStorage implements DataStorage {
 
 	private GuiShopManager plugin;
-	private ConfigurationLoader<CommentedConfigurationNode> auctionConfigLoader;
-	private CommentedConfigurationNode auctionNode;
+	private ConfigurationLoader<?> auctionConfigLoader;
+	private ConfigurationNode auctionNode;
 	private boolean isLoaded = false;
-	public WorkConfigs(GuiShopManager instance) {
+	public ConfigStorage(GuiShopManager instance) {
 		plugin = instance;
-		auctionConfigLoader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).path(plugin.getConfigDir().resolve("Auction.conf")).build();
+		Optional<File> auctionConfig = Stream.of(plugin.getConfigDir().toFile().listFiles()).filter(file -> file.getName().contains("Auction")).findFirst();
+		if(auctionConfig.isPresent()) {
+			auctionConfigLoader = createConfigLoader(auctionConfig.get(), 2);
+		} else auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getRootNode().node("ConfigTypes", "Auction").getString()), plugin.getRootNode().node("ConfigTypes", "Auction").getString(), 2);
 		try {
 			auctionNode = auctionConfigLoader.load();
+			if(!plugin.getRootNode().node("ConfigTypes", "Auction").getString().equals("." + Files.getFileExtension(auctionConfig.get().getName()))) {
+				BasicConfigurationNode copy = BasicConfigurationNode.root().from(auctionNode);
+				auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getRootNode().node("ConfigTypes", "Auction").getString()), plugin.getRootNode().node("ConfigTypes", "Auction").getString(), 2);
+				auctionConfigLoader.save(copy);
+				auctionNode = auctionConfigLoader.load();
+				auctionConfig.get().delete();
+				auctionConfig = null;
+				copy = null;
+			}
 		} catch (IOException e) {
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
@@ -48,12 +67,8 @@ public class WorkConfigs extends WorkData {
 	@Override
 	public void saveShop(String shopId) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			SerializedShop serializableShop = plugin.getShop(shopId).serialize();
-			ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).path(plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "Shops").getString() + File.separator + shopId + ".conf")).build();
 			try {
-				CommentedConfigurationNode shopNode = shopConfigLoader.load();
-				shopNode.node("ShopData").set(TypeTokens.SHOP_TOKEN, serializableShop);
-				shopConfigLoader.save(shopNode);
+				createConfigLoader(plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "Shops").getString() + File.separator + shopId + plugin.getRootNode().node("ConfigTypes", "Shop").getString()), plugin.getRootNode().node("ConfigTypes", "Shop").getString(), 2).loadToReference().referenceTo(SerializedShop.class).setAndSave(plugin.getShop(shopId).serialize());
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
@@ -65,21 +80,23 @@ public class WorkConfigs extends WorkData {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			File shopsFolder = plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "Shops").getString()).toFile();
 			if(!shopsFolder.exists()) return;
-			for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().contains(".conf"))).collect(Collectors.toList())) {
-				ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).file(shopFile).build();
+			for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().endsWith(".conf") || file.getName().endsWith(".json") || file.getName().endsWith(".yml"))).collect(Collectors.toList())) {
 				try {
-					CommentedConfigurationNode shopNode = shopConfigLoader.load();
-					Shop shop = shopNode.node("ShopData").get(TypeTokens.SHOP_TOKEN).deserialize();
-					String shopId = shop.getID();
-					plugin.addShop(shopId, shop);
-					for(ShopMenuData shopMenuData : plugin.getShop(shopId).getMenus().values()) {
+					Shop shop = createConfigLoader(shopFile, 2).loadToReference().referenceTo(SerializedShop.class).get().deserialize();
+					plugin.addShop(shop.getID(), shop);
+					for(ShopMenuData shopMenuData : plugin.getShop(shop.getID()).getMenus().values()) {
 						for(ShopItem shopItem : shopMenuData.getItems().values()) shopItem.getPrices().forEach(price -> {
 							price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
 						});
 					}
+					if(!plugin.getRootNode().node("ConfigTypes", "Shop").getString().equals("." + Files.getFileExtension(shopFile.getName()))) {
+						shopFile.delete();
+						saveShop(shop.getID());
+					}
 				} catch (ConfigurateException e) {
 					plugin.getLogger().error(e.getLocalizedMessage());
 				}
+				
 			}
 		});
 	}
@@ -89,21 +106,15 @@ public class WorkConfigs extends WorkData {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			File shopsFolder = plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "Shops").getString()).toFile();
 			if(!shopsFolder.exists()) return;
-			Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().equals(shopId + ".conf"))).findFirst().ifPresent(file -> {
-				file.delete();
-			});
+			Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().equals(shopId + ".conf") || file.getName().equals(shopId + ".json") || file.getName().equals(shopId + ".yml"))).forEach(File::delete);
 		});
 	}
 
 	@Override
 	public void saveCommandsShop(String shopId) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			SerializedCommandShop serializableShop = plugin.getCommandShopData(shopId).serialize();
-			ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).path(plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "CommandsShops").getString() + File.separator + shopId + ".conf")).build();
 			try {
-				CommentedConfigurationNode shopNode = shopConfigLoader.load();
-				shopNode.node("ShopData").set(TypeTokens.COMMANDS_SHOP_TOKEN, serializableShop);
-				shopConfigLoader.save(shopNode);
+				createConfigLoader(plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "CommandsShops").getString() + File.separator + shopId + plugin.getRootNode().node("ConfigTypes", "CommandShop").getString()), plugin.getRootNode().node("ConfigTypes", "CommandShop").getString(), 2).loadToReference().referenceTo(SerializedCommandShop.class).setAndSave(plugin.getCommandShopData(shopId).serialize());
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
@@ -115,11 +126,9 @@ public class WorkConfigs extends WorkData {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			File shopsFolder = plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "CommandsShops").getString()).toFile();
 			if(!shopsFolder.exists()) return;
-			for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().contains(".conf"))).collect(Collectors.toList())) {
-				ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().defaultOptions(plugin.getLocaleAPI().getConfigurationOptions()).file(shopFile).build();
+			for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().endsWith(".conf") || file.getName().endsWith(".json") || file.getName().endsWith(".yml"))).collect(Collectors.toList())) {
 				try {
-					CommentedConfigurationNode shopNode = shopConfigLoader.load();
-					CommandShopData shop = shopNode.node("ShopData").get(TypeTokens.COMMANDS_SHOP_TOKEN).deserialize();
+					CommandShopData shop = createConfigLoader(shopFile, 2).loadToReference().referenceTo(SerializedCommandShop.class).get().deserialize();
 					String shopId = shop.getID();
 					plugin.addCommandShopData(shopId, shop);
 					for(CommandShopMenuData shopMenuData : plugin.getCommandShopData(shopId).getMenus().values()) {
@@ -128,6 +137,10 @@ public class WorkConfigs extends WorkData {
 								price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
 							});
 						}
+					}
+					if(!plugin.getRootNode().node("ConfigTypes", "CommandShop").getString().equals("." + Files.getFileExtension(shopFile.getName()))) {
+						shopFile.delete();
+						saveCommandsShop(shop.getID());
 					}
 				} catch (ConfigurateException e) {
 					plugin.getLogger().error(e.getLocalizedMessage());
@@ -141,9 +154,7 @@ public class WorkConfigs extends WorkData {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			File shopsFolder = plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "CommandsShops").getString()).toFile();
 			if(!shopsFolder.exists()) return;
-			Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().equals(shopId + ".conf"))).findFirst().ifPresent(file -> {
-				file.delete();
-			});
+			Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().equals(shopId + ".conf") || file.getName().equals(shopId + ".json") || file.getName().equals(shopId + ".yml"))).forEach(File::delete);
 		});
 	}
 
@@ -172,7 +183,7 @@ public class WorkConfigs extends WorkData {
 			if(!auctionNode.node("ExpiredData").virtual() && !auctionNode.node("ExpiredData").empty()) {
 				try {
 					plugin.getExpiredAuctionItems().putAll(auctionNode.node("ExpiredData").get(TypeTokens.MAP_EXPIRED_AUCTIONSTACKS_TOKEN));
-					for(List<SerializedAuctionStack> auctionStacks : plugin.getExpiredAuctionItems().values()) {
+					for(Set<SerializedAuctionStack> auctionStacks : plugin.getExpiredAuctionItems().values()) {
 						for(SerializedAuctionStack auctionStack : auctionStacks) {
 							auctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(auctionStack.getBetData().getCurrencyName()));
 							auctionStack.getPrices().forEach(price -> {
@@ -187,7 +198,7 @@ public class WorkConfigs extends WorkData {
 			if(!auctionNode.node("ExpiredDataBet").virtual() && !auctionNode.node("ExpiredDataBet").empty()) {
 				try {
 					plugin.getExpiredBetAuctionItems().putAll(auctionNode.node("ExpiredDataBet").get(TypeTokens.MAP_EXPIRED_AUCTIONSTACKS_TOKEN));
-					for(List<SerializedAuctionStack> auctionStacks : plugin.getExpiredBetAuctionItems().values()) {
+					for(Set<SerializedAuctionStack> auctionStacks : plugin.getExpiredBetAuctionItems().values()) {
 						for(SerializedAuctionStack auctionStack : auctionStacks) {
 							auctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(auctionStack.getBetData().getCurrencyName()));
 							auctionStack.getPrices().forEach(price -> {
@@ -282,6 +293,28 @@ public class WorkConfigs extends WorkData {
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
+		}
+	}
+
+	private ConfigTypes getConfigType(String string) {
+		return Stream.of(ConfigTypes.values()).filter(t -> t.toString().equals(string)).findFirst().orElse(ConfigTypes.HOCON);
+	}
+
+	private ConfigurationLoader<? extends ConfigurationNode> createConfigLoader(Path path, String configType, int itemStackSerializerVariant) {
+		switch (getConfigType(configType)) {
+			case HOCON: return SerializeOptions.createHoconConfigurationLoader(itemStackSerializerVariant).path(path).build();
+			case YAML: return SerializeOptions.createYamlConfigurationLoader(itemStackSerializerVariant).path(path).build();
+			case JSON: return SerializeOptions.createJsonConfigurationLoader(itemStackSerializerVariant).path(path).build();
+			default: return SerializeOptions.createHoconConfigurationLoader(itemStackSerializerVariant).path(path).build();
+		}
+	}
+
+	private ConfigurationLoader<? extends ConfigurationNode> createConfigLoader(File file, int itemStackSerializerVariant) {
+		switch (getConfigType("." + Files.getFileExtension(file.getName()))) {
+			case HOCON: return SerializeOptions.createHoconConfigurationLoader(itemStackSerializerVariant).file(file).build();
+			case YAML: return SerializeOptions.createYamlConfigurationLoader(itemStackSerializerVariant).file(file).build();
+			case JSON: return SerializeOptions.createJsonConfigurationLoader(itemStackSerializerVariant).file(file).build();
+			default: return SerializeOptions.createHoconConfigurationLoader(itemStackSerializerVariant).file(file).build();
 		}
 	}
 

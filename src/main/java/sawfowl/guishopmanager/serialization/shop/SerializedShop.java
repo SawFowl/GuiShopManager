@@ -81,7 +81,7 @@ public class SerializedShop implements Serializable {
 		for(Entry<Integer, List<SerializedShopStack>> menuEntry : getShopMenus().entrySet()) {
 			ShopMenuData shopMenu = new ShopMenuData();
 			for(SerializedShopStack serializedShopStack : menuEntry.getValue()) {
-				if(serializedShopStack.getSerializedItemStack().getOptItemType().isPresent()) {
+				if(serializedShopStack.getSerializedItemStack().getItemType().isPresent()) {
 					shopMenu.addOrUpdateItem(serializedShopStack.getSlot(), new ShopItem(serializedShopStack.getSerializedItemStack().getItemStack(), serializedShopStack.getSerializedShopPrices()));
 				}
 			}

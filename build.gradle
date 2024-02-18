@@ -1,15 +1,16 @@
 plugins {
 	id("java")
-	id("org.spongepowered.gradle.plugin") version "2.0.2"
 	id("eclipse")
+	id("org.spongepowered.gradle.plugin") version "2.0.2"
 }
 
 group = "sawfowl.guishopmanager"
 version = "${major}.${minor}.${patch}-${api}-${suffix}"
 
 java {
-	sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+	sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
 }
+compileJava.options.compilerArgs << "-Xmaxerrs" << "9999"
 
 repositories {
 	mavenCentral()
@@ -28,13 +29,15 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-	implementation "org.spongepowered:spongeapi:8.0.0"
-	implementation "com.github.SawFowl:LocaleAPI:2.6.0"
+	implementation "org.spongepowered:spongeapi:${api}"
+	implementation 'org.spongepowered:spongevanilla:1.19.4-10.0.0-RC1397:universal'
+	implementation "com.github.SawFowl:LocaleAPI:${localeapi}"
+	implementation "com.github.SawFowl:CommandPack:${commandpack}"
 	//implementation fileTree(dir: 'libs', include: '*.jar')
 }
 
 sponge {
-	apiVersion("8.0.0")
+	apiVersion("${api}")
 	loader {
 		name("java_plain")
 		version("1.0")
@@ -63,7 +66,17 @@ sponge {
 			loadOrder("after")
 			version("2.6.0")
 		}
+		dependency("commandpack") {
+			optional(false)
+			loadOrder("after")
+			version("${commandpack}")
+		}
 		dependency("mysqldriver") {
+			optional(true)
+			loadOrder("after")
+			version("1.0.0")
+		}
+		dependency("h2driver") {
 			optional(true)
 			loadOrder("after")
 			version("1.0.0")

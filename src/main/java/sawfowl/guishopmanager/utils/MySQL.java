@@ -1,4 +1,4 @@
-package sawfowl.guishopmanager.data;
+package sawfowl.guishopmanager.utils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

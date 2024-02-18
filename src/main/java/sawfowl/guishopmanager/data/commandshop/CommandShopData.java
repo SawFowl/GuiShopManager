@@ -9,9 +9,9 @@ import java.util.Map.Entry;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+
 import sawfowl.guishopmanager.serialization.commandsshop.SerializedCommandShop;
 import sawfowl.guishopmanager.serialization.commandsshop.SerializedCommandShopStack;
-import sawfowl.localeapi.serializetools.SerializedItemStack;
 
 public class CommandShopData {
 
@@ -73,7 +73,7 @@ public class CommandShopData {
 		for(Entry<Integer, CommandShopMenuData> menuEntry : menus.entrySet()) {
 			List<SerializedCommandShopStack> serializedShopStack = new ArrayList<SerializedCommandShopStack>();
 			for(Entry<Integer, CommandItemData> itemsEntry : menuEntry.getValue().getItems().entrySet()) {
-				serializedShopStack.add(new SerializedCommandShopStack(itemsEntry.getKey(), new SerializedItemStack(itemsEntry.getValue().getItemStack()), itemsEntry.getValue().getPrices()));
+				serializedShopStack.add(new SerializedCommandShopStack(itemsEntry.getKey(), itemsEntry.getValue().getItemStack(), itemsEntry.getValue().getPrices()));
 			}
 			serializableShop.updateMenu(menuEntry.getKey(), serializedShopStack);
 			for(Entry<String, Component> titlesEntry : titles.entrySet()) {

@@ -1,4 +1,4 @@
-package sawfowl.guishopmanager.commands;
+package sawfowl.guishopmanager.commands.commandshop;
 
 import java.util.Locale;
 
@@ -13,10 +13,10 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.utils.CommandParameters;
 
-public class ShopTranslate implements CommandExecutor {
+public class CommandsShopTranslate implements CommandExecutor {
 
 	GuiShopManager plugin;
-	public ShopTranslate(GuiShopManager instance) {
+	public CommandsShopTranslate(GuiShopManager instance) {
 		plugin = instance;
 	}
 
@@ -25,7 +25,7 @@ public class ShopTranslate implements CommandExecutor {
 		Object src = context.cause().root();
 		if(context.one(CommandParameters.SHOP_ID).isPresent()) {
 			String shopId = context.one(CommandParameters.SHOP_ID).get();
-			if(plugin.shopExists(shopId)) {
+			if(plugin.commandShopExists(shopId)) {
 				if(context.one(CommandParameters.LOCALE).isPresent()) {
 					String localeId = context.one(CommandParameters.LOCALE).get();
 					boolean exist = false;
@@ -37,8 +37,8 @@ public class ShopTranslate implements CommandExecutor {
 					}
 					if(exist) {
 						if(context.one(CommandParameters.TRANSLATE).isPresent()) {
-							plugin.getShop(shopId).addTitle(localeId, LegacyComponentSerializer.legacyAmpersand().deserialize(context.one(CommandParameters.TRANSLATE).get()));
-							plugin.getWorkShopData().saveShop(shopId);
+							plugin.getCommandShopData(shopId).addTitle(localeId, LegacyComponentSerializer.legacyAmpersand().deserialize(context.one(CommandParameters.TRANSLATE).get()));
+							plugin.getCommandsShopStorage().saveCommandsShop(shopId);
 							((Audience) src).sendMessage(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "TranslateAdded"));
 						} else {
 							((Audience) src).sendMessage(plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Messages", "TranslateNotPresent"));

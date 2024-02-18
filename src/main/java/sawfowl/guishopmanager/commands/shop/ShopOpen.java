@@ -1,4 +1,4 @@
-package sawfowl.guishopmanager.commands;
+package sawfowl.guishopmanager.commands.shop;
 
 import java.util.ArrayList;
 import java.util.List;

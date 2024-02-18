@@ -1,9 +1,10 @@
 package sawfowl.guishopmanager.serialization.shop;
 
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-import sawfowl.localeapi.serializetools.SerializedItemStack;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
 
 import java.io.Serializable;
 import java.util.List;
@@ -12,9 +13,9 @@ import java.util.List;
 public class SerializedShopStack implements Serializable {
 
 	SerializedShopStack(){}
-	public SerializedShopStack(int slot, SerializedItemStack serializableItemStack, List<SerializedShopPrice> serializedShopPrices) {
+	public SerializedShopStack(int slot, ItemStack itemStack, List<SerializedShopPrice> serializedShopPrices) {
 		this.slot = slot;
-		this.serializedItemStack = serializableItemStack;
+		this.itemStack = new SerializedItemStackJsonNbt(itemStack);
 		this.serializedShopPrices = serializedShopPrices;
 	}
 
@@ -25,10 +26,10 @@ public class SerializedShopStack implements Serializable {
 	@Setting("Prices")
 	private List<SerializedShopPrice> serializedShopPrices;
 	@Setting("ItemStack")
-	private SerializedItemStack serializedItemStack;
+	private SerializedItemStackJsonNbt itemStack;
 
-	public SerializedItemStack getSerializedItemStack() {
-		return serializedItemStack;
+	public SerializedItemStackJsonNbt getSerializedItemStack() {
+		return itemStack;
 	}
 
 	public List<SerializedShopPrice> getSerializedShopPrices() {
@@ -43,7 +44,7 @@ public class SerializedShopStack implements Serializable {
 	public String toString() {
 		return  "Slot: " + slot +
 				"; Prices: " + serializedShopPrices +
-				"; ItemStack: " + serializedItemStack;
+				"; ItemStack: " + itemStack;
 	}
 
 }

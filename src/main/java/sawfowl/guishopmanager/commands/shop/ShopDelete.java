@@ -1,4 +1,4 @@
-package sawfowl.guishopmanager.commands;
+package sawfowl.guishopmanager.commands.shop;
 
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;

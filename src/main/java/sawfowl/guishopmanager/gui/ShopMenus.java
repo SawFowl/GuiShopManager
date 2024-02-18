@@ -345,7 +345,7 @@ public class ShopMenus {
 								plugin.getShop(shopId).getShopMenuData(menuID).addOrUpdateItem(shopSlot, new ShopItem(editData.itemStack, prices));
 							}
 						}
-						plugin.getWorkShopData().saveShop(shopId);
+						plugin.getShopStorage().saveShop(shopId);
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
 							createInventoryToEditor(shopMenu, player, shopId, menuID);
 						}).build());
@@ -377,7 +377,7 @@ public class ShopMenus {
 								plugin.getShop(shopId).getShopMenuData(menuID).addOrUpdateItem(shopSlot, new ShopItem(editData.itemStack, prices));
 							}
 						}
-						plugin.getWorkShopData().saveShop(shopId);
+						plugin.getShopStorage().saveShop(shopId);
 						closePlayerInventory(player);
 					}
 				} else {

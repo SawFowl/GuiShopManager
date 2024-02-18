@@ -6,7 +6,7 @@ import java.util.Map;
 
 import net.kyori.adventure.text.Component;
 import sawfowl.guishopmanager.GuiShopManager;
-import sawfowl.localeapi.utils.AbstractLocaleUtil;
+import sawfowl.localeapi.api.PluginLocale;
 
 public class Locales {
 
@@ -15,20 +15,20 @@ public class Locales {
 		plugin = instance;
 	}
 
-	public Map<Locale, AbstractLocaleUtil> getLocales() {
+	public Map<Locale, PluginLocale> getLocales() {
 		return plugin.getLocaleAPI().getPluginLocales("guishopmanager");
 	}
-	public AbstractLocaleUtil getDefaultLocale() {
+	public PluginLocale getDefaultLocale() {
 		return getLocales().get(org.spongepowered.api.util.locale.Locales.DEFAULT);
 	}
-	public AbstractLocaleUtil getOrDefaultLocale(Locale locale) {
+	public PluginLocale getOrDefaultLocale(Locale locale) {
 		return getLocales().getOrDefault(locale, getDefaultLocale());
 	}
 	public Component getComponent(Locale locale, Object... localeNode) {
-		return getOrDefaultLocale(locale).getComponent(false, localeNode);
+		return getOrDefaultLocale(locale).getComponent(localeNode);
 	}
 	public List<Component> getComponents(Locale locale, Object... localeNode) {
-		return getOrDefaultLocale(locale).getListComponents(false, localeNode);
+		return getOrDefaultLocale(locale).getListComponents(localeNode);
 	}
 
 }

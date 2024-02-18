@@ -1,4 +1,4 @@
-package sawfowl.guishopmanager.commands;
+package sawfowl.guishopmanager.commands.auction;
 
 import java.util.stream.Collectors;
 
@@ -11,13 +11,14 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.locale.LocaleSource;
+import org.spongepowered.plugin.PluginContainer;
 
 import net.kyori.adventure.audience.Audience;
+
 import sawfowl.guishopmanager.GuiShopManager;
-import sawfowl.guishopmanager.serialization.commandsshop.SerializedCommandsList;
+import sawfowl.guishopmanager.serialization.commandsshop.CommandsList;
 import sawfowl.guishopmanager.utils.CommandParameters;
-import sawfowl.localeapi.serializetools.CompoundTag;
-import sawfowl.localeapi.serializetools.SerializedItemStack;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
 
 public class AddCommand implements CommandExecutor {
 
@@ -46,10 +47,10 @@ public class AddCommand implements CommandExecutor {
 			} else {
 				if(context.one(CommandParameters.COMMAND).isPresent()) {
 					String command = context.all(CommandParameters.COMMAND).stream().map(Object::toString).collect(Collectors.joining(", "));
-					SerializedItemStack serializedItemStack = new SerializedItemStack(itemStack);
-					SerializedCommandsList serializedCommandsList = serializedItemStack.getOrCreateTag().containsTag("guishopmanager") ? (SerializedCommandsList) serializedItemStack.getOrCreateTag().getTag("guishopmanager", CompoundTag.getClass(SerializedCommandsList.class)).get() : new SerializedCommandsList();
+					SerializedItemStackJsonNbt serializedItemStack = new SerializedItemStackJsonNbt(itemStack);
+					CommandsList serializedCommandsList = serializedItemStack.getOrCreateTag().containsTag(getPluginContainer(), "Commands") ? serializedItemStack.getOrCreateTag().getJsonObject(getPluginContainer(), "Commands").filter(e -> e.isJsonArray()).map(e -> new CommandsList(e.getAsJsonArray())).orElse(new CommandsList()) : new CommandsList();
 					serializedCommandsList.addCommand(command);
-					serializedItemStack.getOrCreateTag().putTag("guishopmanager", serializedCommandsList);
+					serializedItemStack.getOrCreateTag().putJsonElement(getPluginContainer(), "Commands", serializedCommandsList.asJsonArray());
 					itemStack.copyFrom(serializedItemStack.getItemStack());
 					if(main) {
 						player.setItemInHand(HandTypes.MAIN_HAND, serializedItemStack.getItemStack());
@@ -58,6 +59,10 @@ public class AddCommand implements CommandExecutor {
 			}
 		}
 		return CommandResult.success();
+	}
+
+	private PluginContainer getPluginContainer() {
+		return plugin.getPluginContainer();
 	}
 
 }

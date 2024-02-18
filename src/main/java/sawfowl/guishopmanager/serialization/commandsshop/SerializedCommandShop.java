@@ -79,7 +79,7 @@ public class SerializedCommandShop {
 		for(Entry<Integer, List<SerializedCommandShopStack>> menuEntry : getShopMenus().entrySet()) {
 			CommandShopMenuData shopMenu = new CommandShopMenuData();
 			for(SerializedCommandShopStack serializedShopStack : menuEntry.getValue()) {
-				if(serializedShopStack.getSerializedItemStack().getOptItemType().isPresent()) {
+				if(serializedShopStack.getSerializedItemStack().getItemType().isPresent()) {
 					shopMenu.addOrUpdateItem(serializedShopStack.getSlot(), new CommandItemData(serializedShopStack.getSerializedItemStack(), serializedShopStack.getSerializedShopPrices()));
 				}
 			}

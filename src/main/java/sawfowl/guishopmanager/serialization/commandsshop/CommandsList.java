@@ -2,21 +2,25 @@ package sawfowl.guishopmanager.serialization.commandsshop;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
+
+import com.google.gson.JsonArray;
 
 import sawfowl.guishopmanager.GuiShopManager;
-import sawfowl.localeapi.serializetools.CompoundTag;
 
-@ConfigSerializable
-public class SerializedCommandsList extends CompoundTag {
+public class CommandsList {
 
-	@Setting("Commands")
-	List<String> commands = new ArrayList<>();
+	private List<String> commands = new ArrayList<>();
+
+	public CommandsList(){}
+
+	public CommandsList(JsonArray commands) {
+		this.commands = commands.asList().stream().map(e -> e.getAsString()).collect(Collectors.toList());
+	}
 
 	public List<String> getCommands() {
 		return commands;
@@ -32,15 +36,20 @@ public class SerializedCommandsList extends CompoundTag {
 
 	public void executeAll(ServerPlayer player) {
 		commands.forEach(command -> {
-			String execute = command.replace("%player%", player.name()).replace("%uuid%", player.uniqueId().toString());
 			Sponge.server().scheduler().executor(GuiShopManager.getInstance().getPluginContainer()).execute(() -> {
 				try {
-					Sponge.server().commandManager().process(Sponge.systemSubject(), execute);
+					Sponge.server().commandManager().process(Sponge.systemSubject(), command.replace("%player%", player.name()).replace("%uuid%", player.uniqueId().toString()));
 				} catch (CommandException e) {
 					e.printStackTrace();
 				}
 			});
 		});
+	}
+
+	public JsonArray asJsonArray() {
+		JsonArray array = new JsonArray();
+		commands.forEach(array::add);
+		return array;
 	}
 
 	@Override

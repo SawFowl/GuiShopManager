@@ -9,30 +9,25 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurationOptions;
-import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
-import org.spongepowered.configurate.objectmapping.ObjectMapper;
-import org.spongepowered.configurate.objectmapping.meta.NodeResolver;
-import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 
 import net.kyori.adventure.text.Component;
+
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.utils.TypeTokens;
-import sawfowl.localeapi.serializetools.SerializedItemStack;
+import sawfowl.localeapi.api.serializetools.SerializeOptions;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
 
 public class GeneratedFillItems {
 
 	GuiShopManager plugin;
 	private ConfigurationLoader<CommentedConfigurationNode> configLoader;
 	private CommentedConfigurationNode itemsNode;
+	private Map<FillItems, SerializedItemStackJsonNbt> items;
 	public GeneratedFillItems(GuiShopManager instance){
 		plugin = instance;
-		items = new HashMap<FillItems, ItemStack>();
-		final ObjectMapper.Factory factory = ObjectMapper.factoryBuilder().addNodeResolver(NodeResolver.onlyWithSetting()).build();
-		final TypeSerializerCollection child = TypeSerializerCollection.defaults().childBuilder().registerAnnotatedObjects(factory).build();
-		final ConfigurationOptions options = ConfigurationOptions.defaults().serializers(child);
-		configLoader = HoconConfigurationLoader.builder().defaultOptions(options).path(plugin.getConfigDir().resolve("FillItems.conf")).build();
+		items = new HashMap<FillItems, SerializedItemStackJsonNbt>();
+		configLoader = SerializeOptions.createHoconConfigurationLoader(2).path(plugin.getConfigDir().resolve("FillItems.conf")).build();
 		try {
 			itemsNode = configLoader.load();
 		} catch (IOException e) {
@@ -45,14 +40,12 @@ public class GeneratedFillItems {
 		}
 	}
 
-	private Map<FillItems, ItemStack> items;
-
 	public void addItem(FillItems item, ItemStack itemStack) {
-		items.put(item, itemStack);
+		items.put(item, new SerializedItemStackJsonNbt(itemStack));
 	}
 
 	public ItemStack getItemStack(FillItems item) {
-		return items.get(item).copy();
+		return items.get(item).getItemStack();
 	}
 
 	private void generate() throws IOException {
@@ -61,160 +54,160 @@ public class GeneratedFillItems {
 		if(itemsNode.node("BasicFill").empty()) {
 			basicFill = ItemStack.of(ItemTypes.WHITE_STAINED_GLASS_PANE);
 			basicFill.offer(Keys.CUSTOM_NAME, Component.empty());
-			itemsNode.node("BasicFill").set(TypeTokens.SERIALIZED_STACK_TOKEN, new SerializedItemStack(basicFill));
+			itemsNode.node("BasicFill").set(new SerializedItemStackJsonNbt(basicFill));
 			save = true;
 		} else {
-			basicFill = itemsNode.node("BasicFill").get(TypeTokens.SERIALIZED_STACK_TOKEN).getItemStack();
+			basicFill = itemsNode.node("BasicFill").get(SerializedItemStackJsonNbt.class).getItemStack();
 		}
 		
 		ItemStack bottomFill;
 		if(itemsNode.node("BottomFill").empty()) {
 			bottomFill = ItemStack.of(ItemTypes.BLACK_STAINED_GLASS_PANE);
 			bottomFill.offer(Keys.CUSTOM_NAME, Component.empty());
-			itemsNode.node("BottomFill").set(TypeTokens.SERIALIZED_STACK_TOKEN, new SerializedItemStack(bottomFill));
+			itemsNode.node("BottomFill").set(new SerializedItemStackJsonNbt(bottomFill));
 			save = true;
 		} else {
-			bottomFill = itemsNode.node("BottomFill").get(TypeTokens.SERIALIZED_STACK_TOKEN).getItemStack();
+			bottomFill = itemsNode.node("BottomFill").get(SerializedItemStackJsonNbt.class).getItemStack();
 		}
 		
 		ItemStack back;
 		if(itemsNode.node("PreviousMenu").empty()) {
 			back = ItemStack.of(ItemTypes.CHEST_MINECART);
-			itemsNode.node("PreviousMenu").set(TypeTokens.SERIALIZED_STACK_TOKEN, new SerializedItemStack(back));
+			itemsNode.node("PreviousMenu").set(new SerializedItemStackJsonNbt(back));
 			save = true;
 		} else {
-			back = itemsNode.node("PreviousMenu").get(TypeTokens.SERIALIZED_STACK_TOKEN).getItemStack();
+			back = itemsNode.node("PreviousMenu").get(SerializedItemStackJsonNbt.class).getItemStack();
 		}
 		
 		ItemStack next;
 		if(itemsNode.node("NextMenu").empty()) {
 			next = ItemStack.of(ItemTypes.CHEST_MINECART);
-			itemsNode.node("NextMenu").set(TypeTokens.SERIALIZED_STACK_TOKEN, new SerializedItemStack(next));
+			itemsNode.node("NextMenu").set(new SerializedItemStackJsonNbt(next));
 			save = true;
 		} else {
-			next = itemsNode.node("NextMenu").get(TypeTokens.SERIALIZED_STACK_TOKEN).getItemStack();
+			next = itemsNode.node("NextMenu").get(SerializedItemStackJsonNbt.class).getItemStack();
 		}
 		
 		ItemStack buy;
 		if(itemsNode.node("BuyItem").empty()) {
 			buy = ItemStack.of(ItemTypes.WRITABLE_BOOK);
-			itemsNode.node("BuyItem").set(TypeTokens.SERIALIZED_STACK_TOKEN, new SerializedItemStack(buy));
+			itemsNode.node("BuyItem").set(new SerializedItemStackJsonNbt(buy));
 			save = true;
 		} else {
-			buy = itemsNode.node("BuyItem").get(TypeTokens.SERIALIZED_STACK_TOKEN).getItemStack();
+			buy = itemsNode.node("BuyItem").get(SerializedItemStackJsonNbt.class).getItemStack();
 		}
 		
 		ItemStack sell;
 		if(itemsNode.node("SellItem").empty()) {
 			sell = ItemStack.of(ItemTypes.WRITABLE_BOOK);
-			itemsNode.node("SellItem").set(TypeTokens.SERIALIZED_STACK_TOKEN, new SerializedItemStack(buy));
+			itemsNode.node("SellItem").set(new SerializedItemStackJsonNbt(sell));
 			save = true;
 		} else {
-			sell = itemsNode.node("SellItem").get(TypeTokens.SERIALIZED_STACK_TOKEN).getItemStack();
+			sell = itemsNode.node("SellItem").get(SerializedItemStackJsonNbt.class).getItemStack();
 		}
 		
 		ItemStack clear;
 		if(itemsNode.node("ClearItem").empty()) {
 			clear = ItemStack.of(ItemTypes.PAPER);
-			itemsNode.node("ClearItem").set(TypeTokens.SERIALIZED_STACK_TOKEN, new SerializedItemStack(clear));
+			itemsNode.node("ClearItem").set(new SerializedItemStackJsonNbt(clear));
 			save = true;
 		} else {
-			clear = itemsNode.node("ClearItem").get(TypeTokens.SERIALIZED_STACK_TOKEN).getItemStack();
+			clear = itemsNode.node("ClearItem").get(SerializedItemStackJsonNbt.class).getItemStack();
 		}
 		
 		ItemStack changeCurrency;
 		if(itemsNode.node("ChangeCurrency").empty()) {
 			changeCurrency = ItemStack.of(ItemTypes.KNOWLEDGE_BOOK);
-			itemsNode.node("ChangeCurrency").set(TypeTokens.SERIALIZED_STACK_TOKEN, new SerializedItemStack(changeCurrency));
+			itemsNode.node("ChangeCurrency").set(new SerializedItemStackJsonNbt(changeCurrency));
 			save = true;
 		} else {
-			changeCurrency = itemsNode.node("ChangeCurrency").get(TypeTokens.SERIALIZED_STACK_TOKEN).getItemStack();
+			changeCurrency = itemsNode.node("ChangeCurrency").get(SerializedItemStackJsonNbt.class).getItemStack();
 		}
 		
 		ItemStack switchMode;
 		if(itemsNode.node("SwitchMode").empty()) {
 			switchMode = ItemStack.of(ItemTypes.COMPASS);
-			itemsNode.node("SwitchMode").set(TypeTokens.SERIALIZED_STACK_TOKEN, new SerializedItemStack(switchMode));
+			itemsNode.node("SwitchMode").set(new SerializedItemStackJsonNbt(switchMode));
 			save = true;
 		} else {
-			switchMode = itemsNode.node("SwitchMode").get(TypeTokens.SERIALIZED_STACK_TOKEN).getItemStack();
+			switchMode = itemsNode.node("SwitchMode").get(SerializedItemStackJsonNbt.class).getItemStack();
 		}
 		
 		ItemStack exit;
 		if(itemsNode.node("Exit").empty()) {
 			exit = ItemStack.of(ItemTypes.BARRIER);
-			itemsNode.node("Exit").set(TypeTokens.SERIALIZED_STACK_TOKEN, new SerializedItemStack(exit));
+			itemsNode.node("Exit").set(new SerializedItemStackJsonNbt(exit));
 			save = true;
 		} else {
-			exit = itemsNode.node("Exit").get(TypeTokens.SERIALIZED_STACK_TOKEN).getItemStack();
+			exit = itemsNode.node("Exit").get(SerializedItemStackJsonNbt.class).getItemStack();
 		}
 		
 		ItemStack auctionAdd;
 		if(itemsNode.node("AuctionAddItem").empty()) {
 			auctionAdd = ItemStack.of(ItemTypes.GREEN_DYE);
-			itemsNode.node("AuctionAddItem").set(TypeTokens.SERIALIZED_STACK_TOKEN, new SerializedItemStack(auctionAdd));
+			itemsNode.node("AuctionAddItem").set(new SerializedItemStackJsonNbt(auctionAdd));
 			save = true;
 		} else {
-			auctionAdd = itemsNode.node("AuctionAddItem").get(TypeTokens.SERIALIZED_STACK_TOKEN).getItemStack();
+			auctionAdd = itemsNode.node("AuctionAddItem").get(SerializedItemStackJsonNbt.class).getItemStack();
 		}
 		
 		ItemStack auctionReturn;
 		if(itemsNode.node("AuctionReturnItem").empty()) {
 			auctionReturn = ItemStack.of(ItemTypes.RED_DYE);
-			itemsNode.node("AuctionReturnItem").set(TypeTokens.SERIALIZED_STACK_TOKEN, new SerializedItemStack(auctionReturn));
+			itemsNode.node("AuctionReturnItem").set(new SerializedItemStackJsonNbt(auctionReturn));
 			save = true;
 		} else {
-			auctionReturn = itemsNode.node("AuctionReturnItem").get(TypeTokens.SERIALIZED_STACK_TOKEN).getItemStack();
+			auctionReturn = itemsNode.node("AuctionReturnItem").get(SerializedItemStackJsonNbt.class).getItemStack();
 		}
 		
-		ItemStack changePrice = null;
+		SerializedItemStackJsonNbt changePrice = null;
 		if(itemsNode.node("ChangePrice").empty()) {
-			Map<String, SerializedItemStack> items = new HashMap<String, SerializedItemStack>();
+			Map<String, SerializedItemStackJsonNbt> items = new HashMap<String, SerializedItemStackJsonNbt>();
 			for(int i = 0; i < 9; i++) {
 				if(i == 0 || i == 1 || i == 2) {
-					changePrice = ItemStack.of(ItemTypes.IRON_NUGGET);
+					changePrice = new SerializedItemStackJsonNbt(ItemStack.of(ItemTypes.IRON_NUGGET));
 				}
 				if(i == 3 || i == 4 || i == 5) {
-					changePrice = ItemStack.of(ItemTypes.GOLD_NUGGET);
+					changePrice = new SerializedItemStackJsonNbt(ItemStack.of(ItemTypes.GOLD_NUGGET));
 				}
 				if(i == 6 || i == 7 || i == 8) {
-					changePrice = ItemStack.of(ItemTypes.DIAMOND);
+					changePrice = new SerializedItemStackJsonNbt(ItemStack.of(ItemTypes.DIAMOND));
 				}
-				addItem(FillItems.valueOf("CHANGEPRICE" + i), changePrice);
-				items.put(String.valueOf(i), new SerializedItemStack(changePrice));
-				itemsNode.node("ChangePrice").set(TypeTokens.MAP_SERIALIZED_STACKS_TOKEN, items);
+				this.items.put(FillItems.valueOf("CHANGEPRICE" + i), changePrice);
+				items.put(String.valueOf(i), changePrice);
+				itemsNode.node("ChangePrice").set(TypeTokens.MAP_JSON_ITEMSTACK_TOKEN, items);
 			}
 			save = true;
 		} else {
-			Map<String, SerializedItemStack> items = new HashMap<String, SerializedItemStack>();
-			items.putAll(itemsNode.node("ChangePrice").get(TypeTokens.MAP_SERIALIZED_STACKS_TOKEN));
-			for(Entry<String, SerializedItemStack> entry : items.entrySet()) {
-				addItem(FillItems.valueOf("CHANGEPRICE" + entry.getKey()), entry.getValue().getItemStack());
+			Map<String, SerializedItemStackJsonNbt> items = new HashMap<String, SerializedItemStackJsonNbt>();
+			items.putAll(itemsNode.node("ChangePrice").get(TypeTokens.MAP_JSON_ITEMSTACK_TOKEN));
+			for(Entry<String, SerializedItemStackJsonNbt> entry : items.entrySet()) {
+				this.items.put(FillItems.valueOf("CHANGEPRICE" + entry.getKey()), entry.getValue());
 			}
 		}
 		
-		ItemStack changeSize = null;
+		SerializedItemStackJsonNbt changeSize = null;
 		if(itemsNode.node("ChangeSize").empty()) {
-			Map<String, SerializedItemStack> items = new HashMap<String, SerializedItemStack>();
+			Map<String, SerializedItemStackJsonNbt> items = new HashMap<String, SerializedItemStackJsonNbt>();
 			for(int i = 0; i < 9; i++) {
 				if(i == 0 || i == 1 || i == 2) {
-					changeSize = ItemStack.of(ItemTypes.IRON_NUGGET);
+					changeSize = new SerializedItemStackJsonNbt(ItemStack.of(ItemTypes.IRON_NUGGET));
 				}
 				if(i == 3 || i == 4 || i == 5) {
-					changeSize = ItemStack.of(ItemTypes.GOLD_NUGGET);
+					changeSize = new SerializedItemStackJsonNbt(ItemStack.of(ItemTypes.GOLD_NUGGET));
 				}
 				if(i == 6 || i == 7 || i == 8) {
-					changeSize = ItemStack.of(ItemTypes.DIAMOND);
+					changeSize = new SerializedItemStackJsonNbt(ItemStack.of(ItemTypes.DIAMOND));
 				}
-				addItem(FillItems.valueOf("CHANGESIZE" + i), changeSize);
-				items.put(String.valueOf(i), new SerializedItemStack(changeSize));
-				itemsNode.node("ChangeSize").set(TypeTokens.MAP_SERIALIZED_STACKS_TOKEN, items);
+				this.items.put(FillItems.valueOf("CHANGESIZE" + i), changeSize);
+				items.put(String.valueOf(i), changeSize);
+				itemsNode.node("ChangeSize").set(TypeTokens.MAP_JSON_ITEMSTACK_TOKEN, items);
 			}
 			save = true;
 		} else {
-			Map<String, SerializedItemStack> items = new HashMap<String, SerializedItemStack>();
-			items.putAll(itemsNode.node("ChangeSize").get(TypeTokens.MAP_SERIALIZED_STACKS_TOKEN));
-			for(Entry<String, SerializedItemStack> entry : items.entrySet()) {
+			Map<String, SerializedItemStackJsonNbt> items = new HashMap<String, SerializedItemStackJsonNbt>();
+			items.putAll(itemsNode.node("ChangeSize").get(TypeTokens.MAP_JSON_ITEMSTACK_TOKEN));
+			for(Entry<String, SerializedItemStackJsonNbt> entry : items.entrySet()) {
 				addItem(FillItems.valueOf("CHANGESIZE" + entry.getKey()), entry.getValue().getItemStack());
 			}
 		}
@@ -230,8 +223,6 @@ public class GeneratedFillItems {
 		addItem(FillItems.EXIT, exit);
 		addItem(FillItems.ADD, auctionAdd);
 		addItem(FillItems.RETURN, auctionReturn);
-		if(save) {
-			configLoader.save(itemsNode);
-		}
+		if(save) configLoader.save(itemsNode);
 	}
 }

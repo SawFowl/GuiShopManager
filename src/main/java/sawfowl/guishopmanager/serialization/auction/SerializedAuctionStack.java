@@ -2,6 +2,7 @@ package sawfowl.guishopmanager.serialization.auction;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -10,7 +11,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import net.kyori.adventure.text.Component;
-import sawfowl.localeapi.serializetools.SerializedItemStack;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
 
 @ConfigSerializable
 public class SerializedAuctionStack implements Serializable {
@@ -18,7 +19,7 @@ public class SerializedAuctionStack implements Serializable {
 	SerializedAuctionStack(){}
 
 	public SerializedAuctionStack(ItemStack itemStack, List<SerializedAuctionPrice> prices, UUID ownerUUID, String ownerName, long timeExpires, String serverName) {
-		this.serializedItemStack = new SerializedItemStack(itemStack);
+		this.itemStack = new SerializedItemStackJsonNbt(itemStack);
 		this.prices = prices;
 		this.ownerUUID = ownerUUID;
 		this.ownerName = ownerName;
@@ -30,7 +31,7 @@ public class SerializedAuctionStack implements Serializable {
 	private static final long serialVersionUID = 01;
 
 	@Setting("ItemStack")
-	private SerializedItemStack serializedItemStack;
+	private SerializedItemStackJsonNbt itemStack;
 	@Setting("Prices")
 	private List<SerializedAuctionPrice> prices;
 	@Setting("OwnerUUID")
@@ -47,10 +48,10 @@ public class SerializedAuctionStack implements Serializable {
 	private SerializedBetData serializedBetData;
 
 	public void setItemStack(ItemStack itemStack) {
-		serializedItemStack = new SerializedItemStack(itemStack.copy());
+		this.itemStack = new SerializedItemStackJsonNbt(itemStack);
 	}
-	public SerializedItemStack getSerializedItemStack() {
-		return serializedItemStack;
+	public SerializedItemStackJsonNbt getSerializedItemStack() {
+		return itemStack;
 	}
 	public long getTimeExpires() {
 		return timeExpires;
@@ -112,6 +113,19 @@ public class SerializedAuctionStack implements Serializable {
 			long hour = millis / (1000 * 60 * 60);
 			return Component.text(String.format("%02dh %02dm", hour, minute));
 		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(ownerUUID, stackUUID, timeExpires);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null || getClass() != obj.getClass()) return false;
+		if(this == obj) return true;
+		SerializedAuctionStack other = (SerializedAuctionStack) obj;
+		return Objects.equals(ownerUUID, other.ownerUUID) && Objects.equals(stackUUID, other.stackUUID) && timeExpires == other.timeExpires;
 	}
 
 }

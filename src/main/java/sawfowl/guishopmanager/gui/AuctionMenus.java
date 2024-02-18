@@ -27,17 +27,21 @@ import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.util.Ticks;
+import org.spongepowered.plugin.PluginContainer;
+
+import com.google.gson.JsonPrimitive;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
+
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.configure.FillItems;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionPrice;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 import sawfowl.guishopmanager.serialization.auction.SerializedBetData;
-
-import sawfowl.localeapi.serializetools.SerializedItemStack;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackPlainNBT;
 
 public class AuctionMenus {
 
@@ -69,8 +73,8 @@ public class AuctionMenus {
 					slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 				} else {
 					SerializedAuctionStack auctionItem = auctionStacks.get(currentItem);
-					SerializedItemStack configuredStack = new SerializedItemStack(auctionItem.getSerializedItemStack().getItemStack());
-					configuredStack.getOrCreateTag().putUUID("uuid", auctionItem.getStackUUID());
+					SerializedItemStackJsonNbt configuredStack = new SerializedItemStackJsonNbt(auctionItem.getSerializedItemStack().getItemStack());
+					configuredStack.getOrCreateTag().putJsonElement(getPluginContainer(), "uuid", new JsonPrimitive(auctionItem.getStackUUID().toString()));
 					List<Component> itemLore = configuredStack.getItemStack().get(Keys.LORE).orElse(new ArrayList<Component>());
 					if(configuredStack.getItemStack().get(Keys.LORE).isPresent()) {
 						configuredStack.getItemStack().remove(Keys.LORE);
@@ -194,15 +198,15 @@ public class AuctionMenus {
 							createInventory(player, page + 1, plugin.getAuctionItems().values().stream().collect(Collectors.toList()));
 						}).build());
 					} else if(slotIndex <= 44) {
-						SerializedItemStack itemStack = new SerializedItemStack(slot.peek());
-						if(!itemStack.getOrCreateTag().containsTag("uuid")) return true;
-						if(!plugin.getAuctionItems().containsKey(itemStack.getOrCreateTag().getUUID("uuid").get())) {
+						SerializedItemStackJsonNbt itemStack = new SerializedItemStackJsonNbt(slot.peek());
+						if(!itemStack.getOrCreateTag().containsTag(getPluginContainer(), "uuid")) return true;
+						UUID stackUUID = UUID.fromString(itemStack.getOrCreateTag().getString(getPluginContainer(), "uuid").get());
+						if(!plugin.getAuctionItems().containsKey(stackUUID)) {
 							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionItemNotFound"));
 							Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
 								slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 							}).build());
 						}
-						UUID stackUUID = itemStack.getOrCreateTag().getUUID("uuid").get();
 						if(plugin.getAuctionItems().get(stackUUID).getOwnerUUID().equals(player.uniqueId())) {
 							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionCancelBuy"));
 							return false;
@@ -213,7 +217,7 @@ public class AuctionMenus {
 							}).build());
 						} else if(clickType == ClickTypes.CLICK_RIGHT.get()) {
 							SerializedAuctionStack auctionItem = plugin.getAuctionItems().get(stackUUID);
-							if(!auctionItem.containsCurrency(currencies.get(editData.priceNumber)) || auctionItem.getPrices().get(editData.priceNumber).getPrice().doubleValue() == 0 || auctionItem.getSerializedItemStack().getItemStack().quantity() > calculateMaxBuyItems(player, auctionItem.getSerializedItemStack().getItemStack(), auctionItem.getPrices().get(editData.priceNumber))) {
+							if(!auctionItem.containsCurrency(currencies.get(editData.priceNumber)) || auctionItem.getPrices().get(editData.priceNumber).getPrice().doubleValue() == 0 || auctionItem.getSerializedItemStack().getQuantity() > calculateMaxBuyItems(player, auctionItem.getSerializedItemStack().getItemStack(), auctionItem.getPrices().get(editData.priceNumber))) {
 								return false;
 							}
 							if(plugin.getEconomy().checkPlayerBalance(player.uniqueId(), auctionItem.getPrices().get(editData.priceNumber).getCurrency(), auctionItem.getPrices().get(editData.priceNumber).getPrice())) {
@@ -223,7 +227,7 @@ public class AuctionMenus {
 								}
 								slot.set(plugin.getFillItems().getItemStack(FillItems.BASIC));
 								ItemStack toOffer = auctionItem.getSerializedItemStack().getItemStack();
-								plugin.getAuctionWorkData().removeAuctionStack(auctionItem.getStackUUID());
+								plugin.getAuctionStorage().removeAuctionStack(auctionItem.getStackUUID());
 								plugin.getAuctionItems().remove(stackUUID);
 								player.inventory().query(QueryTypes.INVENTORY_TYPE.get().of(PrimaryPlayerInventory.class)).offer(toOffer);
 							} else {
@@ -335,7 +339,7 @@ public class AuctionMenus {
 					} else if(slotIndex == 18) {
 						if(betData.getMoney().doubleValue() > minimalBet.doubleValue() && plugin.getEconomy().checkPlayerBalance(player.uniqueId(), currency, betData.getMoney())) {
 							plugin.getAuctionItems().get(idAuctionItem).setBetData(betData);
-							plugin.getAuctionWorkData().saveAuctionStack(plugin.getAuctionItems().get(idAuctionItem));
+							plugin.getAuctionStorage().saveAuctionStack(plugin.getAuctionItems().get(idAuctionItem));
 						} else {
 							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "BetIsNotSet"));
 						}
@@ -346,7 +350,7 @@ public class AuctionMenus {
 						closePlayerInventory(player);
 						if(betData.getMoney().doubleValue() > minimalBet.doubleValue() && plugin.getEconomy().checkPlayerBalance(player.uniqueId(), currency, betData.getMoney())) {
 							plugin.getAuctionItems().get(idAuctionItem).setBetData(betData);
-							plugin.getAuctionWorkData().saveAuctionStack(plugin.getAuctionItems().get(idAuctionItem));
+							plugin.getAuctionStorage().saveAuctionStack(plugin.getAuctionItems().get(idAuctionItem));
 						} else {
 							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "BetIsNotSet"));
 						}
@@ -525,12 +529,12 @@ public class AuctionMenus {
 					}
 				} else {
 					if(slot.totalQuantity() > 0 && !prices.isEmpty()) {
-						SerializedItemStack serializedItemStack = new SerializedItemStack(slot.peek());
-						if(plugin.maskIsBlackList(serializedItemStack.getType()) || plugin.itemIsBlackList(slot.peek())) {
+						SerializedItemStackJsonNbt serializedItemStack = new SerializedItemStackJsonNbt(slot.peek());
+						if(plugin.maskIsBlackList(serializedItemStack.getItemTypeAsString()) || plugin.itemIsBlackList(slot.peek())) {
 							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ItemBlocked"));
 							return false;
 						}
-						if(plugin.getRootNode().node("Auction", "NbtLimit").getInt() < auctionStack.getSerializedItemStack().getNBT().toString().length()) {
+						if(checkNbtLength(auctionStack)) {
 							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "LongNBT"));
 							return false;
 						}
@@ -562,8 +566,8 @@ public class AuctionMenus {
 		menu.setReadOnly(true);
 		for(SerializedAuctionStack auctionItem : plugin.getAuctionItems().values()) {
 			if(auctionItem.getServerName().equals(serverName) && auctionItem.getOwnerUUID().equals(player.uniqueId())) {
-				SerializedItemStack itemStack = new SerializedItemStack(auctionItem.getSerializedItemStack().getItemStack());
-				itemStack.getOrCreateTag().putUUID("uuid", auctionItem.getStackUUID());
+				SerializedItemStackJsonNbt itemStack = new SerializedItemStackJsonNbt(auctionItem.getSerializedItemStack().getItemStack());
+				itemStack.getOrCreateTag().putJsonElement(getPluginContainer(), "uuid", new JsonPrimitive(auctionItem.getStackUUID().toString()));
 				menu.inventory().offer(itemStack.getItemStack());
 			}
 		}
@@ -571,14 +575,14 @@ public class AuctionMenus {
 			@Override
 			public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
 				if(menu.inventory().containsChild(slot) && slotIndex <= 53 && slot.totalQuantity() > 0) {
-					SerializedItemStack itemStack = new SerializedItemStack(slot.peek());
-					if(itemStack.getOrCreateTag().containsTag("uuid")) {
-						UUID uuid = itemStack.getOrCreateTag().getUUID("uuid").get();
-						if(plugin.getAuctionItems().containsKey(uuid) && player.inventory().query(QueryTypes.INVENTORY_TYPE.get().of(PrimaryPlayerInventory.class)).freeCapacity() > 0) {
+					SerializedItemStackJsonNbt itemStack = new SerializedItemStackJsonNbt(slot.peek());
+					if(itemStack.getOrCreateTag().containsTag(getPluginContainer(), "uuid")) {
+						UUID uuid = itemStack.getOrCreateTag().getString(getPluginContainer(), "uuid").map(s -> UUID.fromString(s)).orElse(null);
+						if(uuid != null && plugin.getAuctionItems().containsKey(uuid) && player.inventory().query(QueryTypes.INVENTORY_TYPE.get().of(PrimaryPlayerInventory.class)).freeCapacity() > 0) {
 							slot.clear();
 							ItemStack toOffer = plugin.getAuctionItems().get(uuid).getSerializedItemStack().getItemStack();
 							plugin.getAuctionItems().remove(uuid);
-							plugin.getAuctionWorkData().removeAuctionStack(uuid);
+							plugin.getAuctionStorage().removeAuctionStack(uuid);
 							player.inventory().offer(toOffer);
 						}
 					}
@@ -701,7 +705,7 @@ public class AuctionMenus {
 	}
 
 	private void addItem(ServerPlayer player, SerializedAuctionStack auctionStack) {
-		if(plugin.maskIsBlackList(auctionStack.getSerializedItemStack().getType()) || plugin.itemIsBlackList(auctionStack.getSerializedItemStack().getItemStack())) {
+		if(plugin.maskIsBlackList(new SerializedItemStackPlainNBT(auctionStack.getSerializedItemStack().getItemStack()).getItemTypeAsString()) || plugin.itemIsBlackList(auctionStack.getSerializedItemStack().getItemStack())) {
 			player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ItemBlocked"));
 			return;
 		}
@@ -727,14 +731,18 @@ public class AuctionMenus {
 		}
 		plugin.getAuctionItems().put(auctionStack.getStackUUID(), auctionStack);
 		Sponge.game().asyncScheduler().submit(Task.builder().delay(Ticks.of(5)).execute(() -> {
-			plugin.getAuctionWorkData().saveAuctionStack(auctionStack);
+			plugin.getAuctionStorage().saveAuctionStack(auctionStack);
 		}).plugin(plugin.getPluginContainer()).build());
 		player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(auctionStack.getSerializedItemStack().getItemStack())).poll(auctionStack.getSerializedItemStack().getQuantity());
 		player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionItemAdded"));
 	}
 
 	private boolean checkNbtLength(SerializedAuctionStack auctionStack) {
-		return auctionStack.getSerializedItemStack().getNBT().length() > plugin.getRootNode().node("Auction", "NbtLimit").getInt();
+		return auctionStack.getSerializedItemStack().getNBT() != null && auctionStack.getSerializedItemStack().getNBT().toString().length() > plugin.getRootNode().node("Auction", "NbtLimit").getInt();
+	}
+
+	private PluginContainer getPluginContainer() {
+		return plugin.getPluginContainer();
 	}
 
 	private class EditData {

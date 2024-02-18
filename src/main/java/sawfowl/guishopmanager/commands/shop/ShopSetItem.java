@@ -1,4 +1,4 @@
-package sawfowl.guishopmanager.commands;
+package sawfowl.guishopmanager.commands.shop;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -91,7 +91,7 @@ public class ShopSetItem implements CommandExecutor {
 														serializedShopPrice.setBuyOrSellPrice(buyPrice, true, true);
 														serializedShopPrice.setBuyOrSellPrice(sellPrice, true, false);
 														shop.getMenus().get(menuId).getItems().put(slot, new ShopItem(itemStack, Arrays.asList(serializedShopPrice)));
-														plugin.getWorkShopData().saveShop(shopId);
+														plugin.getShopStorage().saveShop(shopId);
 														Component itemMessage = itemStack.type().asComponent();
 														String[] splitedItemID = RegistryTypes.ITEM_TYPE.get().valueKey(itemStack.type()).asString().split(":");
 														itemMessage.hoverEvent(HoverEvent.showItem(ShowItem.of(Key.key(splitedItemID[0], splitedItemID[1]), 1)));

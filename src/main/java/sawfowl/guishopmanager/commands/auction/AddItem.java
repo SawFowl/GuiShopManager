@@ -1,4 +1,4 @@
-package sawfowl.guishopmanager.commands;
+package sawfowl.guishopmanager.commands.auction;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -29,10 +29,10 @@ import sawfowl.localeapi.api.TextUtils;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionPrice;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 
-public class AuctionAddItem implements CommandExecutor {
+public class AddItem implements CommandExecutor {
 
 	GuiShopManager plugin;
-	public AuctionAddItem(GuiShopManager instance) {
+	public AddItem(GuiShopManager instance) {
 		plugin = instance;
 	}
 
@@ -167,7 +167,7 @@ public class AuctionAddItem implements CommandExecutor {
 	}
 
 	private void run(ServerPlayer player, SerializedAuctionStack auctionStack) {
-		if(plugin.maskIsBlackList(auctionStack.getSerializedItemStack().getType()) || plugin.itemIsBlackList(auctionStack.getSerializedItemStack().getItemStack())) {
+		if(plugin.maskIsBlackList(auctionStack.getSerializedItemStack().getItemTypeAsString()) || plugin.itemIsBlackList(auctionStack.getSerializedItemStack().getItemStack())) {
 			player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ItemBlocked"));
 			return;
 		}
@@ -193,14 +193,14 @@ public class AuctionAddItem implements CommandExecutor {
 		}
 		plugin.getAuctionItems().put(auctionStack.getStackUUID(), auctionStack);
 		Sponge.game().asyncScheduler().submit(Task.builder().delay(Ticks.of(5)).execute(() -> {
-			plugin.getAuctionWorkData().saveAuctionStack(auctionStack);
+			plugin.getAuctionStorage().saveAuctionStack(auctionStack);
 		}).plugin(plugin.getPluginContainer()).build());
 		player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(auctionStack.getSerializedItemStack().getItemStack())).poll(auctionStack.getSerializedItemStack().getQuantity());
 		player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionItemAdded"));
 	}
 
 	private boolean checkNbtLength(SerializedAuctionStack auctionStack) {
-		return auctionStack.getSerializedItemStack().getNBT().length() > plugin.getRootNode().node("Auction", "NbtLimit").getInt();
+		return auctionStack.getSerializedItemStack().getNBT().toString().length() > plugin.getRootNode().node("Auction", "NbtLimit").getInt();
 	}
 
 	private long time() {

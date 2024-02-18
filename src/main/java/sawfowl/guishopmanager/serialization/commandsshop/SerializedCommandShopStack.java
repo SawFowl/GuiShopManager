@@ -1,10 +1,11 @@
 package sawfowl.guishopmanager.serialization.commandsshop;
 
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-import sawfowl.localeapi.serializetools.CompoundTag;
-import sawfowl.localeapi.serializetools.SerializedItemStack;
+import sawfowl.guishopmanager.GuiShopManager;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
 
 import java.io.Serializable;
 import java.util.List;
@@ -13,9 +14,9 @@ import java.util.List;
 public class SerializedCommandShopStack implements Serializable {
 
 	SerializedCommandShopStack(){}
-	public SerializedCommandShopStack(int slot, SerializedItemStack serializableItemStack, List<SerializedCommandShopPrice> serializedShopPrices) {
+	public SerializedCommandShopStack(int slot, ItemStack itemStack, List<SerializedCommandShopPrice> serializedShopPrices) {
 		this.slot = slot;
-		this.serializedItemStack = serializableItemStack;
+		this.serializedItemStack = new SerializedItemStackJsonNbt(itemStack);
 		this.serializedShopPrices = serializedShopPrices;
 	}
 
@@ -26,9 +27,9 @@ public class SerializedCommandShopStack implements Serializable {
 	@Setting("Prices")
 	private List<SerializedCommandShopPrice> serializedShopPrices;
 	@Setting("ItemStack")
-	private SerializedItemStack serializedItemStack;
+	private SerializedItemStackJsonNbt serializedItemStack;
 
-	public SerializedItemStack getSerializedItemStack() {
+	public SerializedItemStackJsonNbt getSerializedItemStack() {
 		return serializedItemStack;
 	}
 
@@ -40,8 +41,8 @@ public class SerializedCommandShopStack implements Serializable {
 		return slot;
 	}
 
-	public SerializedCommandsList getCommands() {
-		return serializedItemStack.getOrCreateTag().containsTag("guishopmanager") ? (SerializedCommandsList) serializedItemStack.getOrCreateTag().getTag("guishopmanager", CompoundTag.getClass(SerializedCommandsList.class)).get() : new SerializedCommandsList();
+	public CommandsList getCommands() {
+		return serializedItemStack.getOrCreateTag().containsTag(GuiShopManager.getInstance().getPluginContainer(), "Commands") ? serializedItemStack.getOrCreateTag().getJsonObject(GuiShopManager.getInstance().getPluginContainer(), "Commands").filter(e -> e.isJsonArray()).map(e -> new CommandsList(e.getAsJsonArray())).orElse(new CommandsList()) : new CommandsList();
 	}
 
 	@Override

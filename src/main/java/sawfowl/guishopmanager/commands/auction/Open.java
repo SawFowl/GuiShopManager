@@ -1,4 +1,4 @@
-package sawfowl.guishopmanager.commands;
+package sawfowl.guishopmanager.commands.auction;
 
 import java.util.stream.Collectors;
 
@@ -14,10 +14,10 @@ import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.utils.CommandParameters;
 
-public class AuctionOpen implements CommandExecutor {
+public class Open implements CommandExecutor {
 
 	GuiShopManager plugin;
-	public AuctionOpen(GuiShopManager instance) {
+	public Open(GuiShopManager instance) {
 		plugin = instance;
 	}
 
