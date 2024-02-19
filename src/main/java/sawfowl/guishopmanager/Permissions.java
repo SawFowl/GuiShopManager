@@ -4,6 +4,8 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.service.economy.Currency;
 
 import net.kyori.adventure.text.Component;
+
+import sawfowl.guishopmanager.utils.Currencies;
 import sawfowl.localeapi.api.TextUtils;
 
 public class Permissions {
@@ -37,7 +39,7 @@ public class Permissions {
 	}
 
 	public static boolean commandShopCurrencyPermission(ServerPlayer player, String shopId, Currency currency) {
-		return player.hasPermission("guishopmanager.currency." + TextUtils.clearDecorations(currency.displayName())) || player.hasPermission(commandShopCurrencyPermission(shopId, currency.symbol())) || player.hasPermission(commandShopCurrencyPermission(shopId, currency.displayName())) || player.hasPermission(commandShopCurrencyPermission(shopId, currency.pluralDisplayName()));
+		return player.hasPermission("guishopmanager.currency." + Currencies.get().findValueKey(currency).map(key -> key.asString()).orElse(TextUtils.clearDecorations(currency.displayName()))) || player.hasPermission(commandShopCurrencyPermission(shopId, currency.symbol())) || player.hasPermission(commandShopCurrencyPermission(shopId, currency.displayName())) || player.hasPermission(commandShopCurrencyPermission(shopId, currency.pluralDisplayName()));
 	}
 
 	public static String commandShopCurrencyPermission(String shopId, Component currency) {
