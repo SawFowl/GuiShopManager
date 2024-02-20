@@ -75,18 +75,17 @@ import sawfowl.guishopmanager.utils.MySQL;
 import sawfowl.commandpack.utils.StorageType;
 import sawfowl.guishopmanager.commands.MainCommand;
 import sawfowl.guishopmanager.commands.auction.AddBlackList;
-import sawfowl.guishopmanager.commands.auction.AddCommand;
 import sawfowl.guishopmanager.commands.auction.AddItem;
-import sawfowl.guishopmanager.commands.auction.Open;
-import sawfowl.guishopmanager.commands.commandshop.CommandsShopCreate;
-import sawfowl.guishopmanager.commands.commandshop.CommandsShopDelete;
-import sawfowl.guishopmanager.commands.commandshop.CommandsShopEdit;
-import sawfowl.guishopmanager.commands.commandshop.CommandsShopOpen;
-import sawfowl.guishopmanager.commands.commandshop.CommandsShopTranslate;
+import sawfowl.guishopmanager.commands.auction.Auction;
+import sawfowl.guishopmanager.commands.commandshop.AddCommand;
+import sawfowl.guishopmanager.commands.commandshop.CommandShopCreate;
+import sawfowl.guishopmanager.commands.commandshop.CommandShopDelete;
+import sawfowl.guishopmanager.commands.commandshop.CommandShopEdit;
+import sawfowl.guishopmanager.commands.commandshop.CommandShop;
+import sawfowl.guishopmanager.commands.commandshop.CommandShopTranslate;
 import sawfowl.guishopmanager.commands.shop.ShopCreate;
 import sawfowl.guishopmanager.commands.shop.ShopDelete;
 import sawfowl.guishopmanager.commands.shop.ShopEdit;
-import sawfowl.guishopmanager.commands.shop.ShopOpen;
 import sawfowl.guishopmanager.commands.shop.ShopSetItem;
 import sawfowl.guishopmanager.commands.shop.ShopTranslate;
 import sawfowl.guishopmanager.configure.Expire;
@@ -694,10 +693,10 @@ public class GuiShopManager {
 				.build();
 		
 		Command.Parameterized commandAuction = Command.builder()
-				.shortDescription(Component.text("Open auction"))
+				.shortDescription(Component.text("Auction auction"))
 				.permission(Permissions.AUCTION_OPEN_SELF)
 				.addParameters(CommandParameters.PLAYER)
-				.executor(new Open(instance))
+				.executor(new Auction(instance))
 				.addChild(commandAuctionAdd, "add", "additem")
 				.addChild(commandAuctionItemBlocking, "blacklist", "block")
 				.build();
@@ -738,16 +737,16 @@ public class GuiShopManager {
 				.build();
 		
 		Command.Parameterized commandShopOpen = Command.builder()
-				.shortDescription(Component.text("Open a shop"))
+				.shortDescription(Component.text("Auction a shop"))
 				.permission(Permissions.SHOP_OPEN_SELF)
 				.addParameters(CommandParameters.SHOP_ID, CommandParameters.PLAYER)
-				.executor(new ShopOpen(instance))
+				.executor(new sawfowl.guishopmanager.commands.shop.Shop(instance))
 				.build();
 		
 		Command.Parameterized commandShop = Command.builder()
-				.shortDescription(Component.text("Open a shop"))
+				.shortDescription(Component.text("Auction a shop"))
 				.permission(Permissions.HELP)
-				.executor(new ShopOpen(instance))
+				.executor(new sawfowl.guishopmanager.commands.shop.Shop(instance))
 				.addChild(commandShopCreate, "create")
 				.addChild(commandShopDelete, "delete")
 				.addChild(commandShopEdit, "edit")
@@ -767,35 +766,35 @@ public class GuiShopManager {
 				.shortDescription(Component.text("Add command to item"))
 				.permission(Permissions.COMMANDSSHOP_CREATE)
 				.addParameter(CommandParameters.SHOP_ID)
-				.executor(new CommandsShopCreate(instance))
+				.executor(new CommandShopCreate(instance))
 				.build();
 		
 		Command.Parameterized commandEditCommandsShop = Command.builder()
 				.shortDescription(Component.text("Add command to item"))
 				.permission(Permissions.COMMANDSSHOP_EDIT)
 				.addParameter(CommandParameters.SHOP_ID)
-				.executor(new CommandsShopEdit(instance))
+				.executor(new CommandShopEdit(instance))
 				.build();
 		
 		Command.Parameterized commandDeleteCommandsShop = Command.builder()
 				.shortDescription(Component.text("Add command to item"))
 				.permission(Permissions.COMMANDSSHOP_DELETE)
 				.addParameter(CommandParameters.SHOP_ID)
-				.executor(new CommandsShopDelete(instance))
+				.executor(new CommandShopDelete(instance))
 				.build();
 		
 		Command.Parameterized commandTranslateCommandsShop = Command.builder()
 				.shortDescription(Component.text("Add command to item"))
 				.permission(Permissions.COMMANDSSHOP_CREATE)
 				.addParameters(CommandParameters.SHOP_ID, CommandParameters.LOCALE, CommandParameters.TRANSLATE)
-				.executor(new CommandsShopTranslate(instance))
+				.executor(new CommandShopTranslate(instance))
 				.build();
 		
 		Command.Parameterized commandOpenCommandsShop = Command.builder()
 				.shortDescription(Component.text("Add command to item"))
 				.permission(Permissions.COMMANDSSHOP_OPEN_SELF)
 				.addParameters(CommandParameters.SHOP_ID, CommandParameters.PLAYER)
-				.executor(new CommandsShopOpen(instance))
+				.executor(new CommandShop(instance))
 				.build();
 		
 		Command.Parameterized commandsShop = Command.builder()
@@ -862,9 +861,9 @@ public class GuiShopManager {
 				logger.error(e.getLocalizedMessage());
 			}
 		}
-		if(rootNode.node("Aliases", "ShopOpen", "Enable").getBoolean()) {
+		if(rootNode.node("Aliases", "Shop", "Enable").getBoolean()) {
 			try {
-				List<String> aliasesList = rootNode.node("Aliases", "ShopOpen", "List").getList(String.class);
+				List<String> aliasesList = rootNode.node("Aliases", "Shop", "List").getList(String.class);
 				if(!aliasesList.isEmpty()) {
 					String first = aliasesList.remove(0);
 					if(aliasesList.isEmpty()) {

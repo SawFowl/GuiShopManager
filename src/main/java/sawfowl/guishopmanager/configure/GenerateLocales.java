@@ -86,7 +86,8 @@ public class GenerateLocales {
 		check(getRuLocale(), "&cНомер слота должен быть в диапазоне от 0 до 44.", null, "Messages", "InvalidSlot");
 		check(getRuLocale(), "&cВы не указали цену покупки.", null, "Messages", "BuyPriceNotPresent");
 		check(getRuLocale(), "&cВы не указали цену продажи.", null, "Messages", "SellPriceNotPresent");
-		check(getRuLocale(), "&cПожалуйста предъявите итем ┬──┬ ノ(゜-゜ノ)", null, "Messages", "ItemNotPresent");
+		check(getRuLocale(), "&cПожалуйста предъявите итем ┬──┬ ノ(゜-゜ノ)",  null, "Messages", "ItemNotPresent");
+		check(getRuLocale(), "&aВы добавили команду к предмету.", null, "Messages", "CommandAdded");
 		check(getRuLocale(), "&aПредмет &7[&r%item%&7]&a добавлен в магазин %shop%.", null, "Messages", "ShopItemAdded");
 		check(getRuLocale(), "&cНужно быть игроком или указать ник игрока.", null, "Messages", "PlayerIsNotPresent");
 		check(getRuLocale(), "&cВы не можете открывать меню другому игроку.", null, "Messages", "DontOpenOther");
@@ -209,6 +210,7 @@ public class GenerateLocales {
 		check(getDefaultLocale(), "&cSpecify the purchase price.", null, "Messages", "BuyPriceNotPresent");
 		check(getDefaultLocale(), "&cSpecify the sale price.", null, "Messages", "SellPriceNotPresent");
 		check(getDefaultLocale(), "&cPlease present the item ┬──┬ ノ(゜-゜ノ)", null, "Messages", "ItemNotPresent");
+		check(getDefaultLocale(), "&aYou have added a command to an item.", null, "Messages", "CommandAdded");
 		check(getDefaultLocale(), "&cItem &7[&r%item%&7]&a added to shop %shop%.", null, "Messages", "ShopItemAdded");
 		check(getDefaultLocale(), "&cThis item cannot be sold.", null, "Messages", "InvalidItem");
 		check(getDefaultLocale(), "&cYou need to be a player or specify the player's nickname.", null, "Messages", "PlayerIsNotPresent");

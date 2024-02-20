@@ -20,7 +20,7 @@ import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
 import sawfowl.commandpack.api.data.command.Settings;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
-import sawfowl.guishopmanager.commands.auction.Open;
+import sawfowl.guishopmanager.commands.auction.Auction;
 
 public class MainCommand extends AbstractCommand {
 
@@ -35,7 +35,7 @@ public class MainCommand extends AbstractCommand {
 		return auctionEnable
 				?
 				builder()
-					.addChild(new Open(plugin).build(), "auction", "market")
+					.addChild(new Auction(plugin).build(), "auction", "market")
 					//.addChild(commandShop, "shop")
 					//.addChild(commandsShop, "commandsshop", "cshop")
 					//.addChild(commandReload, "reload")

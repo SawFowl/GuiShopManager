@@ -16,7 +16,7 @@ public class CommandParameters {
 
 	public static final Parameter.Value<String> CURRENCY = Parameter.string().optional().key("Currency").build();
 
-	public static final Parameter.Value<String> COMMAND = Parameter.remainingJoinedStrings().optional().key("Command").build();
+	public static final Parameter.Value<String> COMMAND = Parameter.remainingJoinedStrings().key("Command").build();
 
 	public static final Parameter.Value<Double> AUCTION_PRICE = Parameter.doubleNumber().optional().key("Price").build();
 

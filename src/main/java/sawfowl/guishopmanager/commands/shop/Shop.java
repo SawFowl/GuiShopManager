@@ -17,12 +17,11 @@ import net.kyori.adventure.text.event.HoverEvent;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.utils.CommandParameters;
-import sawfowl.guishopmanager.data.shop.Shop;
 
-public class ShopOpen implements CommandExecutor {
+public class Shop implements CommandExecutor {
 
 	GuiShopManager plugin;
-	public ShopOpen(GuiShopManager instance) {
+	public Shop(GuiShopManager instance) {
 		plugin = instance;
 	}
 
@@ -75,7 +74,7 @@ public class ShopOpen implements CommandExecutor {
 					player = context.one(CommandParameters.PLAYER).get();
 				}
 				Component hover = plugin.getLocales().getComponent(((LocaleSource) src).locale(), "Hover", "OpenShop");
-				for(Shop shop : plugin.getAllShops()) {
+				for(sawfowl.guishopmanager.data.shop.Shop shop : plugin.getAllShops()) {
 					final ServerPlayer fPlayer = player;
 					Component message = shop.getOrDefaultTitle(((LocaleSource) src).locale()).clickEvent(SpongeComponents.executeCallback(cause -> {
 						run(fPlayer, shop.getID());

@@ -35,7 +35,7 @@ public class ShopCreate implements CommandExecutor  {
 			if(context.one(CommandParameters.SHOP_ID).isPresent()) {
 				String shopID = TextUtils.clearDecorations(context.one(CommandParameters.SHOP_ID).get().toLowerCase());
 				try {
-					if(!plugin.getRootNode().node("Aliases", "ShopOpen", "List").empty() && plugin.getRootNode().node("Aliases", "ShopOpen", "List").getList(String.class).stream().map(String::toLowerCase).collect(Collectors.toList()).contains(shopID)) {
+					if(!plugin.getRootNode().node("Aliases", "Shop", "List").empty() && plugin.getRootNode().node("Aliases", "Shop", "List").getList(String.class).stream().map(String::toLowerCase).collect(Collectors.toList()).contains(shopID)) {
 						player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "InvalidShopID"));
 						return CommandResult.success();
 					}

@@ -22,9 +22,9 @@ import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.commands.AbstractCommand;
 import sawfowl.guishopmanager.utils.CommandParameters;
 
-public class Open extends AbstractCommand {
+public class Auction extends AbstractCommand {
 
-	public Open(GuiShopManager instance) {
+	public Auction(GuiShopManager instance) {
 		super(instance);
 	}
 

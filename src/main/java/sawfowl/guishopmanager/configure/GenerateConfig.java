@@ -43,9 +43,9 @@ public class GenerateConfig {
 		check(getNode("StorageFolders", "CommandsShops"), null, "commands", TypeTokens.STRING_TOKEN);
 		check(getNode("Debug"), "Debug messages.", false, TypeTokens.BOOLEAN_TOKEN);
 		check(getNode("PlayerTransactionMessage"), "Message to players on successful purchase/sale.", true, TypeTokens.BOOLEAN_TOKEN);
-		check(getNode("Aliases", "ShopOpen"), "Aliases for the \"/gsm shop open\" command.", null, null);
-		check(getNode("Aliases", "ShopOpen", "Enable"), null, true, TypeTokens.BOOLEAN_TOKEN);
-		check(getNode("Aliases", "ShopOpen", "List"), null, Arrays.asList("shop"), TypeTokens.LIST_STRINGS_TOKEN);
+		check(getNode("Aliases", "Shop"), "Aliases for the \"/gsm shop open\" command.", null, null);
+		check(getNode("Aliases", "Shop", "Enable"), null, true, TypeTokens.BOOLEAN_TOKEN);
+		check(getNode("Aliases", "Shop", "List"), null, Arrays.asList("shop"), TypeTokens.LIST_STRINGS_TOKEN);
 		check(getNode("Aliases", "Auction"), "Aliases for the \"/gsm auction\" command.", null, null);
 		check(getNode("Aliases", "Auction", "Enable"), null, true, TypeTokens.BOOLEAN_TOKEN);
 		check(getNode("Aliases", "Auction", "List"), null, Arrays.asList("auction", "market"), TypeTokens.LIST_STRINGS_TOKEN);
