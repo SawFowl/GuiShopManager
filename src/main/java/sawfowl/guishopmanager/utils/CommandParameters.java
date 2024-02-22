@@ -4,13 +4,20 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
+import sawfowl.guishopmanager.Permissions;
+import sawfowl.localeapi.api.EnumLocales;
+
 public class CommandParameters {
 
-	public static final Parameter.Value<ServerPlayer> PLAYER = Parameter.player().optional().key("Player").build();
+	public static final Parameter.Value<ServerPlayer> PLAYER_FOR_SHOP = Parameter.player().optional().requiredPermission(Permissions.SHOP_OPEN_OTHER).key("Player").build();
+
+	public static final Parameter.Value<ServerPlayer> PLAYER_FOR_AUCTION = Parameter.player().optional().requiredPermission(Permissions.AUCTION_OPEN_OTHER).key("Player").build();
+
+	public static final Parameter.Value<ServerPlayer> PLAYER_FOR_COMMANDSHOP = Parameter.player().optional().requiredPermission(Permissions.COMMANDSSHOP_OPEN_OTHER).key("Player").build();
 
 	public static final Parameter.Value<String> SHOP_ID = Parameter.string().optional().key("ShopName").build();
 
-	public static final Parameter.Value<String> LOCALE = Parameter.string().optional().key("Locale").build();
+	public static final Parameter.Value<String> LOCALE = Parameter.choices(EnumLocales.getTags().toArray(new String[]{})).optional().key("Locale").build();
 
 	public static final Parameter.Value<String> TRANSLATE = Parameter.remainingJoinedStrings().optional().key("Translate").build();
 

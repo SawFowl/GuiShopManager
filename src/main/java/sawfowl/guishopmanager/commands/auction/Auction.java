@@ -12,11 +12,9 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
 
 import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
 import sawfowl.commandpack.api.data.command.Settings;
-
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.commands.AbstractCommand;
@@ -50,18 +48,13 @@ public class Auction extends AbstractCommand {
 	}
 
 	@Override
-	public Component getComponent(Object[] arg0) {
-		return null;
-	}
-
-	@Override
 	public String permission() {
 		return Permissions.AUCTION_OPEN_SELF;
 	}
 
 	@Override
 	public List<ParameterSettings> getArguments() {
-		return Arrays.asList(ParameterSettings.of(CommandParameters.PLAYER, true, false, new Object[] {"Messages", "PlayerIsNotPresent"}));
+		return Arrays.asList(ParameterSettings.of(CommandParameters.PLAYER_FOR_AUCTION, true, false, new Object[] {"Messages", "PlayerIsNotPresent"}));
 	}
 
 	@Override

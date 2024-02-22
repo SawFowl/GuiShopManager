@@ -12,8 +12,6 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.RegistryTypes;
 
-import net.kyori.adventure.text.Component;
-
 import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
@@ -72,11 +70,6 @@ public class AddBlackList extends AbstractPlayerCommand {
 	@Override
 	public String command() {
 		return "blacklist";
-	}
-
-	@Override
-	public Component getComponent(Object[] arg0) {
-		return null;
 	}
 
 	@Override

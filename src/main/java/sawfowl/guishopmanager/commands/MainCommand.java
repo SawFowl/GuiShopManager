@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandExecutor;
+import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.Command.Parameterized;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.service.pagination.PaginationList;
+import org.spongepowered.api.util.locale.LocaleSource;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -21,33 +25,13 @@ import sawfowl.commandpack.api.data.command.Settings;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.commands.auction.Auction;
+import sawfowl.guishopmanager.commands.commandshop.CommandShop;
+import sawfowl.guishopmanager.commands.shop.Shop;
 
 public class MainCommand extends AbstractCommand {
 
-	boolean auctionEnable = false;
 	public MainCommand(GuiShopManager instance) {
 		super(instance);
-		auctionEnable = plugin.getRootNode().node("Auction", "Enable").getBoolean();
-	}
-
-	@Override
-	public Parameterized build() {
-		return auctionEnable
-				?
-				builder()
-					.addChild(new Auction(plugin).build(), "auction", "market")
-					//.addChild(commandShop, "shop")
-					//.addChild(commandsShop, "commandsshop", "cshop")
-					//.addChild(commandReload, "reload")
-					.executor(this)
-				.build()
-				: 
-				builder()
-					//.addChild(commandShop, "shop")
-					//.addChild(commandsShop, "commandsshop", "cshop")
-					//.addChild(commandReload, "reload")
-					.executor(this)
-				.build();
 	}
 
 	@Override
@@ -55,7 +39,7 @@ public class MainCommand extends AbstractCommand {
 		List<Component> messages = new ArrayList<Component>();
 		if(isPlayer) {
 			ServerPlayer player = (ServerPlayer) audience;
-			if(auctionEnable) {
+			if(plugin.getRootNode().node("Auction", "Enable").getBoolean()) {
 				if(player.hasPermission(Permissions.AUCTION_OPEN_SELF)) {
 					if(player.hasPermission(Permissions.AUCTION_OPEN_OTHER)) {
 						messages.add(deserialize("&a/guishopmanager auction &e<Player>").clickEvent(ClickEvent.suggestCommand("/guishopmanager auction")).hoverEvent(HoverEvent.showText(getComponent(locale, "Hover", "RunCommand"))));
@@ -120,7 +104,7 @@ public class MainCommand extends AbstractCommand {
 				.linesPerPage(7)
 				.sendTo(player);
 		} else {
-			if(auctionEnable) {
+			if(plugin.getRootNode().node("Auction", "Enable").getBoolean()) {
 				messages.add(deserialize("&a/guishopmanager auction &e<Player>"));
 				messages.add(deserialize("&a/guishopmanager auction additem &c<Bet> <Price> &e<Currency>"));
 				messages.add(deserialize("&a/guishopmanager auction blacklist &e<flags [mask | item]>"));
@@ -153,11 +137,6 @@ public class MainCommand extends AbstractCommand {
 	}
 
 	@Override
-	public Component getComponent(Object[] arg0) {
-		return null;
-	}
-
-	@Override
 	public String permission() {
 		return Permissions.HELP;
 	}
@@ -170,6 +149,52 @@ public class MainCommand extends AbstractCommand {
 	@Override
 	public Settings applyCommandSettings() {
 		return Settings.builder().setAliases("gsm").build();
+	}
+
+	@Override
+	public Parameterized build() {
+		return plugin.getRootNode().node("Auction", "Enable").getBoolean()
+				?
+				builder()
+					.addChild(new Auction(plugin).build(), "auction", "market")
+					.addChild(new Shop(plugin).build(), "shop")
+					.addChild(new CommandShop(plugin).build(), "commandsshop", "cshop")
+					.addChild(
+						Command.builder()
+							.shortDescription(Component.text("Reload plugin"))
+							.permission(Permissions.RELOAD)
+							.executor(new CommandExecutor() {
+								@Override
+								public CommandResult execute(CommandContext context) throws CommandException {
+									plugin.reload();
+									context.cause().audience().sendMessage(getComponent(context.cause().subject() instanceof LocaleSource ? (((LocaleSource) context.cause().subject()).locale()) : plugin.getLocaleAPI().getSystemOrDefaultLocale(), "Messages", "Reload"));
+									return CommandResult.success();
+								}
+							})
+							.build(), "reload"
+						)
+					.executor(this)
+				.build()
+				: 
+				builder()
+					.addChild(new Shop(plugin).build(), "shop")
+					.addChild(new CommandShop(plugin).build(), "commandsshop", "cshop")
+					.addChild(
+						Command.builder()
+							.shortDescription(Component.text("Reload plugin"))
+							.permission(Permissions.RELOAD)
+							.executor(new CommandExecutor() {
+								@Override
+								public CommandResult execute(CommandContext context) throws CommandException {
+									plugin.reload();
+									context.cause().audience().sendMessage(getComponent(context.cause().subject() instanceof LocaleSource ? (((LocaleSource) context.cause().subject()).locale()) : plugin.getLocaleAPI().getSystemOrDefaultLocale(), "Messages", "Reload"));
+									return CommandResult.success();
+								}
+							})
+							.build(), "reload"
+						)
+					.executor(this)
+				.build();
 	}
 
 	private Component deserialize(String string) {

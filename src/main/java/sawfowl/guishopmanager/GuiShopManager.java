@@ -36,11 +36,6 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.SpongeComponents;
-import org.spongepowered.api.command.Command;
-import org.spongepowered.api.command.CommandExecutor;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
-import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -48,14 +43,12 @@ import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
-import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
-import org.spongepowered.api.util.locale.LocaleSource;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -64,30 +57,15 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import com.google.inject.Inject;
 
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 
-import sawfowl.guishopmanager.utils.CommandParameters;
 import sawfowl.guishopmanager.utils.Economy;
 import sawfowl.guishopmanager.utils.Locales;
 import sawfowl.guishopmanager.utils.MySQL;
+import sawfowl.commandpack.api.CommandPack;
 import sawfowl.commandpack.utils.StorageType;
 import sawfowl.guishopmanager.commands.MainCommand;
-import sawfowl.guishopmanager.commands.auction.AddBlackList;
-import sawfowl.guishopmanager.commands.auction.AddItem;
-import sawfowl.guishopmanager.commands.auction.Auction;
-import sawfowl.guishopmanager.commands.commandshop.AddCommand;
-import sawfowl.guishopmanager.commands.commandshop.CommandShopCreate;
-import sawfowl.guishopmanager.commands.commandshop.CommandShopDelete;
-import sawfowl.guishopmanager.commands.commandshop.CommandShopEdit;
-import sawfowl.guishopmanager.commands.commandshop.CommandShop;
-import sawfowl.guishopmanager.commands.commandshop.CommandShopTranslate;
-import sawfowl.guishopmanager.commands.shop.ShopCreate;
-import sawfowl.guishopmanager.commands.shop.ShopDelete;
-import sawfowl.guishopmanager.commands.shop.ShopEdit;
-import sawfowl.guishopmanager.commands.shop.ShopSetItem;
-import sawfowl.guishopmanager.commands.shop.ShopTranslate;
 import sawfowl.guishopmanager.configure.Expire;
 import sawfowl.guishopmanager.configure.GenerateConfig;
 import sawfowl.guishopmanager.configure.GenerateLocales;
@@ -352,11 +330,16 @@ public class GuiShopManager {
 	}
 
 	@Listener
+	public void getCommandPackAPI(CommandPack.PostAPI event) {
+		event.getAPI().registerCommand(new MainCommand(instance));
+	}
+
+	@Listener
 	public void onReload(RefreshGameEvent event) {
 		reload();
 	}
 
-	private void reload() {
+	public void reload() {
 		loadConfigs();
 		setWorkDataClasses();
 		fillItems = null;
@@ -672,210 +655,6 @@ public class GuiShopManager {
 			blackListNode = configLoaderBlackLists.load();
 		} catch (IOException e) {
 			logger.error(e.getLocalizedMessage());
-		}
-	}
-
-	@Listener
-	public void commandRegister(RegisterCommandEvent<Command.Parameterized> event) {
-		
-		Command.Parameterized commandAuctionAdd = Command.builder()
-				.shortDescription(Component.text("Add item to auction"))
-				.permission(Permissions.AUCTION_ADD_ITEM)
-				.addParameters(CommandParameters.AUCTION_BET, CommandParameters.AUCTION_PRICE, CommandParameters.CURRENCY)
-				.executor(new AddItem(instance))
-				.build();
-		
-		Command.Parameterized commandAuctionItemBlocking = Command.builder()
-				.shortDescription(Component.text("Block item for sale in auction."))
-				.permission(Permissions.AUCTION_BLOCK_ITEM)
-				.addFlags(CommandParameters.MASK, CommandParameters.ITEM)
-				.executor(new AddBlackList(instance))
-				.build();
-		
-		Command.Parameterized commandAuction = Command.builder()
-				.shortDescription(Component.text("Auction auction"))
-				.permission(Permissions.AUCTION_OPEN_SELF)
-				.addParameters(CommandParameters.PLAYER)
-				.executor(new Auction(instance))
-				.addChild(commandAuctionAdd, "add", "additem")
-				.addChild(commandAuctionItemBlocking, "blacklist", "block")
-				.build();
-		
-		Command.Parameterized commandShopCreate = Command.builder()
-				.shortDescription(Component.text("Create a shop"))
-				.permission(Permissions.SHOP_CREATE)
-				.addParameter(CommandParameters.SHOP_ID)
-				.executor(new ShopCreate(instance))
-				.build();
-		
-		Command.Parameterized commandShopDelete = Command.builder()
-				.shortDescription(Component.text("Delete a shop"))
-				.permission(Permissions.SHOP_DELETE)
-				.addParameter(CommandParameters.SHOP_ID)
-				.executor(new ShopDelete(instance))
-				.build();
-		
-		Command.Parameterized commandShopEdit = Command.builder()
-				.shortDescription(Component.text("Edit a shop"))
-				.permission(Permissions.SHOP_EDIT)
-				.addParameter(CommandParameters.SHOP_ID)
-				.executor(new ShopEdit(instance))
-				.build();
-		
-		Command.Parameterized commandShopTranslate = Command.builder()
-				.shortDescription(Component.text("Add a translatable name for shop"))
-				.permission(Permissions.SHOP_TRANSLATE)
-				.addParameters(CommandParameters.SHOP_ID, CommandParameters.LOCALE, CommandParameters.TRANSLATE)
-				.executor(new ShopTranslate(instance))
-				.build();
-		
-		Command.Parameterized commandShopSetItem = Command.builder()
-				.shortDescription(Component.text("Add or replace an item in the shop"))
-				.permission(Permissions.SHOP_EDIT)
-				.addParameters(CommandParameters.SHOP_ID, CommandParameters.SHOP_MENU_NUMBER, CommandParameters.SLOT, CommandParameters.SHOP_BUY_PRICE, CommandParameters.SHOP_SELL_PRICE, CommandParameters.CURRENCY)
-				.executor(new ShopSetItem(instance))
-				.build();
-		
-		Command.Parameterized commandShopOpen = Command.builder()
-				.shortDescription(Component.text("Auction a shop"))
-				.permission(Permissions.SHOP_OPEN_SELF)
-				.addParameters(CommandParameters.SHOP_ID, CommandParameters.PLAYER)
-				.executor(new sawfowl.guishopmanager.commands.shop.Shop(instance))
-				.build();
-		
-		Command.Parameterized commandShop = Command.builder()
-				.shortDescription(Component.text("Auction a shop"))
-				.permission(Permissions.HELP)
-				.executor(new sawfowl.guishopmanager.commands.shop.Shop(instance))
-				.addChild(commandShopCreate, "create")
-				.addChild(commandShopDelete, "delete")
-				.addChild(commandShopEdit, "edit")
-				.addChild(commandShopSetItem, "setitem", "add", "set")
-				.addChild(commandShopTranslate, "translate")
-				.addChild(commandShopOpen, "open")
-				.build();
-		
-		Command.Parameterized commandAddCommand = Command.builder()
-				.shortDescription(Component.text("Add command to item"))
-				.permission(Permissions.COMMANDSSHOP_ADD_COMMAND)
-				.addParameters(CommandParameters.COMMAND)
-				.executor(new AddCommand(instance))
-				.build();
-		
-		Command.Parameterized commandCreateCommandsShop = Command.builder()
-				.shortDescription(Component.text("Add command to item"))
-				.permission(Permissions.COMMANDSSHOP_CREATE)
-				.addParameter(CommandParameters.SHOP_ID)
-				.executor(new CommandShopCreate(instance))
-				.build();
-		
-		Command.Parameterized commandEditCommandsShop = Command.builder()
-				.shortDescription(Component.text("Add command to item"))
-				.permission(Permissions.COMMANDSSHOP_EDIT)
-				.addParameter(CommandParameters.SHOP_ID)
-				.executor(new CommandShopEdit(instance))
-				.build();
-		
-		Command.Parameterized commandDeleteCommandsShop = Command.builder()
-				.shortDescription(Component.text("Add command to item"))
-				.permission(Permissions.COMMANDSSHOP_DELETE)
-				.addParameter(CommandParameters.SHOP_ID)
-				.executor(new CommandShopDelete(instance))
-				.build();
-		
-		Command.Parameterized commandTranslateCommandsShop = Command.builder()
-				.shortDescription(Component.text("Add command to item"))
-				.permission(Permissions.COMMANDSSHOP_CREATE)
-				.addParameters(CommandParameters.SHOP_ID, CommandParameters.LOCALE, CommandParameters.TRANSLATE)
-				.executor(new CommandShopTranslate(instance))
-				.build();
-		
-		Command.Parameterized commandOpenCommandsShop = Command.builder()
-				.shortDescription(Component.text("Add command to item"))
-				.permission(Permissions.COMMANDSSHOP_OPEN_SELF)
-				.addParameters(CommandParameters.SHOP_ID, CommandParameters.PLAYER)
-				.executor(new CommandShop(instance))
-				.build();
-		
-		Command.Parameterized commandsShop = Command.builder()
-				.shortDescription(Component.text("Commands shop"))
-				.permission(Permissions.COMMANDSSHOP_OPEN_SELF)
-				.addChild(commandAddCommand, "addcommand")
-				.addChild(commandCreateCommandsShop, "create")
-				.addChild(commandEditCommandsShop, "edit")
-				.addChild(commandDeleteCommandsShop, "delete")
-				.addChild(commandTranslateCommandsShop, "translate")
-				.addChild(commandOpenCommandsShop, "open")
-				.build();
-		
-		Command.Parameterized commandReload = Command.builder()
-				.shortDescription(Component.text("Reload plugin"))
-				.permission(Permissions.RELOAD)
-				.executor(new CommandExecutor() {
-					@Override
-					public CommandResult execute(CommandContext context) throws CommandException {
-						if(!context.associatedObject().isPresent()) return CommandResult.success();
-						reload();
-						((Audience) context.associatedObject().get()).sendMessage(getLocales().getComponent(((LocaleSource) context.associatedObject().get()).locale(), "Messages", "Reload"));
-						return CommandResult.success();
-					}
-				})
-				.build();
-		
-		Command.Parameterized mainCommand = rootNode.node("Auction", "Enable").getBoolean()
-				? 
-				Command.builder()
-					.shortDescription(Component.text("Reload plugin"))
-					.permission(Permissions.HELP)
-					.addChild(commandAuction, "auction", "market")
-					.addChild(commandShop, "shop")
-					.addChild(commandsShop, "commandsshop", "cshop")
-					.addChild(commandReload, "reload")
-					.executor(new MainCommand(instance))
-					.build() 
-				:
-				Command.builder()
-					.shortDescription(Component.text("Reload plugin"))
-					.permission(Permissions.HELP)
-					.addChild(commandShop, "shop")
-					.addChild(commandsShop, "commandsshop", "cshop")
-					.addChild(commandReload, "reload")
-					.executor(new MainCommand(instance))
-					.build();
-		
-		event.register(container, mainCommand, "guishopmanager", "gsm");
-		
-		if(rootNode.node("Auction", "Enable").getBoolean() && rootNode.node("Aliases", "Auction", "Enable").getBoolean()) {
-			try {
-				List<String> aliasesList = rootNode.node("Aliases", "Auction", "List").getList(String.class);
-				if(!aliasesList.isEmpty()) {
-					String first = aliasesList.remove(0);
-					if(aliasesList.isEmpty()) {
-						event.register(container, commandAuction, first);
-					} else {
-						String[] aliases = aliasesList.toArray(new String[0]);
-						event.register(container, commandAuction, first, aliases);
-					}
-				}
-			} catch (SerializationException e) {
-				logger.error(e.getLocalizedMessage());
-			}
-		}
-		if(rootNode.node("Aliases", "Shop", "Enable").getBoolean()) {
-			try {
-				List<String> aliasesList = rootNode.node("Aliases", "Shop", "List").getList(String.class);
-				if(!aliasesList.isEmpty()) {
-					String first = aliasesList.remove(0);
-					if(aliasesList.isEmpty()) {
-						event.register(container, commandShopOpen, first);
-					} else {
-						String[] aliases = aliasesList.toArray(new String[0]);
-						event.register(container, commandShopOpen, first, aliases);
-					}
-				}
-			} catch (SerializationException e) {
-				logger.error(e.getLocalizedMessage());
-			}
 		}
 	}
 

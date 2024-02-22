@@ -9,23 +9,23 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
 import sawfowl.guishopmanager.GuiShopManager;
+import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.commands.AbstractCommand;
 import sawfowl.guishopmanager.utils.CommandParameters;
 
-public class CommandShopTranslate extends AbstractCommand {
+public class Translate extends AbstractCommand {
 
-	public CommandShopTranslate(GuiShopManager instance) {
+	public Translate(GuiShopManager instance) {
 		super(instance);
 	}
 
 	@Override
 	public Parameterized build() {
-		return null;
+		return fastBuild();
 	}
 
 	@Override
@@ -35,8 +35,7 @@ public class CommandShopTranslate extends AbstractCommand {
 			if(plugin.commandShopExists(shopId)) {
 				if(context.one(CommandParameters.LOCALE).isPresent()) {
 					String localeId = context.one(CommandParameters.LOCALE).get();
-					boolean exist = plugin.getLocaleAPI().getLocalesList().stream().filter(locale -> locale.toLanguageTag().equals(localeId)).findFirst().isPresent();
-					if(exist) {
+					if(plugin.getLocaleAPI().getLocalesList().stream().filter(locale -> locale.toLanguageTag().equals(localeId)).findFirst().isPresent()) {
 						if(context.one(CommandParameters.TRANSLATE).isPresent()) {
 							plugin.getCommandShopData(shopId).addTitle(localeId, LegacyComponentSerializer.legacyAmpersand().deserialize(context.one(CommandParameters.TRANSLATE).get()));
 							plugin.getCommandsShopStorage().saveCommandsShop(shopId);
@@ -54,13 +53,8 @@ public class CommandShopTranslate extends AbstractCommand {
 	}
 
 	@Override
-	public Component getComponent(Object[] arg0) {
-		return null;
-	}
-
-	@Override
 	public String permission() {
-		return null;
+		return Permissions.COMMANDSSHOP_TRANSLATE;
 	}
 
 	@Override

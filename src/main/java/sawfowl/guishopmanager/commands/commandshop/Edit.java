@@ -22,9 +22,9 @@ import sawfowl.guishopmanager.commands.AbstractPlayerCommand;
 import sawfowl.guishopmanager.data.commandshop.CommandShopData;
 import sawfowl.guishopmanager.utils.CommandParameters;
 
-public class CommandShopEdit extends AbstractPlayerCommand {
+public class Edit extends AbstractPlayerCommand {
 
-	public CommandShopEdit(GuiShopManager instance) {
+	public Edit(GuiShopManager instance) {
 		super(instance);
 	}
 
@@ -63,11 +63,6 @@ public class CommandShopEdit extends AbstractPlayerCommand {
 	@Override
 	public String command() {
 		return "edit";
-	}
-
-	@Override
-	public Component getComponent(Object[] arg0) {
-		return null;
 	}
 
 	@Override

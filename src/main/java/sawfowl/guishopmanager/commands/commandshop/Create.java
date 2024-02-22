@@ -20,9 +20,9 @@ import sawfowl.guishopmanager.data.commandshop.CommandShopMenuData;
 import sawfowl.guishopmanager.utils.CommandParameters;
 import sawfowl.localeapi.api.TextUtils;
 
-public class CommandShopCreate extends AbstractPlayerCommand {
+public class Create extends AbstractPlayerCommand {
 	
-	public CommandShopCreate(GuiShopManager instance) {
+	public Create(GuiShopManager instance) {
 		super(instance);
 	}
 
@@ -47,11 +47,6 @@ public class CommandShopCreate extends AbstractPlayerCommand {
 	@Override
 	public String command() {
 		return "create";
-	}
-
-	@Override
-	public Component getComponent(Object[] arg0) {
-		return null;
 	}
 
 	@Override

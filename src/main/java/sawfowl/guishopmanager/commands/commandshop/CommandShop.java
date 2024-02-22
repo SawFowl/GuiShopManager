@@ -33,10 +33,10 @@ public class CommandShop extends AbstractCommand {
 	public Parameterized build() {
 		return builder()
 				.addChild(new AddCommand(plugin).build(), "addcommand")
-				.addChild(new CommandShopCreate(plugin).build(), "create")
-				.addChild(new CommandShopDelete(plugin).build(), "delete")
-				.addChild(new CommandShopEdit(plugin).build(), "edit")
-				.addChild(new CommandShopTranslate(plugin).build(), "translate")
+				.addChild(new Create(plugin).build(), "create")
+				.addChild(new Delete(plugin).build(), "delete")
+				.addChild(new Edit(plugin).build(), "edit")
+				.addChild(new Translate(plugin).build(), "translate")
 				.executor(this)
 				.build();
 	}
@@ -52,9 +52,9 @@ public class CommandShop extends AbstractCommand {
 				if(!plugin.commandShopExists(shopID)) {
 					src.sendMessage(getComponent(locale, "Messages", "ShopIDNotExists"));
 				} else {
-					if(context.one(CommandParameters.PLAYER).isPresent()) {
-						if(context.cause().hasPermission(Permissions.COMMANDSSHOP_OPEN_OTHER) || context.one(CommandParameters.PLAYER).get().uniqueId().equals((src instanceof ServerPlayer) ? ((ServerPlayer) src).uniqueId() : null)) {
-							run(context.one(CommandParameters.PLAYER).get(), shopID);
+					if(context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).isPresent()) {
+						if(context.cause().hasPermission(Permissions.COMMANDSSHOP_OPEN_OTHER) || context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).get().uniqueId().equals((src instanceof ServerPlayer) ? ((ServerPlayer) src).uniqueId() : null)) {
+							run(context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).get(), shopID);
 						} else exception(locale, "Messages", "DontOpenOther");
 					} else {
 						if(srcPlayer != null) {
@@ -66,13 +66,13 @@ public class CommandShop extends AbstractCommand {
 				List<Component> messages = new ArrayList<Component>();
 				ServerPlayer srcPlayer = (src instanceof ServerPlayer) ? (ServerPlayer) src : null;
 				ServerPlayer player = null;
-				if(srcPlayer == null && !context.one(CommandParameters.PLAYER).isPresent()) {
+				if(srcPlayer == null && !context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).isPresent()) {
 					exception(locale, "Messages", "PlayerIsNotPresent");
 				} else if(srcPlayer != null) {
-					if(!context.one(CommandParameters.PLAYER).isPresent()) {
+					if(!context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).isPresent()) {
 						player = srcPlayer;
 					} else {
-						if(srcPlayer.uniqueId().equals(context.one(CommandParameters.PLAYER).get().uniqueId())) {
+						if(srcPlayer.uniqueId().equals(context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).get().uniqueId())) {
 							player = srcPlayer;
 						} else {
 							if(!srcPlayer.hasPermission(Permissions.COMMANDSSHOP_OPEN_OTHER)) {
@@ -80,8 +80,8 @@ public class CommandShop extends AbstractCommand {
 							}
 						}
 					}
-				} else if(srcPlayer == null && context.one(CommandParameters.PLAYER).isPresent()) {
-					player = context.one(CommandParameters.PLAYER).get();
+				} else if(srcPlayer == null && context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).isPresent()) {
+					player = context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).get();
 				}
 				Component hover = getComponent(locale, "Hover", "OpenShop");
 				for(CommandShopData shop : plugin.getAllCommandShops()) {
@@ -107,11 +107,6 @@ public class CommandShop extends AbstractCommand {
 	}
 
 	@Override
-	public Component getComponent(Object[] arg0) {
-		return null;
-	}
-
-	@Override
 	public String permission() {
 		return Permissions.COMMANDSSHOP_OPEN_SELF;
 	}
@@ -120,7 +115,7 @@ public class CommandShop extends AbstractCommand {
 	public List<ParameterSettings> getArguments() {
 		return Arrays.asList(
 			ParameterSettings.of(CommandParameters.SHOP_ID, false, "Messages", "ShopIDNotExists"),
-			ParameterSettings.of(CommandParameters.PLAYER, false, "Messages", "PlayerIsNotPresent")
+			ParameterSettings.of(CommandParameters.PLAYER_FOR_COMMANDSHOP, false, "Messages", "PlayerIsNotPresent")
 		);
 	}
 

@@ -173,11 +173,6 @@ public class AddItem extends AbstractPlayerCommand {
 	}
 
 	@Override
-	public Component getComponent(Object[] arg0) {
-		return null;
-	}
-
-	@Override
 	public String permission() {
 		return Permissions.AUCTION_ADD_ITEM;
 	}

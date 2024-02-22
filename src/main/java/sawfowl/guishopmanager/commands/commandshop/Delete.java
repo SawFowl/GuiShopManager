@@ -9,7 +9,6 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
 
 import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
 import sawfowl.guishopmanager.GuiShopManager;
@@ -17,9 +16,9 @@ import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.commands.AbstractCommand;
 import sawfowl.guishopmanager.utils.CommandParameters;
 
-public class CommandShopDelete extends AbstractCommand {
+public class Delete extends AbstractCommand {
 
-	public CommandShopDelete(GuiShopManager instance) {
+	public Delete(GuiShopManager instance) {
 		super(instance);
 	}
 
@@ -40,11 +39,6 @@ public class CommandShopDelete extends AbstractCommand {
 	@Override
 	public String command() {
 		return "delete";
-	}
-
-	@Override
-	public Component getComponent(Object[] arg0) {
-		return null;
 	}
 
 	@Override

@@ -12,8 +12,6 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 
-import net.kyori.adventure.text.Component;
-
 import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.commands.AbstractPlayerCommand;
@@ -61,11 +59,6 @@ public class AddCommand extends AbstractPlayerCommand {
 	@Override
 	public String command() {
 		return "addcommand";
-	}
-
-	@Override
-	public Component getComponent(Object[] arg0) {
-		return null;
 	}
 
 	@Override
