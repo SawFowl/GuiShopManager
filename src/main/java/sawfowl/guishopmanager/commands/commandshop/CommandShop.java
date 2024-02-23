@@ -46,19 +46,19 @@ public class CommandShop extends AbstractCommand {
 		if(plugin.commandShopsEmpty()) {
 			src.sendMessage(getComponent(locale, "Messages", "ShopListEmpty"));
 		} else {
-			if(context.one(CommandParameters.SHOP_ID).isPresent()) {
-				String shopID = context.one(CommandParameters.SHOP_ID).get();
+			if(context.one(CommandParameters.COMMAND_SHOP).isPresent()) {
+				CommandShopData shop = context.one(CommandParameters.COMMAND_SHOP).orElse(null);
 				ServerPlayer srcPlayer = (src instanceof ServerPlayer) ? (ServerPlayer) src : null;
-				if(!plugin.commandShopExists(shopID)) {
+				if(shop == null) {
 					src.sendMessage(getComponent(locale, "Messages", "ShopIDNotExists"));
 				} else {
 					if(context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).isPresent()) {
 						if(context.cause().hasPermission(Permissions.COMMANDSSHOP_OPEN_OTHER) || context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).get().uniqueId().equals((src instanceof ServerPlayer) ? ((ServerPlayer) src).uniqueId() : null)) {
-							run(context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).get(), shopID);
+							run(context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).get(), shop);
 						} else exception(locale, "Messages", "DontOpenOther");
 					} else {
 						if(srcPlayer != null) {
-							run(srcPlayer, shopID);
+							run(srcPlayer, shop);
 						} else exception(locale, "Messages", "PlayerIsNotPresent");
 					}
 				}
@@ -87,7 +87,7 @@ public class CommandShop extends AbstractCommand {
 				for(CommandShopData shop : plugin.getAllCommandShops()) {
 					final ServerPlayer fPlayer = player;
 					Component message = shop.getOrDefaultTitle(locale).clickEvent(SpongeComponents.executeCallback(cause -> {
-						run(fPlayer, shop.getID());
+						run(fPlayer, shop);
 					})).hoverEvent(HoverEvent.showText(hover));
 					messages.add(message);
 				}
@@ -114,13 +114,13 @@ public class CommandShop extends AbstractCommand {
 	@Override
 	public List<ParameterSettings> getArguments() {
 		return Arrays.asList(
-			ParameterSettings.of(CommandParameters.SHOP_ID, false, "Messages", "ShopIDNotExists"),
+			ParameterSettings.of(CommandParameters.COMMAND_SHOP, false, "Messages", "ShopIDNotExists"),
 			ParameterSettings.of(CommandParameters.PLAYER_FOR_COMMANDSHOP, false, "Messages", "PlayerIsNotPresent")
 		);
 	}
 
-	private void run(ServerPlayer player, String shopID) {
-		if(player != null) plugin.getCommandShopMenu().createInventoryToPlayer(plugin.getCommandShopData(shopID).getCommandShopMenuData(1), player, shopID, 1);
+	private void run(ServerPlayer player, CommandShopData shop) {
+		if(player != null) plugin.getCommandShopMenu().createInventoryToPlayer(shop.getCommandShopMenuData(1), player, shop.getID(), 1);
 	}
 
 }

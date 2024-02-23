@@ -12,7 +12,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import net.kyori.adventure.audience.Audience;
-
+import sawfowl.commandpack.api.CommandPack;
 import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
 import sawfowl.commandpack.api.data.command.Settings;
 import sawfowl.guishopmanager.GuiShopManager;
@@ -22,6 +22,8 @@ import sawfowl.guishopmanager.utils.CommandParameters;
 
 public class Auction extends AbstractCommand {
 
+	private String command;
+	private List<String> aliases;
 	public Auction(GuiShopManager instance) {
 		super(instance);
 	}
@@ -37,9 +39,15 @@ public class Auction extends AbstractCommand {
 
 	@Override
 	public void execute(CommandContext context, Audience audience, Locale locale, boolean isPlayer) throws CommandException {
-		ServerPlayer player = getPlayer(context).orElse((ServerPlayer) audience);
-		if(isPlayer && !((ServerPlayer) audience).hasPermission(Permissions.AUCTION_OPEN_OTHER) && !((ServerPlayer) audience).uniqueId().equals(player.uniqueId())) exception(locale, "Messages", "DontOpenOther");
-		plugin.getAuctionMenus().createInventory(player, 1, plugin.getAuctionItems().values().stream().collect(Collectors.toList()));
+		if(isPlayer) {
+			ServerPlayer player = getPlayer(context).orElse((ServerPlayer) audience);
+			if(!((ServerPlayer) audience).hasPermission(Permissions.AUCTION_OPEN_OTHER) && !((ServerPlayer) audience).uniqueId().equals(player.uniqueId())) exception(locale, "Messages", "DontOpenOther");
+			plugin.getAuctionMenus().createInventory(player, 1, plugin.getAuctionItems().values().stream().collect(Collectors.toList()));
+		} else {
+			ServerPlayer player = getPlayer(context).orElse(null);
+			if(player == null) exception(locale, "Messages", "PlayerIsNotPresent");
+			plugin.getAuctionMenus().createInventory(player, 1, plugin.getAuctionItems().values().stream().collect(Collectors.toList()));
+		}
 	}
 
 	@Override
@@ -54,17 +62,26 @@ public class Auction extends AbstractCommand {
 
 	@Override
 	public List<ParameterSettings> getArguments() {
-		return Arrays.asList(ParameterSettings.of(CommandParameters.PLAYER_FOR_AUCTION, true, false, new Object[] {"Messages", "PlayerIsNotPresent"}));
+		return Arrays.asList(ParameterSettings.of(CommandParameters.PLAYER_FOR_AUCTION, false, "Messages", "PlayerIsNotPresent"));
 	}
 
 	@Override
 	public Settings applyCommandSettings() {
 		try {
-			return Settings.builder().setAliases(plugin.getRootNode().node("Aliases", "Auction", "List").getList(String.class)).build();
+			aliases = plugin.getRootNode().node("Aliases", "Auction", "List").getList(String.class);
+			if(!aliases.isEmpty()) {
+				command = aliases.get(0);
+				aliases.remove(0);
+				if(!aliases.isEmpty()) return Settings.builder().setAliases(aliases).build();
+			}
 		} catch (SerializationException e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public void register(CommandPack commandPack) {
+		if(command != null) commandPack.registerCommand(this);
 	}
 
 }

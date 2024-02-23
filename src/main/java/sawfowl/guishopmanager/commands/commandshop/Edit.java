@@ -31,17 +31,16 @@ public class Edit extends AbstractPlayerCommand {
 	@Override
 	public void execute(CommandContext context, ServerPlayer player, Locale locale) throws CommandException {
 		if(plugin.commandShopsEmpty()) exception(locale, "Messages", "ShopListEmptyEditor");
-		if(context.one(CommandParameters.SHOP_ID).isPresent()) {
-			if(plugin.commandShopExists(context.one(CommandParameters.SHOP_ID).get())) {
-				run(player, context.one(CommandParameters.SHOP_ID).get());
-			} else exception(locale, "Messages", "ShopIDNotExists");
+		CommandShopData shop = context.one(CommandParameters.COMMAND_SHOP).orElse(null);
+		if(shop != null) {
+			run(player, shop);
 		} else {
 			List<Component> messages = new ArrayList<Component>();
-			for(CommandShopData shop : plugin.getAllCommandShops()) {
+			for(CommandShopData shop1 : plugin.getAllCommandShops()) {
 				final ServerPlayer fPlayer = player;
 				Component hover = getComponent(locale, "Hover", "OpenShopEdit");
-				Component message = shop.getOrDefaultTitle(locale).clickEvent(SpongeComponents.executeCallback(cause -> {
-					run(fPlayer, shop.getID());
+				Component message = shop1.getOrDefaultTitle(locale).clickEvent(SpongeComponents.executeCallback(cause -> {
+					run(fPlayer, shop1);
 				})).hoverEvent(HoverEvent.showText(hover));
 				messages.add(message);
 			}
@@ -72,11 +71,11 @@ public class Edit extends AbstractPlayerCommand {
 
 	@Override
 	public List<ParameterSettings> getArguments() {
-		return Arrays.asList(ParameterSettings.of(CommandParameters.SHOP_ID, false, "Messages", "ShopIDNotPresent"));
+		return Arrays.asList(ParameterSettings.of(CommandParameters.COMMAND_SHOP, false, "Messages", "ShopIDNotPresent"));
 	}
 
-	private void run(ServerPlayer player, String shopID) {
-		plugin.getCommandShopMenu().createInventoryToEditor(plugin.getCommandShopData(shopID).getCommandShopMenuData(1), (ServerPlayer) player, shopID, 1);
+	private void run(ServerPlayer player, CommandShopData shop) {
+		plugin.getCommandShopMenu().createInventoryToEditor(shop.getCommandShopMenuData(1), (ServerPlayer) player, shop.getID(), 1);
 	}
 
 }

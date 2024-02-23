@@ -1,5 +1,6 @@
 package sawfowl.guishopmanager.commands.auction;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -79,7 +80,7 @@ public class AddBlackList extends AbstractPlayerCommand {
 
 	@Override
 	public List<ParameterSettings> getArguments() {
-		return null;
+		return new ArrayList<ParameterSettings>();
 	}
 
 }

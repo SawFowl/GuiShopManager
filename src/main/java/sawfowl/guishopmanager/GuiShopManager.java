@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -66,6 +67,7 @@ import sawfowl.guishopmanager.utils.MySQL;
 import sawfowl.commandpack.api.CommandPack;
 import sawfowl.commandpack.utils.StorageType;
 import sawfowl.guishopmanager.commands.MainCommand;
+import sawfowl.guishopmanager.commands.auction.Auction;
 import sawfowl.guishopmanager.configure.Expire;
 import sawfowl.guishopmanager.configure.GenerateConfig;
 import sawfowl.guishopmanager.configure.GenerateLocales;
@@ -216,6 +218,9 @@ public class GuiShopManager {
 		shopStorage.deleteShop(shopId);
 		shops.remove(shopId);
 	}
+	public Collection<String> availableShops() {
+		return shops.keySet();
+	}
 	public void addCommandShopData(String id, CommandShopData shop) {
 		commandShops.put(id, shop);
 		commandsShopStorage.saveCommandsShop(id);
@@ -235,6 +240,9 @@ public class GuiShopManager {
 	public void removeCommandShopData(String shopId) {
 		commandsShopStorage.deleteCommandsShop(shopId);
 		commandShops.remove(shopId);
+	}
+	public Collection<String> availableCommandShops() {
+		return commandShops.keySet();
 	}
 	public Map<UUID, SerializedAuctionStack> getAuctionItems() {
 		return auctionItems;
@@ -332,6 +340,8 @@ public class GuiShopManager {
 	@Listener
 	public void getCommandPackAPI(CommandPack.PostAPI event) {
 		event.getAPI().registerCommand(new MainCommand(instance));
+		if(rootNode.node("Aliases", "Shop", "Enable").getBoolean()) new sawfowl.guishopmanager.commands.shop.Shop(instance).register(event.getAPI());
+		if(rootNode.node("Aliases", "Auction", "Enable").getBoolean()) new Auction(instance).register(event.getAPI());
 	}
 
 	@Listener

@@ -34,7 +34,6 @@ import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 
 public class AddItem extends AbstractPlayerCommand {
 
-	GuiShopManager plugin;
 	public AddItem(GuiShopManager instance) {
 		super(instance);
 	}
@@ -225,7 +224,7 @@ public class AddItem extends AbstractPlayerCommand {
 	}
 
 	private boolean checkNbtLength(SerializedAuctionStack auctionStack) {
-		return auctionStack.getSerializedItemStack().getNBT().toString().length() > plugin.getRootNode().node("Auction", "NbtLimit").getInt();
+		return auctionStack.getSerializedItemStack().getNBT() != null && auctionStack.getSerializedItemStack().getNBT().toString().length() > plugin.getRootNode().node("Auction", "NbtLimit").getInt();
 	}
 
 	private long time() {

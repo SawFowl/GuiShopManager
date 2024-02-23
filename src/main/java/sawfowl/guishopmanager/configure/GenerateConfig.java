@@ -28,7 +28,7 @@ public class GenerateConfig {
 	}
 
 	private void generate() {
-		check(getNode("SplitStorage"), "Data storage methods. MySQL used if true.", null, null);
+		check(getNode("SplitStorage"), "Data storage methods.\nAvailable variants: File, H2, MySql.", null, null);
 		check(getNode("SplitStorage", "Auction"), null, StorageType.FILE.typeName(), TypeTokens.STRING_TOKEN);
 		check(getNode("SplitStorage", "Shops"), null, StorageType.FILE.typeName(), TypeTokens.STRING_TOKEN);
 		check(getNode("SplitStorage", "CommandsShops"), null, StorageType.FILE.typeName(), TypeTokens.STRING_TOKEN);

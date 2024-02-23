@@ -6,25 +6,31 @@ import java.util.List;
 import java.util.Locale;
 
 import org.spongepowered.api.adventure.SpongeComponents;
+import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.Command.Parameterized;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.util.locale.LocaleSource;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 
+import sawfowl.commandpack.api.CommandPack;
 import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
+import sawfowl.commandpack.api.data.command.Settings;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.commands.AbstractCommand;
 import sawfowl.guishopmanager.utils.CommandParameters;
 
-public class Shop extends AbstractCommand {
+public class Shop extends AbstractCommand implements CommandExecutor  {
 
+	private String command;
+	private List<String> aliases;
 	public Shop(GuiShopManager instance) {
 		super(instance);
 	}
@@ -46,21 +52,21 @@ public class Shop extends AbstractCommand {
 		if(plugin.shopsEmpty()) {
 			audience.sendMessage(plugin.getLocales().getComponent(((LocaleSource) audience).locale(), "Messages", "ShopListEmpty"));
 		} else {
-			if(context.one(CommandParameters.SHOP_ID).isPresent()) {
-				String shopID = context.one(CommandParameters.SHOP_ID).get();
+			if(context.one(CommandParameters.SHOP).isPresent()) {
+				sawfowl.guishopmanager.data.shop.Shop shop = context.one(CommandParameters.SHOP).orElse(null);
 				ServerPlayer srcPlayer = (audience instanceof ServerPlayer) ? (ServerPlayer) audience : null;
-				if(!plugin.shopExists(shopID)) {
+				if(shop == null) {
 					audience.sendMessage(plugin.getLocales().getComponent(((LocaleSource) audience).locale(), "Messages", "ShopIDNotExists"));
 				} else {
 					if(context.one(CommandParameters.PLAYER_FOR_SHOP).isPresent()) {
 						if(context.cause().hasPermission(Permissions.SHOP_OPEN_OTHER) || context.one(CommandParameters.PLAYER_FOR_SHOP).get().uniqueId().equals((audience instanceof ServerPlayer) ? ((ServerPlayer) audience).uniqueId() : null)) {
-							run(context.one(CommandParameters.PLAYER_FOR_SHOP).get(), shopID);
+							run(context.one(CommandParameters.PLAYER_FOR_SHOP).get(), shop);
 						} else {
 							audience.sendMessage(plugin.getLocales().getComponent(((LocaleSource) audience).locale(), "Messages", "DontOpenOther"));
 						}
 					} else {
 						if(srcPlayer != null) {
-							run(srcPlayer, shopID);
+							run(srcPlayer, shop);
 						} else {
 							audience.sendMessage(plugin.getLocales().getComponent(((LocaleSource) audience).locale(), "Messages", "PlayerIsNotPresent"));
 						}
@@ -91,7 +97,7 @@ public class Shop extends AbstractCommand {
 				for(sawfowl.guishopmanager.data.shop.Shop shop : plugin.getAllShops()) {
 					final ServerPlayer fPlayer = player;
 					Component message = shop.getOrDefaultTitle(((LocaleSource) audience).locale()).clickEvent(SpongeComponents.executeCallback(cause -> {
-						run(fPlayer, shop.getID());
+						run(fPlayer, shop);
 					})).hoverEvent(HoverEvent.showText(hover));
 					messages.add(message);
 				}
@@ -107,7 +113,7 @@ public class Shop extends AbstractCommand {
 
 	@Override
 	public String command() {
-		return "shop";
+		return command;
 	}
 
 	@Override
@@ -118,13 +124,32 @@ public class Shop extends AbstractCommand {
 	@Override
 	public List<ParameterSettings> getArguments() {
 		return Arrays.asList(
-			ParameterSettings.of(CommandParameters.SHOP_ID, false, "Messages", "ShopIDNotPresent"),
+			ParameterSettings.of(CommandParameters.SHOP, false, "Messages", "ShopIDNotPresent"),
 			ParameterSettings.of(CommandParameters.PLAYER_FOR_SHOP, false, "Messages", "PlayerIsNotPresent")
 		);
 	}
 
-	private void run(ServerPlayer player, String shopID) {
-		if(player != null) plugin.getShopMenu().createInventoryToPlayer(plugin.getShop(shopID).getShopMenuData(1), player, shopID, 1);
+	@Override
+	public Settings applyCommandSettings() {
+		try {
+			aliases = plugin.getRootNode().node("Aliases", "Shop", "List").getList(String.class);
+			if(!aliases.isEmpty()) {
+				command = aliases.get(0);
+				aliases.remove(0);
+				if(!aliases.isEmpty()) return Settings.builder().setAliases(aliases).build();
+			}
+		} catch (SerializationException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public void register(CommandPack commandPack) {
+		if(command != null) commandPack.registerCommand(this);
+	}
+
+	private void run(ServerPlayer player, sawfowl.guishopmanager.data.shop.Shop shop) {
+		if(player != null) plugin.getShopMenu().createInventoryToPlayer(shop.getShopMenuData(1), player, shop.getID(), 1);
 	}
 
 }

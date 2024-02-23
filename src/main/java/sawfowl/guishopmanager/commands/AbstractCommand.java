@@ -38,7 +38,7 @@ public abstract class AbstractCommand extends AbstractPluginCommand<GuiShopManag
 
 	@Override
 	public Map<String, ParameterSettings> getSettingsMap() {
-		return getArguments().stream().collect(Collectors.toMap(arg -> arg.getKey(), arg -> arg));
+		return getArguments() == null ? null : getArguments().stream().collect(Collectors.toMap(arg -> arg.getKey(), arg -> arg));
 	}
 
 }

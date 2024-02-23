@@ -31,13 +31,14 @@ public class Edit extends AbstractPlayerCommand {
 	@Override
 	public void execute(CommandContext context, ServerPlayer player, Locale locale) throws CommandException {
 		if(!plugin.shopsEmpty()) {
-			if(!context.one(CommandParameters.SHOP_ID).isPresent() || !plugin.shopExists(context.one(CommandParameters.SHOP_ID).get())) {
+			Shop shop = context.one(CommandParameters.SHOP).orElse(null);
+			if(shop == null) {
 				List<Component> messages = new ArrayList<Component>();
-				for(Shop shop : plugin.getAllShops()) {
+				for(Shop shop1 : plugin.getAllShops()) {
 					final ServerPlayer fPlayer = player;
 					Component hover = plugin.getLocales().getComponent(player.locale(), "Hover", "OpenShopEdit");
-					Component message = shop.getOrDefaultTitle(player.locale()).clickEvent(SpongeComponents.executeCallback(cause -> {
-						run(fPlayer, shop.getID());
+					Component message = shop1.getOrDefaultTitle(player.locale()).clickEvent(SpongeComponents.executeCallback(cause -> {
+						run(fPlayer, shop);
 					})).hoverEvent(HoverEvent.showText(hover));
 					messages.add(message);
 				}
@@ -48,7 +49,7 @@ public class Edit extends AbstractPlayerCommand {
 				.linesPerPage(10)
 				.sendTo(player);
 			} else {
-				run(player, context.one(CommandParameters.SHOP_ID).get());
+				run(player, shop);
 			}
 		} else exception(player, "Messages", "ShopListEmptyEditor");
 	}
@@ -70,11 +71,11 @@ public class Edit extends AbstractPlayerCommand {
 
 	@Override
 	public List<ParameterSettings> getArguments() {
-		return Arrays.asList(ParameterSettings.of(CommandParameters.SHOP_ID, false, "Messages", "ShopIDNotPresent"));
+		return Arrays.asList(ParameterSettings.of(CommandParameters.SHOP, false, "Messages", "ShopIDNotPresent"));
 	}
 
-	private void run(ServerPlayer player, String shopID) {
-		plugin.getShopMenu().createInventoryToEditor(plugin.getShop(shopID).getShopMenuData(1), (ServerPlayer) player, shopID, 1);
+	private void run(ServerPlayer player, Shop shop) {
+		plugin.getShopMenu().createInventoryToEditor(shop.getShopMenuData(1), (ServerPlayer) player, shop.getID(), 1);
 	}
 
 }

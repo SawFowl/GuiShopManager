@@ -14,6 +14,7 @@ import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.commands.AbstractCommand;
+import sawfowl.guishopmanager.data.commandshop.CommandShopData;
 import sawfowl.guishopmanager.utils.CommandParameters;
 
 public class Delete extends AbstractCommand {
@@ -24,14 +25,14 @@ public class Delete extends AbstractCommand {
 
 	@Override
 	public Parameterized build() {
-		return null;
+		return fastBuild();
 	}
 
 	@Override
 	public void execute(CommandContext context, Audience audience, Locale locale, boolean isPlayer) throws CommandException {
-		String shopId = context.one(CommandParameters.SHOP_ID).get();
-		if(plugin.commandShopExists(shopId)) {
-			plugin.removeCommandShopData(shopId);
+		CommandShopData shop = context.one(CommandParameters.COMMAND_SHOP).orElse(null);
+		if(shop != null) {
+			plugin.removeCommandShopData(shop.getID());
 			audience.sendMessage(getComponent(locale, "Messages", "SuccessDelete"));
 		} else exception(locale, "Messages", "ShopIDNotExists");
 	}
@@ -48,7 +49,7 @@ public class Delete extends AbstractCommand {
 
 	@Override
 	public List<ParameterSettings> getArguments() {
-		return Arrays.asList(ParameterSettings.of(CommandParameters.SHOP_ID, false, false, new Object[] {"Messages", "ShopIDNotPresent"}));
+		return Arrays.asList(ParameterSettings.of(CommandParameters.COMMAND_SHOP, false, false, new Object[] {"Messages", "ShopIDNotPresent"}));
 	}
 
 }
