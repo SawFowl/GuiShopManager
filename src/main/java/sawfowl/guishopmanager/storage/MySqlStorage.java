@@ -129,15 +129,7 @@ public class MySqlStorage extends Thread implements DBStorage {
 			ResultSet results = statement.executeQuery("SELECT * FROM " + prefix + "shops ORDER BY written;");
 			while(results.next()) {
 				if(updateTimeShops == null) updateTimeShops = results.getString("written");
-				String shopId = results.getString("shop_id");
-				plugin.addShop(shopId, createNode(results.getString("shop_data")).get(TypeTokens.SHOP_TOKEN).deserialize());
-				for(ShopMenuData shopMenuData : plugin.getShop(shopId).getMenus().values()) {
-					for(ShopItem shopItem : shopMenuData.getItems().values()) {
-						shopItem.getPrices().forEach(price -> {
-							price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-						});
-					}
-				}
+				plugin.addShop(results.getString("shop_id"), setShopCurrencies(plugin, createNode(results.getString("shop_data")).get(TypeTokens.SHOP_TOKEN).deserialize()));
 			}
 			statement.close();
 			statement = null;
@@ -192,15 +184,7 @@ public class MySqlStorage extends Thread implements DBStorage {
 			ResultSet results = statement.executeQuery("SELECT * FROM " + prefix + "commands ORDER BY written;");
 			while(results.next()) {
 				if(updateTimeCommandShops == null) updateTimeCommandShops = results.getString("written");
-				String shopId = results.getString("shop_id");
-				plugin.addCommandShopData(shopId, createNode(results.getString("shop_data")).get(TypeTokens.COMMANDS_SHOP_TOKEN).deserialize());
-				for(CommandShopMenuData shopMenuData : plugin.getCommandShopData(shopId).getMenus().values()) {
-					for(CommandItemData shopItem : shopMenuData.getItems().values()) {
-						shopItem.getPrices().forEach(price -> {
-							price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-						});
-					}
-				}
+				plugin.addCommandShopData(results.getString("shop_id"), setCommandShopCurrencies(plugin, createNode(results.getString("shop_data")).get(TypeTokens.COMMANDS_SHOP_TOKEN).deserialize()));
 			}
 			statement.close();
 			statement = null;
@@ -350,13 +334,10 @@ public class MySqlStorage extends Thread implements DBStorage {
 			while(results.next()) {
 				if(updateTimeAuction == null) updateTimeAuction = results.getString("written");
 				UUID stackUUID = UUID.fromString(results.getString("stack_uuid"));
-				SerializedAuctionStack serializedAuctionStack = createNode(results.getString("auction_stack")).get(TypeTokens.AUCTIONSTACK_TOKEN);
+				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, createNode(results.getString("auction_stack")).get(TypeTokens.AUCTIONSTACK_TOKEN));
 				serializedAuctionStack.setStackUUID(stackUUID);
 				if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
 					serializedAuctionStack.setStackUUID(stackUUID);
-					serializedAuctionStack.getPrices().forEach(price -> {
-						price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-					});
 					loaded.put(stackUUID, serializedAuctionStack);
 				}
 			}
@@ -377,12 +358,8 @@ public class MySqlStorage extends Thread implements DBStorage {
 			Map<UUID, Set<SerializedAuctionStack>> loadedExpireData = new HashMap<UUID, Set<SerializedAuctionStack>>();
 			while(results.next()) {
 				if(updateTimeAuctionExpired == null) updateTimeAuctionExpired = results.getString("written");
-				SerializedAuctionStack serializedAuctionStack = createNode(results.getString("auction_stack")).get(TypeTokens.AUCTIONSTACK_TOKEN);
-				serializedAuctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(serializedAuctionStack.getBetData().getCurrencyName()));
+				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, createNode(results.getString("auction_stack")).get(TypeTokens.AUCTIONSTACK_TOKEN));
 				if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
-					serializedAuctionStack.getPrices().forEach(price -> {
-						price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-					});
 					if(!loadedExpireData.containsKey(serializedAuctionStack.getOwnerUUID())) {
 						Set<SerializedAuctionStack> newList = new HashSet<SerializedAuctionStack>();
 						newList.add(serializedAuctionStack);
@@ -409,12 +386,8 @@ public class MySqlStorage extends Thread implements DBStorage {
 			Map<UUID, Set<SerializedAuctionStack>> loadedExpireBetData = new HashMap<UUID, Set<SerializedAuctionStack>>();
 			while(results.next()) {
 				if(updateTimeAuctionExpiredBet == null) updateTimeAuctionExpiredBet = results.getString("written");
-				SerializedAuctionStack serializedAuctionStack = createNode(results.getString("auction_stack")).get(TypeTokens.AUCTIONSTACK_TOKEN);
+				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, createNode(results.getString("auction_stack")).get(TypeTokens.AUCTIONSTACK_TOKEN));
 				if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
-					serializedAuctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(serializedAuctionStack.getBetData().getCurrencyName()));
-					serializedAuctionStack.getPrices().forEach(price -> {
-						price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-					});
 					if(!loadedExpireBetData.containsKey(serializedAuctionStack.getOwnerUUID())) {
 						Set<SerializedAuctionStack> newList = new HashSet<SerializedAuctionStack>();
 						newList.add(serializedAuctionStack);
@@ -488,7 +461,7 @@ public class MySqlStorage extends Thread implements DBStorage {
 			if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
 				serializedAuctionStack.setStackUUID(stackUUID);
 				serializedAuctionStack.getPrices().forEach(price -> {
-					price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
+					price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyId()));
 				});
 				if(plugin.getAuctionItems().containsKey(stackUUID)) plugin.getAuctionItems().remove(stackUUID);
 				plugin.getAuctionItems().put(stackUUID, serializedAuctionStack);
@@ -512,10 +485,10 @@ public class MySqlStorage extends Thread implements DBStorage {
 				updateTime = true;
 			}
 			SerializedAuctionStack serializedAuctionStack = createNode(results.getString("auction_stack")).get(TypeTokens.AUCTIONSTACK_TOKEN);
-			serializedAuctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(serializedAuctionStack.getBetData().getCurrencyName()));
+			serializedAuctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(serializedAuctionStack.getBetData().getCurrencyId()));
 			if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
 				serializedAuctionStack.getPrices().forEach(price -> {
-					price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
+					price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyId()));
 				});
 				if(!plugin.getExpiredAuctionItems().containsKey(serializedAuctionStack.getOwnerUUID())) {
 					Set<SerializedAuctionStack> newList = new HashSet<SerializedAuctionStack>();
@@ -545,9 +518,9 @@ public class MySqlStorage extends Thread implements DBStorage {
 			}
 			SerializedAuctionStack serializedAuctionStack = createNode(results.getString("auction_stack")).get(TypeTokens.AUCTIONSTACK_TOKEN);
 			if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
-				serializedAuctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(serializedAuctionStack.getBetData().getCurrencyName()));
+				serializedAuctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(serializedAuctionStack.getBetData().getCurrencyId()));
 				serializedAuctionStack.getPrices().forEach(price -> {
-					price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
+					price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyId()));
 				});
 				if(!plugin.getExpiredBetAuctionItems().containsKey(serializedAuctionStack.getOwnerUUID())) {
 					Set<SerializedAuctionStack> newList = new HashSet<SerializedAuctionStack>();
@@ -581,7 +554,7 @@ public class MySqlStorage extends Thread implements DBStorage {
 			for(ShopMenuData shopMenuData : plugin.getShop(shopId).getMenus().values()) {
 				for(ShopItem shopItem : shopMenuData.getItems().values()) {
 					shopItem.getPrices().forEach(price -> {
-						price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
+						price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyId()));
 					});
 				}
 			}
@@ -609,7 +582,7 @@ public class MySqlStorage extends Thread implements DBStorage {
 			for(CommandShopMenuData shopMenuData : plugin.getCommandShopData(shopId).getMenus().values()) {
 				for(CommandItemData shopItem : shopMenuData.getItems().values()) {
 					shopItem.getPrices().forEach(price -> {
-						price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
+						price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyId()));
 					});
 				}
 			}

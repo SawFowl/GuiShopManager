@@ -25,12 +25,8 @@ import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.utils.TypeTokens;
 import sawfowl.localeapi.api.ConfigTypes;
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
-import sawfowl.guishopmanager.data.commandshop.CommandItemData;
 import sawfowl.guishopmanager.data.commandshop.CommandShopData;
-import sawfowl.guishopmanager.data.commandshop.CommandShopMenuData;
 import sawfowl.guishopmanager.data.shop.Shop;
-import sawfowl.guishopmanager.data.shop.ShopItem;
-import sawfowl.guishopmanager.data.shop.ShopMenuData;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 import sawfowl.guishopmanager.serialization.commandsshop.SerializedCommandShop;
 import sawfowl.guishopmanager.serialization.shop.SerializedShop;
@@ -83,12 +79,8 @@ public class ConfigStorage implements DataStorage {
 			for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().endsWith(".conf") || file.getName().endsWith(".json") || file.getName().endsWith(".yml"))).collect(Collectors.toList())) {
 				try {
 					Shop shop = createConfigLoader(shopFile, 2).loadToReference().referenceTo(SerializedShop.class).get().deserialize();
+					setShopCurrencies(plugin, shop);
 					plugin.addShop(shop.getID(), shop);
-					for(ShopMenuData shopMenuData : plugin.getShop(shop.getID()).getMenus().values()) {
-						for(ShopItem shopItem : shopMenuData.getItems().values()) shopItem.getPrices().forEach(price -> {
-							price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-						});
-					}
 					if(!plugin.getRootNode().node("ConfigTypes", "Shop").getString().equals("." + Files.getFileExtension(shopFile.getName()))) {
 						shopFile.delete();
 						saveShop(shop.getID());
@@ -129,15 +121,9 @@ public class ConfigStorage implements DataStorage {
 			for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().endsWith(".conf") || file.getName().endsWith(".json") || file.getName().endsWith(".yml"))).collect(Collectors.toList())) {
 				try {
 					CommandShopData shop = createConfigLoader(shopFile, 2).loadToReference().referenceTo(SerializedCommandShop.class).get().deserialize();
+					setCommandShopCurrencies(plugin, shop);
 					String shopId = shop.getID();
 					plugin.addCommandShopData(shopId, shop);
-					for(CommandShopMenuData shopMenuData : plugin.getCommandShopData(shopId).getMenus().values()) {
-						for(CommandItemData shopItem : shopMenuData.getItems().values()) {
-							shopItem.getPrices().forEach(price -> {
-								price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-							});
-						}
-					}
 					if(!plugin.getRootNode().node("ConfigTypes", "CommandShop").getString().equals("." + Files.getFileExtension(shopFile.getName()))) {
 						shopFile.delete();
 						saveCommandsShop(shop.getID());
@@ -169,10 +155,7 @@ public class ConfigStorage implements DataStorage {
 				auctionNode.node("ActualData").childrenMap().forEach((object, node) -> {
 					try {
 						SerializedAuctionStack auctionStack = node.get(TypeTokens.AUCTIONSTACK_TOKEN);
-						auctionStack.getPrices().forEach(price -> {
-							price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-						});
-						if(auctionStack.getBetData() != null) auctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(auctionStack.getBetData().getCurrencyName()));
+						setAuctionCurrencies(plugin, auctionStack);
 						toAdd.put(auctionStack.getStackUUID(), auctionStack);
 					} catch (SerializationException e) {
 						plugin.getLogger().error(e.getLocalizedMessage());
@@ -184,12 +167,7 @@ public class ConfigStorage implements DataStorage {
 				try {
 					plugin.getExpiredAuctionItems().putAll(auctionNode.node("ExpiredData").get(TypeTokens.MAP_EXPIRED_AUCTIONSTACKS_TOKEN));
 					for(Set<SerializedAuctionStack> auctionStacks : plugin.getExpiredAuctionItems().values()) {
-						for(SerializedAuctionStack auctionStack : auctionStacks) {
-							auctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(auctionStack.getBetData().getCurrencyName()));
-							auctionStack.getPrices().forEach(price -> {
-								price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-							});
-						}
+						for(SerializedAuctionStack auctionStack : auctionStacks) setAuctionCurrencies(plugin, auctionStack);
 					}
 				} catch (SerializationException e) {
 					plugin.getLogger().error(e.getLocalizedMessage());
@@ -199,12 +177,7 @@ public class ConfigStorage implements DataStorage {
 				try {
 					plugin.getExpiredBetAuctionItems().putAll(auctionNode.node("ExpiredDataBet").get(TypeTokens.MAP_EXPIRED_AUCTIONSTACKS_TOKEN));
 					for(Set<SerializedAuctionStack> auctionStacks : plugin.getExpiredBetAuctionItems().values()) {
-						for(SerializedAuctionStack auctionStack : auctionStacks) {
-							auctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(auctionStack.getBetData().getCurrencyName()));
-							auctionStack.getPrices().forEach(price -> {
-								price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-							});
-						}
+						for(SerializedAuctionStack auctionStack : auctionStacks) setAuctionCurrencies(plugin, auctionStack);
 					}
 				} catch (SerializationException e) {
 					plugin.getLogger().error(e.getLocalizedMessage());

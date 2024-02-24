@@ -9,7 +9,7 @@ import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import sawfowl.guishopmanager.utils.Currencies;
 
 @ConfigSerializable
 public class SerializedBetData implements Serializable {
@@ -20,7 +20,7 @@ public class SerializedBetData implements Serializable {
 		this.buyerUUID = buyerUUID;
 		this.buyerName = buyerName;
 		this.money = money.doubleValue();
-		currencyName = LegacyComponentSerializer.legacyAmpersand().serialize(currency.displayName());
+		currencyId = Currencies.getId(currency);
 		this.currency = currency;
 	}
 
@@ -36,14 +36,14 @@ public class SerializedBetData implements Serializable {
 	@Setting("Money")
 	private double money;
 	@Setting("Currency")
-	private String currencyName;
+	private String currencyId;
 	@Setting("Tax")
 	private double tax;
 
 	private Currency currency;
 
-	public String getCurrencyName() {
-		return currencyName;
+	public String getCurrencyId() {
+		return currencyId;
 	}
 
 	public String getServer() {
@@ -87,7 +87,7 @@ public class SerializedBetData implements Serializable {
 	}
 
 	public void setCurrency(Currency currency) {
-		currencyName = LegacyComponentSerializer.legacyAmpersand().serialize(currency.displayName());
+		currencyId = Currencies.getId(currency);
 		this.currency = currency;
 	}
 
@@ -105,7 +105,7 @@ public class SerializedBetData implements Serializable {
 				", BuyerUUID: " + buyerUUID +
 				", BuyerName: " + buyerName +
 				", Money: " + money +
-				", Currency: " + currencyName + 
+				", Currency: " + currencyId + 
 				", Tax: " + tax;
 	}
 

@@ -8,21 +8,21 @@ import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import sawfowl.guishopmanager.utils.Currencies;
 
 @ConfigSerializable
 public class SerializedAuctionPrice implements Serializable {
 
 	SerializedAuctionPrice(){}
 	public SerializedAuctionPrice(Currency currency) {
-		currencyName = LegacyComponentSerializer.legacyAmpersand().serialize(currency.displayName());
+		currencyId = Currencies.getId(currency);
 		this.currency = currency;
 	}
 
 	private static final long serialVersionUID = 01;
 
 	@Setting("Currency")
-	private String currencyName;
+	private String currencyId;
 	@Setting("Bet")
 	private double bet;
 	@Setting("Price")
@@ -34,8 +34,16 @@ public class SerializedAuctionPrice implements Serializable {
 
 	private Currency currency;
 
-	public String getCurrencyName() {
-		return currencyName;
+	public String getCurrencyId() {
+		return currencyId;
+	}
+
+	public boolean isPresent() {
+		return currency != null;
+	}
+
+	public boolean isDefault() {
+		return currencyId.equals(Currencies.getDefaultid());
 	}
 
 	public Currency getCurrency() {
@@ -108,7 +116,7 @@ public class SerializedAuctionPrice implements Serializable {
 
 	@Override
 	public String toString() {
-		return  "Currency: " + currencyName +
+		return  "Currency: " + currencyId +
 				", Price: " + price+
 				", Bet: " + bet + 
 				", Tax: " + tax;

@@ -18,10 +18,6 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 
 import sawfowl.guishopmanager.GuiShopManager;
-import sawfowl.guishopmanager.data.commandshop.CommandItemData;
-import sawfowl.guishopmanager.data.commandshop.CommandShopMenuData;
-import sawfowl.guishopmanager.data.shop.ShopItem;
-import sawfowl.guishopmanager.data.shop.ShopMenuData;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 import sawfowl.guishopmanager.serialization.commandsshop.SerializedCommandShop;
 import sawfowl.guishopmanager.serialization.shop.SerializedShop;
@@ -112,15 +108,7 @@ public class H2Storage extends Thread implements DBStorage {
 		try {
 			ResultSet results = getStatement().executeQuery("SELECT * FROM " + prefix + "SHOPS;");
 			while(!results.isClosed() && results.next()) {
-				String shopId = results.getString("SHOP_ID");
-				plugin.addShop(shopId, createNode(results.getString("SHOP_DATA")).get(TypeTokens.SHOP_TOKEN).deserialize());
-				for(ShopMenuData shopMenuData : plugin.getShop(shopId).getMenus().values()) {
-					for(ShopItem shopItem : shopMenuData.getItems().values()) {
-						shopItem.getPrices().forEach(price -> {
-							price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-						});
-					}
-				}
+				plugin.addShop(results.getString("SHOP_ID"), setShopCurrencies(plugin, createNode(results.getString("SHOP_DATA")).get(TypeTokens.SHOP_TOKEN).deserialize()));
 			}
 		}
 		catch (SQLException | IOException e) {
@@ -168,15 +156,7 @@ public class H2Storage extends Thread implements DBStorage {
 		try {
 			ResultSet results = getStatement().executeQuery("SELECT * FROM " + prefix + "COMMANDS;");
 			while(!results.isClosed() && results.next()) {
-				String shopId = results.getString("SHOP_ID");
-				plugin.addCommandShopData(shopId, createNode(results.getString("shop_data")).get(TypeTokens.COMMANDS_SHOP_TOKEN).deserialize());
-				for(CommandShopMenuData shopMenuData : plugin.getCommandShopData(shopId).getMenus().values()) {
-					for(CommandItemData shopItem : shopMenuData.getItems().values()) {
-						shopItem.getPrices().forEach(price -> {
-							price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-						});
-					}
-				}
+				plugin.addCommandShopData(results.getString("SHOP_ID"), setCommandShopCurrencies(plugin, createNode(results.getString("SHOP_DATA")).get(TypeTokens.COMMANDS_SHOP_TOKEN).deserialize()));
 			}
 		}
 		catch (SQLException | IOException e) {
@@ -310,13 +290,10 @@ public class H2Storage extends Thread implements DBStorage {
 			Map<UUID, SerializedAuctionStack> loaded = new HashMap<UUID, SerializedAuctionStack>();
 			while(!results.isClosed() && results.next()) {
 				UUID stackUUID = UUID.fromString(results.getString("STACK_UUID"));
-				SerializedAuctionStack serializedAuctionStack = createNode(results.getString("AUCTION_STACK")).get(TypeTokens.AUCTIONSTACK_TOKEN);
+				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, createNode(results.getString("AUCTION_STACK")).get(TypeTokens.AUCTIONSTACK_TOKEN));
 				serializedAuctionStack.setStackUUID(stackUUID);
 				if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
 					serializedAuctionStack.setStackUUID(stackUUID);
-					serializedAuctionStack.getPrices().forEach(price -> {
-						price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-					});
 					loaded.put(stackUUID, serializedAuctionStack);
 				}
 			}
@@ -333,12 +310,8 @@ public class H2Storage extends Thread implements DBStorage {
 			ResultSet results = getStatement().executeQuery("SELECT * FROM " + prefix + "AUCTION_EXPIRED;");
 			Map<UUID, Set<SerializedAuctionStack>> loadedExpireData = new HashMap<UUID, Set<SerializedAuctionStack>>();
 			while(!results.isClosed() && results.next()) {
-				SerializedAuctionStack serializedAuctionStack = createNode(results.getString("AUCTION_STACK")).get(TypeTokens.AUCTIONSTACK_TOKEN);
-				serializedAuctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(serializedAuctionStack.getBetData().getCurrencyName()));
+				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, createNode(results.getString("AUCTION_STACK")).get(TypeTokens.AUCTIONSTACK_TOKEN));
 				if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
-					serializedAuctionStack.getPrices().forEach(price -> {
-						price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-					});
 					if(!loadedExpireData.containsKey(serializedAuctionStack.getOwnerUUID())) {
 						Set<SerializedAuctionStack> newList = new HashSet<SerializedAuctionStack>();
 						newList.add(serializedAuctionStack);
@@ -361,12 +334,8 @@ public class H2Storage extends Thread implements DBStorage {
 			ResultSet results = getStatement().executeQuery("SELECT * FROM " + prefix + "AUCTION_EXPIRED_BET;");
 			Map<UUID, Set<SerializedAuctionStack>> loadedExpireBetData = new HashMap<UUID, Set<SerializedAuctionStack>>();
 			while(!results.isClosed() && results.next()) {
-				SerializedAuctionStack serializedAuctionStack = createNode(results.getString("AUCTION_STACK")).get(TypeTokens.AUCTIONSTACK_TOKEN);
+				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, createNode(results.getString("AUCTION_STACK")).get(TypeTokens.AUCTIONSTACK_TOKEN));
 				if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
-					serializedAuctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(serializedAuctionStack.getBetData().getCurrencyName()));
-					serializedAuctionStack.getPrices().forEach(price -> {
-						price.setCurrency(plugin.getEconomy().checkCurrency(price.getCurrencyName()));
-					});
 					if(!loadedExpireBetData.containsKey(serializedAuctionStack.getOwnerUUID())) {
 						Set<SerializedAuctionStack> newList = new HashSet<SerializedAuctionStack>();
 						newList.add(serializedAuctionStack);

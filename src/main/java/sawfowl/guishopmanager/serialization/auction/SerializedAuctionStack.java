@@ -11,6 +11,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import net.kyori.adventure.text.Component;
+import sawfowl.guishopmanager.utils.Currencies;
 import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
 
 @ConfigSerializable
@@ -97,12 +98,7 @@ public class SerializedAuctionStack implements Serializable {
 		return prices.size() - 1 >= priceNumber ? prices.get(priceNumber) : prices.get(0);
 	}
 	public boolean containsCurrency(Currency currency) {
-		for(SerializedAuctionPrice serializedAuctionPrice : prices) {
-			if(currency.displayName().equals(serializedAuctionPrice.getCurrency().displayName())) {
-				return true;
-			}
-		}
-		return false;
+		return prices.stream().filter(price -> price.isPresent() && price.getCurrencyId().equals(Currencies.getId(currency))).findFirst().isPresent();
 	}
 	public Component getExpireTimeFromNow() {
 		if (isExpired()) {

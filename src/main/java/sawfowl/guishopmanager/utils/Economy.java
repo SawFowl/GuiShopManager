@@ -222,8 +222,8 @@ public class Economy {
 
 	public Currency checkCurrency(String check) {
 		Currency result = plugin.getEconomyService().defaultCurrency();
-		for(Currency currency : getCurrencies()) {
-			if(check != null && (TextUtils.clearDecorations(TextUtils.clearDecorations(currency.displayName())).equalsIgnoreCase(TextUtils.clearDecorations(check)) || TextUtils.clearDecorations(TextUtils.clearDecorations(currency.symbol())).equalsIgnoreCase(TextUtils.clearDecorations(check)))) {
+		if(check != null) for(Currency currency : getCurrencies()) {
+			if(Currencies.getId(currency).equals(check) || (TextUtils.clearDecorations(TextUtils.clearDecorations(currency.displayName())).equalsIgnoreCase(TextUtils.clearDecorations(check)) || TextUtils.clearDecorations(TextUtils.clearDecorations(currency.symbol())).equalsIgnoreCase(TextUtils.clearDecorations(check)))) {
 				result = currency;
 				break;
 			}
