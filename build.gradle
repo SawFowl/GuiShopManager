@@ -59,12 +59,12 @@ sponge {
 		dependency("spongeapi") {
 			optional(false)
 			loadOrder("after")
-			version("8.0.0")
+			version("${api}")
 		}
 		dependency("localeapi") {
 			optional(false)
 			loadOrder("after")
-			version("2.6.0")
+			version("${localeapi}")
 		}
 		dependency("commandpack") {
 			optional(false)
