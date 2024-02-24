@@ -316,7 +316,6 @@ public class GuiShopManager {
 			economyService  = Sponge.server().serviceProvider().economyService().get();
 		} else {
 			logger.error(locales.getComponent(Sponge.server().locale(), "Messages", "EconomyNotFound"));
-			if(Sponge.server().commandManager().commandMapping("guishopmanager").isPresent()) Sponge.server().commandManager().commandMapping("guishopmanager").get().allAliases().clear();
 			return;
 		}
 		loadExpires();
