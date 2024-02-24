@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.config.ConfigDir;
@@ -44,7 +43,6 @@ import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
-import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
@@ -309,15 +307,13 @@ public class GuiShopManager {
 	}
 
 	@Listener
-	public void onEnable(StartedEngineEvent<Server> event) throws IOException {
+	public void getCommandPackAPI(CommandPack.PostAPI event) {
 		if(generateConfig == null) return;
 		generateConfig.generateBlackList();
-		if(Sponge.server().serviceProvider().economyService().isPresent()) {
-			economyService  = Sponge.server().serviceProvider().economyService().get();
-		} else {
+		if(!Sponge.server().serviceProvider().economyService().isPresent()) {
 			logger.error(locales.getComponent(Sponge.server().locale(), "Messages", "EconomyNotFound"));
 			return;
-		}
+		} else economyService  = Sponge.server().serviceProvider().economyService().get();
 		loadExpires();
 		fillItems = new GeneratedFillItems(instance);
 		economy = new Economy(instance);
@@ -334,10 +330,6 @@ public class GuiShopManager {
 			if(!expiredAuctionItems.isEmpty()) Sponge.server().onlinePlayers().forEach(this::checkExpired);
 			if(!expiredBetAuctionItems.isEmpty()) Sponge.server().onlinePlayers().forEach(this::checkExpiredBet);
 		}).build());
-	}
-
-	@Listener
-	public void getCommandPackAPI(CommandPack.PostAPI event) {
 		event.getAPI().registerCommand(new MainCommand(instance));
 		if(rootNode.node("Aliases", "Shop", "Enable").getBoolean()) new sawfowl.guishopmanager.commands.shop.Shop(instance).register(event.getAPI());
 		if(rootNode.node("Aliases", "Auction", "Enable").getBoolean()) new Auction(instance).register(event.getAPI());
