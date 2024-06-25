@@ -98,7 +98,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
 @Plugin(id = "guishopmanager",
 		name = "GuiShopManager",
-		version = "1.0.4-S7.3",
+		version = "1.0.5-S7.3",
 		dependencies = {
 				@Dependency(id = "localeapi@1.0.0")
 		},
@@ -322,7 +322,7 @@ public class GuiShopManager {
 	private void reload() {
 		loadConfigs();
 		setWorkDataClasses();
-    	fillItems = null;
+		fillItems = null;
 		fillItems = new GeneratedFillItems(instance);
 		expires.clear();
 		loadExpires();
@@ -583,161 +583,161 @@ public class GuiShopManager {
 	}
 
 	@Listener
-    public void onChangeServiceProvider(ChangeServiceProviderEvent event) {
-        if(event.getService().equals(EconomyService.class)) {
-            economyService = (EconomyService) event.getNewProviderRegistration().getProvider();
-        }
+	public void onChangeServiceProvider(ChangeServiceProviderEvent event) {
+		if(event.getService().equals(EconomyService.class)) {
+			economyService = (EconomyService) event.getNewProviderRegistration().getProvider();
+		}
 	}
 
 	public void commandRegister() {
 		
 		CommandSpec commandAuctionAdd = CommandSpec.builder()
-		        .permission(Permissions.auctionadditem)
-		        .arguments(GenericArguments.optional(GenericArguments.doubleNum(Text.of("Bet"))),
-		        		GenericArguments.optional(GenericArguments.doubleNum(Text.of("Price"))),
-		        		GenericArguments.optional(GenericArguments.string(Text.of("Currency"))))
-		        .executor(new AuctionAddItem(instance))
-		        .build();
+				.permission(Permissions.auctionadditem)
+				.arguments(GenericArguments.optional(GenericArguments.doubleNum(Text.of("Bet"))),
+						GenericArguments.optional(GenericArguments.doubleNum(Text.of("Price"))),
+						GenericArguments.optional(GenericArguments.string(Text.of("Currency"))))
+				.executor(new AuctionAddItem(instance))
+				.build();
 		
 		CommandSpec commandAuction = CommandSpec.builder()
-		        .permission(Permissions.auctionopenself)
-		        .arguments(GenericArguments.optional(GenericArguments.player(Text.of("Player"))))
-		        .child(commandAuctionAdd, "add", "additem")
-		        .executor(new AuctionOpen(instance))
-		        .build();
+				.permission(Permissions.auctionopenself)
+				.arguments(GenericArguments.optional(GenericArguments.player(Text.of("Player"))))
+				.child(commandAuctionAdd, "add", "additem")
+				.executor(new AuctionOpen(instance))
+				.build();
 		
 		CommandSpec commandCreate = CommandSpec.builder()
-		        .permission(Permissions.create)
-		        .arguments(GenericArguments.optional(GenericArguments.string(Text.of("Shop"))))
-		        .executor(new ShopCreate(instance))
-		        .build();
+				.permission(Permissions.create)
+				.arguments(GenericArguments.optional(GenericArguments.string(Text.of("Shop"))))
+				.executor(new ShopCreate(instance))
+				.build();
 		
 		CommandSpec commandDelete = CommandSpec.builder()
-		        .permission(Permissions.delete)
-		        .arguments(GenericArguments.optional(GenericArguments.string(Text.of("Shop"))))
-		        .executor(new ShopDelete(instance))
-		        .build();
+				.permission(Permissions.delete)
+				.arguments(GenericArguments.optional(GenericArguments.string(Text.of("Shop"))))
+				.executor(new ShopDelete(instance))
+				.build();
 		
 		CommandSpec commandEdit = CommandSpec.builder()
-		        .permission(Permissions.edit)
-		        .arguments(GenericArguments.optional(GenericArguments.string(Text.of("Shop"))))
-		        .executor(new ShopEdit(instance))
-		        .build();
+				.permission(Permissions.edit)
+				.arguments(GenericArguments.optional(GenericArguments.string(Text.of("Shop"))))
+				.executor(new ShopEdit(instance))
+				.build();
 		
 		CommandSpec commandTranslate = CommandSpec.builder()
-		        .permission(Permissions.edit)
-		        .arguments(GenericArguments.optional(GenericArguments.string(Text.of("Shop"))), 
-		        		GenericArguments.optional(GenericArguments.string(Text.of("Locale"))),
-		        		GenericArguments.optional(GenericArguments.remainingJoinedStrings(Text.of("Translate"))))
-		        .executor(new ShopTranslate(instance))
-		        .build();
+				.permission(Permissions.edit)
+				.arguments(GenericArguments.optional(GenericArguments.string(Text.of("Shop"))), 
+						GenericArguments.optional(GenericArguments.string(Text.of("Locale"))),
+						GenericArguments.optional(GenericArguments.remainingJoinedStrings(Text.of("Translate"))))
+				.executor(new ShopTranslate(instance))
+				.build();
 		
 		CommandSpec commandSetShopItem = CommandSpec.builder()
-		        .permission(Permissions.edit)
-		        .arguments(GenericArguments.optional(GenericArguments.string(Text.of("Shop"))),
-		        		GenericArguments.optional(GenericArguments.integer(Text.of("Menu"))),
-		        		GenericArguments.optional(GenericArguments.integer(Text.of("Slot"))),
-		        		GenericArguments.optional(GenericArguments.doubleNum(Text.of("BuyPrice"))),
-		        		GenericArguments.optional(GenericArguments.doubleNum(Text.of("SellPrice"))),
-		        		GenericArguments.optional(GenericArguments.string(Text.of("Currency"))))
-		        .executor(new ShopSetItem(instance))
-		        .build();
+				.permission(Permissions.edit)
+				.arguments(GenericArguments.optional(GenericArguments.string(Text.of("Shop"))),
+						GenericArguments.optional(GenericArguments.integer(Text.of("Menu"))),
+						GenericArguments.optional(GenericArguments.integer(Text.of("Slot"))),
+						GenericArguments.optional(GenericArguments.doubleNum(Text.of("BuyPrice"))),
+						GenericArguments.optional(GenericArguments.doubleNum(Text.of("SellPrice"))),
+						GenericArguments.optional(GenericArguments.string(Text.of("Currency"))))
+				.executor(new ShopSetItem(instance))
+				.build();
 		
 		CommandSpec commandOpen = CommandSpec.builder()
-		        .permission(Permissions.openself)
-		        .arguments(GenericArguments.optional(GenericArguments.string(Text.of("Shop"))), 
-		        		GenericArguments.optional(GenericArguments.player(Text.of("Player"))))
-		        .executor(new ShopOpen(instance))
-		        .build();
+				.permission(Permissions.openself)
+				.arguments(GenericArguments.optional(GenericArguments.string(Text.of("Shop"))), 
+						GenericArguments.optional(GenericArguments.player(Text.of("Player"))))
+				.executor(new ShopOpen(instance))
+				.build();
 		
 		CommandSpec commandItemBlocking = CommandSpec.builder()
-		        .permission(Permissions.auctionitemblocking)
-		        .arguments(GenericArguments.flags().flag("mask").flag("item").flag("m").flag("i").buildWith(GenericArguments.none()))
-		        .executor(new AddBlackList(instance))
-		        .build();
+				.permission(Permissions.auctionitemblocking)
+				.arguments(GenericArguments.flags().flag("mask").flag("item").flag("m").flag("i").buildWith(GenericArguments.none()))
+				.executor(new AddBlackList(instance))
+				.build();
 		
 		CommandSpec commandReload = CommandSpec.builder()
-		        .permission(Permissions.reload)
-		        .executor((src, args) -> {
+				.permission(Permissions.reload)
+				.executor((src, args) -> {
 					reload();
 					try {
 						src.sendMessage(locales.getOrDefaultLocale(src.getLocale()).getLocaleNode().getNode("Messages", "Reload").getValue(TypeTokens.TEXT_TOKEN));
 					} catch (ObjectMappingException e) {
 						logger.error(e.getLocalizedMessage());
 					}
-    	            return CommandResult.success();
-		        })
-		        .build();
+					return CommandResult.success();
+				})
+				.build();
 		
 		CommandSpec mainCommand;
 		if(rootNode.getNode("Auction", "Enable").getBoolean()) {
 			mainCommand = CommandSpec.builder()
-			        .child(commandAuction, "auction", "market")
-			        .child(commandItemBlocking, "blacklist", "block")
-			        .child(commandCreate, "create")
-			        .child(commandDelete, "delete")
-			        .child(commandEdit, "edit")
-			        .child(commandSetShopItem, "setshopitem", "set", "add")
-			        .child(commandTranslate, "translate")
-			        .child(commandOpen, "open")
-			        .child(commandReload, "reload")
-			        .executor((src, args) -> {
-			        	List<Text> messages = new ArrayList<Text>();
-				        try {
-				        	if(src.hasPermission(Permissions.auctionopenother)) {
-				        		Text create = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm auction &e[Player]")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager auction ")).build();
-				        		messages.add(create);
-				        		Text blacklist = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm blacklist &e<flags [mask | item]>")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager blacklist ")).build();
-				        		messages.add(blacklist);
-				        	} else if(src.hasPermission(Permissions.auctionopenself)) {
-					        	Text create = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm auction")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.runCommand("/guishopmanager auction")).build();
-					        	messages.add(create);
-					        }
-				        	if(src.hasPermission(Permissions.auctionadditem)) {
-				        		Text additem = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm auction add &e<Bet> <Price> <Currency>")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager auction add 0 0 <currency>")).build();
-				        		messages.add(additem);
-				        	}
-				        	if(src.hasPermission(Permissions.create)) {
-				        		Text create = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm create &c<Shop>")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager create ")).build();
-				        		messages.add(create);
-				        	}
-				        	if(src.hasPermission(Permissions.delete)) {
-				        		Text delete = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm delete &c<Shop>")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager delete ")).build();
-				        		messages.add(delete);
-				        	}
-				        	if(src.hasPermission(Permissions.edit)) {
-				        		Text translate = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm translate &c<Shop> <Locale> <DisplayName>")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager translate")).build();
-				        		messages.add(translate);
-				        		Text edit = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm edit &e[shop]")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.runCommand("/guishopmanager edit")).build();
-				        		messages.add(edit);
+					.child(commandAuction, "auction", "market")
+					.child(commandItemBlocking, "blacklist", "block")
+					.child(commandCreate, "create")
+					.child(commandDelete, "delete")
+					.child(commandEdit, "edit")
+					.child(commandSetShopItem, "setshopitem", "set", "add")
+					.child(commandTranslate, "translate")
+					.child(commandOpen, "open")
+					.child(commandReload, "reload")
+					.executor((src, args) -> {
+						List<Text> messages = new ArrayList<Text>();
+						try {
+							if(src.hasPermission(Permissions.auctionopenother)) {
+								Text create = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm auction &e[Player]")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager auction ")).build();
+								messages.add(create);
+								Text blacklist = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm blacklist &e<flags [mask | item]>")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager blacklist ")).build();
+								messages.add(blacklist);
+							} else if(src.hasPermission(Permissions.auctionopenself)) {
+								Text create = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm auction")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.runCommand("/guishopmanager auction")).build();
+								messages.add(create);
+							}
+							if(src.hasPermission(Permissions.auctionadditem)) {
+								Text additem = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm auction add &e<Bet> <Price> <Currency>")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager auction add 0 0 <currency>")).build();
+								messages.add(additem);
+							}
+							if(src.hasPermission(Permissions.create)) {
+								Text create = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm create &c<Shop>")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager create ")).build();
+								messages.add(create);
+							}
+							if(src.hasPermission(Permissions.delete)) {
+								Text delete = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm delete &c<Shop>")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager delete ")).build();
+								messages.add(delete);
+							}
+							if(src.hasPermission(Permissions.edit)) {
+								Text translate = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm translate &c<Shop> <Locale> <DisplayName>")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager translate")).build();
+								messages.add(translate);
+								Text edit = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm edit &e[shop]")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.runCommand("/guishopmanager edit")).build();
+								messages.add(edit);
 								Text setShopItem = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm setshopitem &c<Shop> <Menu> <Slot> <Buy.Price> <Sell.Price> &e[Currency]")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager setshopitem")).build();
 								messages.add(setShopItem);
-				        	}
-				        	if(src.hasPermission(Permissions.openother)) {
-				        		Text open = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm open &e[Shop] [Player]")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.runCommand("/guishopmanager open")).build();
-				        		messages.add(open);
-			        		} else if(src.hasPermission(Permissions.openself)) {
-					        	Text open = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm open &e[Shop]")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager open")).build();
-					        	messages.add(open);
-				        	}
-				        	if(src.hasPermission(Permissions.reload)) {
-				        		Text reload = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm reload")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.runCommand("/guishopmanager reload")).build();
-				        		messages.add(reload);
-				        	}
-				        	if(!messages.isEmpty()) {
+							}
+							if(src.hasPermission(Permissions.openother)) {
+								Text open = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm open &e[Shop] [Player]")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.runCommand("/guishopmanager open")).build();
+								messages.add(open);
+							} else if(src.hasPermission(Permissions.openself)) {
+								Text open = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm open &e[Shop]")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager open")).build();
+								messages.add(open);
+							}
+							if(src.hasPermission(Permissions.reload)) {
+								Text reload = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm reload")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.runCommand("/guishopmanager reload")).build();
+								messages.add(reload);
+							}
+							if(!messages.isEmpty()) {
 								PaginationList.builder()
 								.contents(messages)
 								.title(locales.getOrDefaultLocale(src.getLocale()).getLocaleNode().getNode("Messages", "CommandsTitle").getValue(TypeTokens.TEXT_TOKEN))
 								.padding(locales.getOrDefaultLocale(src.getLocale()).getLocaleNode().getNode("Messages", "CommandsPadding").getValue(TypeTokens.TEXT_TOKEN))
 								.linesPerPage(10)
 								.sendTo(src);
-				        	}
+							}
 						} catch (ObjectMappingException e) {
 							logger.error(e.getLocalizedMessage());
 						}
-		        		return CommandResult.success();
-			        })
-			        .build();
+						return CommandResult.success();
+					})
+					.build();
 
 			if(rootNode.getNode("Aliases", "Auction", "Enable").getBoolean() && !rootNode.getNode("Aliases", "Auction", "List").isEmpty()) {
 				try {
@@ -751,16 +751,16 @@ public class GuiShopManager {
 			
 		} else {
 			mainCommand = CommandSpec.builder()
-			        .child(commandCreate, "create")
-			        .child(commandDelete, "delete")
-			        .child(commandEdit, "edit")
-			        .child(commandSetShopItem, "setshopitem", "set", "add")
-			        .child(commandTranslate, "translate")
-			        .child(commandOpen, "open")
-			        .child(commandReload, "reload")
-			        .executor((src, args) -> {
-			        	List<Text> messages = new ArrayList<Text>();
-				        if(src.hasPermission(Permissions.create)) {
+					.child(commandCreate, "create")
+					.child(commandDelete, "delete")
+					.child(commandEdit, "edit")
+					.child(commandSetShopItem, "setshopitem", "set", "add")
+					.child(commandTranslate, "translate")
+					.child(commandOpen, "open")
+					.child(commandReload, "reload")
+					.executor((src, args) -> {
+						List<Text> messages = new ArrayList<Text>();
+						if(src.hasPermission(Permissions.create)) {
 							Text create = Text.builder().append(TextSerializers.FORMATTING_CODE.deserialize("&a/gsm create &c<Shop>")).onHover(TextActions.showText(locales.getLocalizedText(src.getLocale(), "Hover", "RunCommand"))).onClick(TextActions.suggestCommand("/guishopmanager create ")).build();
 							messages.add(create);
 						}
@@ -795,9 +795,9 @@ public class GuiShopManager {
 							.linesPerPage(10)
 							.sendTo(src);
 						}
-		        		return CommandResult.success();
-			        })
-			        .build();
+						return CommandResult.success();
+					})
+					.build();
 		}
 		
 		Sponge.getCommandManager().register(instance, mainCommand, "guishopmanager", "gsm");

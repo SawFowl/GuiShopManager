@@ -56,20 +56,20 @@ public class ShopOpen implements CommandExecutor {
 			} else {
 				List<Text> messages = new ArrayList<Text>();
 				for(Shop shop : plugin.getAllShops()) {
-					Text message = Text.builder().append(shop.getOrDefaultTitle(player.getLocale()))
-						.onHover(TextActions.showText(plugin.getLocales().getLocalizedText(player.getLocale(), "Hover", "OpenShop")))	
+					Text message = Text.builder().append(shop.getOrDefaultTitle((player == null ? src : player).getLocale()))
+						.onHover(TextActions.showText(plugin.getLocales().getLocalizedText((player == null ? src : player).getLocale(), "Hover", "OpenShop")))	
 						.onClick(TextActions.executeCallback(callback -> {
-							run((Player) src, shop);
+							if(src instanceof Player) run((Player) src, shop);
 						}))
 						.build();
 					messages.add(message);
 				}
-		        PaginationList.builder()
-				.title(plugin.getLocales().getLocalizedText(player.getLocale(), "Messages", "ShopListTitle"))
-				.padding(plugin.getLocales().getLocalizedText(player.getLocale(), "Messages", "ShopListPadding"))
+				PaginationList.builder()
+				.title(plugin.getLocales().getLocalizedText((player == null ? src : player).getLocale(), "Messages", "ShopListTitle"))
+				.padding(plugin.getLocales().getLocalizedText((player == null ? src : player).getLocale(), "Messages", "ShopListPadding"))
 				.contents(messages)
 				.linesPerPage(10)
-				.sendTo(player);
+				.sendTo(player == null ? src : player);
 			}
 		}
 		return CommandResult.success();

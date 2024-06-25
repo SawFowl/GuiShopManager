@@ -18,14 +18,14 @@ import sawfowl.guishopmanager.GuiShopManager;
 
 public class Locales {
 
-	GuiShopManager plugin;
+	private GuiShopManager plugin;
+	private String pluginid = "guishopmanager";
 	public Locales(GuiShopManager instance) {
 		plugin = instance;
 	}
 
-	// ЛОКАЛИЗАЦИЯ
 	public Map<Locale, YamlLocaleUtil> getLocales() {
-		return plugin.getLocaleAPI().getYamlLocalesMap("guishopmanager");
+		return plugin.getLocaleAPI().getYamlLocalesMap(pluginid);
 	}
 	public YamlLocaleUtil getDefaultLocale() {
 		return getLocales().get(plugin.getLocaleAPI().getDefaultLocale());

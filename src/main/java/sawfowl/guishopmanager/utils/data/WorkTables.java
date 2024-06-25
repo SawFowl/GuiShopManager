@@ -49,7 +49,6 @@ public class WorkTables extends WorkData {
 		catch (SQLException e) {
 			plugin.getLogger().error(createShopsTable);
 			plugin.getLogger().error("Create shop table...");
-			
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
 		if(plugin.getRootNode().getNode("Auction", "Enable").getBoolean()) {
@@ -74,35 +73,23 @@ public class WorkTables extends WorkData {
 	public void saveShop(String shopId) {
 		Task.builder().async().execute(() -> {
 			SerializedShop serializableShop = plugin.getShop(shopId).serialize();
-	        try {
-	            StringWriter sink = new StringWriter();
-	            HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSink(() -> new BufferedWriter(sink)).build();
-	            ConfigurationNode node = loader.createEmptyNode();
-	            node.getNode("Content").setValue(TypeToken.of(SerializedShop.class), serializableShop);
-	            loader.save(node);
-	    		String sql = "REPLACE INTO " + prefix + "shops(shop_id, shop_data) VALUES(?, ?);";
-	    		try (PreparedStatement statement = plugin.getMySQL().getOrOpenConnection().prepareStatement(sql)) {
-	    			statement.setString(1, shopId);
-	    		    statement.setString(2, sink.toString());
-	    		    statement.execute();
-	    		} catch (SQLException e) {
-	    			plugin.getLogger().error("Write shop data to database");
-	    			plugin.getLogger().error(e.getLocalizedMessage());
-	    		}
-	        } catch (Exception e) {
-    			plugin.getLogger().error(e.getLocalizedMessage());
-	        }
 			try {
-				List<String> enabledShops = plugin.getRootNode().getNode("ShopList").getValue(new TypeToken<List<String>>() {
-					private static final long serialVersionUID = 01;});
-				if(!enabledShops.contains(shopId)) {
-					enabledShops.add(shopId);
+				StringWriter sink = new StringWriter();
+				HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSink(() -> new BufferedWriter(sink)).build();
+				ConfigurationNode node = loader.createEmptyNode();
+				node.getNode("Content").setValue(TypeToken.of(SerializedShop.class), serializableShop);
+				loader.save(node);
+				String sql = "REPLACE INTO " + prefix + "shops(shop_id, shop_data) VALUES(?, ?);";
+				try (PreparedStatement statement = plugin.getMySQL().getOrOpenConnection().prepareStatement(sql)) {
+					statement.setString(1, shopId);
+					statement.setString(2, sink.toString());
+					statement.execute();
+				} catch (SQLException e) {
+					plugin.getLogger().error("Write shop data to database");
+					plugin.getLogger().error(e.getLocalizedMessage());
 				}
-				plugin.getRootNode().getNode("ShopList").setValue(new TypeToken<List<String>>() {
-					private static final long serialVersionUID = 01;}, enabledShops);
-				plugin.updateConfigs();
-			} catch (ObjectMappingException e) {
-    			plugin.getLogger().error(e.getLocalizedMessage());
+			} catch (Exception e) {
+				plugin.getLogger().error(e.getLocalizedMessage());
 			}
 		}).submit(plugin);
 	}
@@ -114,17 +101,13 @@ public class WorkTables extends WorkData {
 				try {
 					Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
 					ResultSet results = statement.executeQuery("SELECT * FROM " + prefix + "shops;");
-					List<String> enabledShops = plugin.getRootNode().getNode("ShopList").getValue(new TypeToken<List<String>>() {
-						private static final long serialVersionUID = 01;});
 					while(results.next()) {
 						String shopId = results.getString("shop_id");
-						if(enabledShops.contains(shopId)) {
-							String shopData = results.getString("shop_data");
-				            StringReader source = new StringReader(shopData);
-				            HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSource(() -> new BufferedReader(source)).build();
-				            ConfigurationNode node = loader.load();
-							plugin.addShop(shopId, node.getNode("Content").getValue(TypeToken.of(SerializedShop.class)).deserialize());
-						}
+						String shopData = results.getString("shop_data");
+						StringReader source = new StringReader(shopData);
+						HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSource(() -> new BufferedReader(source)).build();
+						ConfigurationNode node = loader.load();
+						plugin.addShop(shopId, node.getNode("Content").getValue(TypeToken.of(SerializedShop.class)).deserialize());
 					}
 					statement.close();
 				}
@@ -139,25 +122,6 @@ public class WorkTables extends WorkData {
 	@Override
 	public void deleteShop(String shopId) {
 		Task.builder().async().execute(() -> {
-			if(!plugin.getRootNode().getNode("ShopList").isEmpty()) {
-				List<String> enabledShops = new ArrayList<String>();
-				try {
-					enabledShops.addAll(plugin.getRootNode().getNode("ShopList").getValue(new TypeToken<List<String>>() {
-						private static final long serialVersionUID = 01;}));
-				} catch (ObjectMappingException e) {
-					plugin.getLogger().error(e.getLocalizedMessage());
-				}
-				if(enabledShops.contains(shopId)) {
-					enabledShops.remove(shopId);
-					try {
-						plugin.getRootNode().getNode("ShopList").setValue(new TypeToken<List<String>>() {
-							private static final long serialVersionUID = 01;}, enabledShops);
-						plugin.updateConfigs();
-					} catch (ObjectMappingException e) {
-						plugin.getLogger().error(e.getLocalizedMessage());
-					}
-				}
-			}
 			try {
 				Statement statement = plugin.getMySQL().getOrOpenConnection().createStatement();
 				statement.executeUpdate("DELETE FROM `" + prefix + "shops` WHERE `" + prefix + "shops`.`shop_id` = \'" + shopId + "\'");
@@ -182,19 +146,19 @@ public class WorkTables extends WorkData {
 	@Override
 	public void saveAuctionStack(SerializedAuctionStack serializedAuctionStack) {
 		String sql = "REPLACE INTO " + prefix + "auction(stack_uuid, auction_stack) VALUES(?, ?);";
-        StringWriter sink = new StringWriter();
-        HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSink(() -> new BufferedWriter(sink)).build();
-        ConfigurationNode node = loader.createEmptyNode();
-        try {
-            node.getNode("Content").setValue(TypeToken.of(SerializedAuctionStack.class), serializedAuctionStack);
+		StringWriter sink = new StringWriter();
+		HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSink(() -> new BufferedWriter(sink)).build();
+		ConfigurationNode node = loader.createEmptyNode();
+		try {
+			node.getNode("Content").setValue(TypeToken.of(SerializedAuctionStack.class), serializedAuctionStack);
 			loader.save(node);
 		} catch (IOException | ObjectMappingException e) {
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
 		try (PreparedStatement statement = plugin.getMySQL().getOrOpenConnection().prepareStatement(sql)) {
 			statement.setString(1, serializedAuctionStack.getStackUUID().toString());
-		    statement.setString(2, sink.toString());
-		    statement.execute();
+			statement.setString(2, sink.toString());
+			statement.execute();
 		} catch (SQLException e) {
 			plugin.getLogger().error("Write AuctionStack to database");
 			plugin.getLogger().error(e.getLocalizedMessage());
@@ -215,11 +179,11 @@ public class WorkTables extends WorkData {
 	@Override
 	public void saveExpireAuctionData(SerializedAuctionStack serializedAuctionStack) {
 		String sql = "REPLACE INTO " + prefix + "auction_expired(stack_uuid, auction_stack) VALUES(?, ?);";
-        StringWriter sink = new StringWriter();
-        HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSink(() -> new BufferedWriter(sink)).build();
-        ConfigurationNode node = loader.createEmptyNode();
-        try {
-            node.getNode("Content").setValue(new TypeToken<SerializedAuctionStack>() {
+		StringWriter sink = new StringWriter();
+		HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSink(() -> new BufferedWriter(sink)).build();
+		ConfigurationNode node = loader.createEmptyNode();
+		try {
+			node.getNode("Content").setValue(new TypeToken<SerializedAuctionStack>() {
 				private static final long serialVersionUID = 01;
 			}, serializedAuctionStack);
 			loader.save(node);
@@ -228,8 +192,8 @@ public class WorkTables extends WorkData {
 		}
 		try (PreparedStatement statement = plugin.getMySQL().getOrOpenConnection().prepareStatement(sql)) {
 			statement.setString(1, serializedAuctionStack.getStackUUID().toString());
-		    statement.setString(2, sink.toString());
-		    statement.execute();
+			statement.setString(2, sink.toString());
+			statement.execute();
 		} catch (SQLException e) {
 			plugin.getLogger().error("Write AuctionStack to database");
 			plugin.getLogger().error(e.getLocalizedMessage());
@@ -251,11 +215,11 @@ public class WorkTables extends WorkData {
 	@Override
 	public void saveExpireBetAuctionData(SerializedAuctionStack serializedAuctionStack) {
 		String sql = "REPLACE INTO " + prefix + "auction_expired_bet(stack_uuid, auction_stack) VALUES(?, ?);";
-        StringWriter sink = new StringWriter();
-        HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSink(() -> new BufferedWriter(sink)).build();
-        ConfigurationNode node = loader.createEmptyNode();
-        try {
-            node.getNode("Content").setValue(new TypeToken<SerializedAuctionStack>() {
+		StringWriter sink = new StringWriter();
+		HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSink(() -> new BufferedWriter(sink)).build();
+		ConfigurationNode node = loader.createEmptyNode();
+		try {
+			node.getNode("Content").setValue(new TypeToken<SerializedAuctionStack>() {
 				private static final long serialVersionUID = 01;
 			}, serializedAuctionStack);
 			loader.save(node);
@@ -264,8 +228,8 @@ public class WorkTables extends WorkData {
 		}
 		try (PreparedStatement statement = plugin.getMySQL().getOrOpenConnection().prepareStatement(sql)) {
 			statement.setString(1, serializedAuctionStack.getStackUUID().toString());
-		    statement.setString(2, sink.toString());
-		    statement.execute();
+			statement.setString(2, sink.toString());
+			statement.execute();
 		} catch (SQLException e) {
 			plugin.getLogger().error("Write AuctionStack to database");
 			plugin.getLogger().error(e.getLocalizedMessage());
@@ -291,14 +255,14 @@ public class WorkTables extends WorkData {
 			while(results.next()) {
 				UUID stackUUID = UUID.fromString(results.getString("stack_uuid"));
 				String content = results.getString("auction_stack");
-	            StringReader source = new StringReader(content);
-	            HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSource(() -> new BufferedReader(source)).build();
-	            ConfigurationNode node = loader.load();
-	            SerializedAuctionStack serializedAuctionStack = node.getNode("Content").getValue(TypeToken.of(SerializedAuctionStack.class));
-	            if(serializedAuctionStack.getSerializedItemStack().isPresent()) {
-	            	serializedAuctionStack.setStackUUID(stackUUID);
-		            loaded.add(serializedAuctionStack);
-	            }
+				StringReader source = new StringReader(content);
+				HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSource(() -> new BufferedReader(source)).build();
+				ConfigurationNode node = loader.load();
+				SerializedAuctionStack serializedAuctionStack = node.getNode("Content").getValue(TypeToken.of(SerializedAuctionStack.class));
+				if(serializedAuctionStack.getSerializedItemStack().isPresent()) {
+					serializedAuctionStack.setStackUUID(stackUUID);
+					loaded.add(serializedAuctionStack);
+				}
 			}
 			statement.close();
 			plugin.getAuctionItems().clear();
@@ -316,19 +280,19 @@ public class WorkTables extends WorkData {
 			Map<UUID, List<SerializedAuctionStack>> loadedExpireData = new HashMap<UUID, List<SerializedAuctionStack>>();
 			while(results.next()) {
 				String content = results.getString("auction_stack");
-	            StringReader source = new StringReader(content);
-	            HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSource(() -> new BufferedReader(source)).build();
-	            ConfigurationNode node = loader.load();
-	            SerializedAuctionStack serializedAuctionStacks = node.getNode("Content").getValue(TypeToken.of(SerializedAuctionStack.class));
-            	if(serializedAuctionStacks.getSerializedItemStack().isPresent()) {
-            		if(!loadedExpireData.containsKey(serializedAuctionStacks.getOwnerUUID())) {
+				StringReader source = new StringReader(content);
+				HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSource(() -> new BufferedReader(source)).build();
+				ConfigurationNode node = loader.load();
+				SerializedAuctionStack serializedAuctionStacks = node.getNode("Content").getValue(TypeToken.of(SerializedAuctionStack.class));
+				if(serializedAuctionStacks.getSerializedItemStack().isPresent()) {
+					if(!loadedExpireData.containsKey(serializedAuctionStacks.getOwnerUUID())) {
 						List<SerializedAuctionStack> newList = new ArrayList<SerializedAuctionStack>();
 						newList.add(serializedAuctionStacks);
 						loadedExpireData.put(serializedAuctionStacks.getOwnerUUID(), newList);
-            		} else {
-            			loadedExpireData.get(serializedAuctionStacks.getOwnerUUID()).add(serializedAuctionStacks);
-            		}
-            	}
+					} else {
+						loadedExpireData.get(serializedAuctionStacks.getOwnerUUID()).add(serializedAuctionStacks);
+					}
+				}
 			}
 			plugin.getExpiredAuctionItems().clear();
 			plugin.getExpiredAuctionItems().putAll(loadedExpireData);
@@ -346,19 +310,19 @@ public class WorkTables extends WorkData {
 			Map<UUID, List<SerializedAuctionStack>> loadedExpireBetData = new HashMap<UUID, List<SerializedAuctionStack>>();
 			while(results.next()) {
 				String content = results.getString("auction_stack");
-	            StringReader source = new StringReader(content);
-	            HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSource(() -> new BufferedReader(source)).build();
-	            ConfigurationNode node = loader.load();
-	            SerializedAuctionStack serializedAuctionStacks = node.getNode("Content").getValue(TypeToken.of(SerializedAuctionStack.class));
-            	if(serializedAuctionStacks.getSerializedItemStack().isPresent()) {
-            		if(!loadedExpireBetData.containsKey(serializedAuctionStacks.getOwnerUUID())) {
+				StringReader source = new StringReader(content);
+				HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSource(() -> new BufferedReader(source)).build();
+				ConfigurationNode node = loader.load();
+				SerializedAuctionStack serializedAuctionStacks = node.getNode("Content").getValue(TypeToken.of(SerializedAuctionStack.class));
+				if(serializedAuctionStacks.getSerializedItemStack().isPresent()) {
+					if(!loadedExpireBetData.containsKey(serializedAuctionStacks.getOwnerUUID())) {
 						List<SerializedAuctionStack> newList = new ArrayList<SerializedAuctionStack>();
 						newList.add(serializedAuctionStacks);
-            			loadedExpireBetData.put(serializedAuctionStacks.getOwnerUUID(), newList);
-            		} else {
-            			loadedExpireBetData.get(serializedAuctionStacks.getOwnerUUID()).add(serializedAuctionStacks);
-            		}
-            	}
+						loadedExpireBetData.put(serializedAuctionStacks.getOwnerUUID(), newList);
+					} else {
+						loadedExpireBetData.get(serializedAuctionStacks.getOwnerUUID()).add(serializedAuctionStacks);
+					}
+				}
 			}
 			plugin.getExpiredBetAuctionItems().clear();
 			plugin.getExpiredBetAuctionItems().putAll(loadedExpireBetData);

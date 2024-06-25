@@ -1,6 +1,5 @@
 package sawfowl.guishopmanager.utils.configure;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,7 +33,7 @@ public class GenerateConfig {
 		check(getNode("StorageFolder"), "This is used if \"MySQLStorage\" != \"true\"", "shops", TypeTokens.STRING_TOKEN);
 		check(getNode("Debug"), "Debug messages.", false, TypeTokens.BOOLEAN_TOKEN);
 		check(getNode("PlayerTransactionMessage"), "Message to players on successful purchase/sale.", true, TypeTokens.BOOLEAN_TOKEN);
-		check(getNode("ShopList"), "List of active shops.", new ArrayList<String>(), TypeTokens.LIST_STRING_VALUE_TOKEN);
+		//check(getNode("ShopList"), "List of active shops.", new ArrayList<String>(), TypeTokens.LIST_STRING_VALUE_TOKEN);
 		check(getNode("Aliases", "ShopOpen"), "Aliases for the \"/gsm open\" command.", null, null);
 		check(getNode("Aliases", "ShopOpen", "Enable"), null, true, TypeTokens.BOOLEAN_TOKEN);
 		check(getNode("Aliases", "ShopOpen", "List"), null, Arrays.asList("shop"), TypeTokens.LIST_STRING_VALUE_TOKEN);
@@ -102,35 +101,35 @@ public class GenerateConfig {
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void check(CommentedConfigurationNode node, String comment, Object value, TypeToken typeToken) {
-        if (node.isVirtual()) {
-        	save = true;
-        	if(comment != null) {
-            	node.setComment(comment);
-        	}
-        	if(value != null) {
-                try {
-    				node.setValue(typeToken, value);
-    			} catch (ObjectMappingException e) {
-    				plugin.getLogger().error(e.getLocalizedMessage());
-    			}
-        	}
-        }
-    }
+		if (node.isVirtual()) {
+			save = true;
+			if(comment != null) {
+				node.setComment(comment);
+			}
+			if(value != null) {
+				try {
+					node.setValue(typeToken, value);
+				} catch (ObjectMappingException e) {
+					plugin.getLogger().error(e.getLocalizedMessage());
+				}
+			}
+		}
+	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void checkBlackList(CommentedConfigurationNode node, String comment, Object value, TypeToken typeToken) {
-        if (node.isVirtual()) {
-        	saveBlackList = true;
-        	if(comment != null) {
-            	node.setComment(comment);
-        	}
-        	if(value != null) {
-                try {
-    				node.setValue(typeToken, value);
-    			} catch (ObjectMappingException e) {
-    				plugin.getLogger().error(e.getLocalizedMessage());
-    			}
-        	}
-        }
-    }
+		if (node.isVirtual()) {
+			saveBlackList = true;
+			if(comment != null) {
+				node.setComment(comment);
+			}
+			if(value != null) {
+				try {
+					node.setValue(typeToken, value);
+				} catch (ObjectMappingException e) {
+					plugin.getLogger().error(e.getLocalizedMessage());
+				}
+			}
+		}
+	}
 
 }

@@ -38,7 +38,7 @@ public class SerializedAuctionStack implements Serializable {
 	@Setting("OwnerName")
 	private String ownerName;
 	@Setting("TimeExpires")
-    private long timeExpires = 0;
+	private long timeExpires = 0;
 	@Setting("Server")
 	private String serverName;
 	//@Setting("StackUUID")
@@ -86,29 +86,29 @@ public class SerializedAuctionStack implements Serializable {
 	public void setBetData(SerializedBetData serializedBetData) {
 		this.serializedBetData = serializedBetData;
 	}
-    public boolean isExpired() {
-        return timeExpires < System.currentTimeMillis();
-    }
-    public SerializedAuctionPrice getOrDefaultPrice(int priceNumber) {
-    	return prices.size() - 1 >= priceNumber ? prices.get(priceNumber) : prices.get(0);
-    }
-    public boolean containsCurrency(Currency currency) {
-    	for(SerializedAuctionPrice serializedAuctionPrice : prices) {
-    		if(currency.getId().equals(serializedAuctionPrice.getCurrency().getId())) {
-    	    	return true;
-    		}
-    	}
-    	return false;
-    }
-    public Text getExpireTimeFromNow() {
-        if (isExpired()) {
-            return Text.of("Now");
-        } else {
-            long millis = timeExpires - System.currentTimeMillis();
-            long minute = (millis / (1000 * 60)) % 60;
-            long hour = millis / (1000 * 60 * 60);
-            return Text.of(String.format("%02dh %02dm", hour, minute));
-        }
-    }
+	public boolean isExpired() {
+		return timeExpires < System.currentTimeMillis();
+	}
+	public SerializedAuctionPrice getOrDefaultPrice(int priceNumber) {
+		return prices.size() - 1 >= priceNumber ? prices.get(priceNumber) : prices.get(0);
+	}
+	public boolean containsCurrency(Currency currency) {
+		for(SerializedAuctionPrice serializedAuctionPrice : prices) {
+			if(currency.getId().equals(serializedAuctionPrice.getCurrency().getId())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	public Text getExpireTimeFromNow() {
+		if (isExpired()) {
+			return Text.of("Now");
+		} else {
+			long millis = timeExpires - System.currentTimeMillis();
+			long minute = (millis / (1000 * 60)) % 60;
+			long hour = millis / (1000 * 60 * 60);
+			return Text.of(String.format("%02dh %02dm", hour, minute));
+		}
+	}
 
 }

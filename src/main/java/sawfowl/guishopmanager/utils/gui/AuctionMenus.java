@@ -43,8 +43,8 @@ public class AuctionMenus {
 	public void createInventory(Player player, int page) {
 		Text menuTitle = page == 1 ? Text.of("Auction") : Text.of("Auction" + page);
 		menuTitle = page == 1 ? plugin.getLocales().getLocalizedText(player.getLocale(), "Gui", "Auction") : Text.of(plugin.getLocales().getLocalizedText(player.getLocale(), "Gui", "Auction"), " || ", page);
-        int firstItem = (page * 45) - 45;
-        int currentItem = firstItem;
+		int firstItem = (page * 45) - 45;
+		int currentItem = firstItem;
 		List<Currency> currencies = new ArrayList<Currency>();
 		currencies.add(plugin.getEconomyService().getDefaultCurrency());
 		for(Currency currency : plugin.getEconomyService().getCurrencies()) {

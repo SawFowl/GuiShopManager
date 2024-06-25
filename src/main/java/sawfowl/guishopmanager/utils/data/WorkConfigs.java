@@ -3,10 +3,13 @@ package sawfowl.guishopmanager.utils.data;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.scheduler.Task;
 import com.google.common.reflect.TypeToken;
 
@@ -14,6 +17,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.utils.serialization.auction.SerializedAuctionStack;
 import sawfowl.guishopmanager.utils.serialization.shop.SerializedShop;
@@ -39,26 +43,11 @@ public class WorkConfigs extends WorkData {
 	public void saveShop(String shopId) {
 		Task.builder().async().execute(() -> {
 			SerializedShop serializableShop = plugin.getShop(shopId).serialize();
-			ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().setPath(plugin.getConfigDir().resolve(plugin.getRootNode().getNode("StorageFolder").getString() + File.separator + shopId + ".conf")).build();
 			try {
+				ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().setPath(plugin.getConfigDir().resolve(plugin.getRootNode().getNode("StorageFolder").getString() + File.separator + shopId + ".conf")).build();
 				CommentedConfigurationNode shopNode = shopConfigLoader.load();
 				shopNode.getNode("ShopData").setValue(TypeToken.of(SerializedShop.class), serializableShop);
 				shopConfigLoader.save(shopNode);
-				List<String> enabledShops = new ArrayList<String>();
-				if(!plugin.getRootNode().getNode("ShopList").isEmpty()) {
-					try {
-						enabledShops.addAll(plugin.getRootNode().getNode("ShopList").getValue(new TypeToken<List<String>>() {
-							private static final long serialVersionUID = 01;}));
-					} catch (ObjectMappingException e) {
-						plugin.getLogger().error(e.getLocalizedMessage());
-					}
-				}
-				if(!enabledShops.contains(shopId)) {
-					enabledShops.add(shopId);
-				}
-				plugin.getRootNode().getNode("ShopList").setValue(new TypeToken<List<String>>() {
-					private static final long serialVersionUID = 01;}, enabledShops);
-				plugin.updateConfigs();
 			} catch (IOException | ObjectMappingException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
@@ -67,55 +56,13 @@ public class WorkConfigs extends WorkData {
 
 	@Override
 	public void loadShops() {
-		Task.builder().async().execute(() -> {
-			if(!plugin.getRootNode().getNode("ShopList").isEmpty()) {
-				try {
-					List<String> remove = new ArrayList<String>();
-					List<String> enabledShops = plugin.getRootNode().getNode("ShopList").getValue(new TypeToken<List<String>>() {
-						private static final long serialVersionUID = 01;});
-					for(String shopId : enabledShops) {
-						if((plugin.getConfigDir().resolve(plugin.getRootNode().getNode("StorageFolder").getString() + File.separator + shopId + ".conf")).toFile().exists()) {
-							ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().setPath(plugin.getConfigDir().resolve(plugin.getRootNode().getNode("StorageFolder").getString() + File.separator + shopId + ".conf")).build();
-							CommentedConfigurationNode shopNode = shopConfigLoader.load();
-							plugin.addShop(shopId, shopNode.getNode("ShopData").getValue(TypeToken.of(SerializedShop.class)).deserialize());
-						} else {
-							remove.add(shopId);
-						}
-					}
-					if(!remove.isEmpty()) {
-						enabledShops.removeAll(remove);
-						plugin.getRootNode().getNode("ShopList").setValue(new TypeToken<List<String>>() {
-							private static final long serialVersionUID = 01;}, enabledShops);
-						plugin.updateConfigs();
-					}
-				} catch (IOException | ObjectMappingException e) {
-					plugin.getLogger().error(e.getLocalizedMessage());
-				}
-			}
-		}).submit(plugin);
+		File shopsFolder = plugin.getConfigDir().resolve(plugin.getConfigDir().resolve(plugin.getRootNode().getNode("StorageFolder").getString())).toFile();
+		if(!shopsFolder.exists()) return;
+		for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> file.getName().endsWith(".conf")).collect(Collectors.toList())) loadShop(shopFile);
 	}
 
 	@Override
 	public void deleteShop(String shopId) {
-		if(!plugin.getRootNode().getNode("ShopList").isEmpty()) {
-			List<String> enabledShops = new ArrayList<String>();
-			try {
-				enabledShops.addAll(plugin.getRootNode().getNode("ShopList").getValue(new TypeToken<List<String>>() {
-					private static final long serialVersionUID = 01;}));
-			} catch (ObjectMappingException e) {
-				plugin.getLogger().error(e.getLocalizedMessage());
-			}
-			if(enabledShops.contains(shopId)) {
-				enabledShops.remove(shopId);
-				try {
-					plugin.getRootNode().getNode("ShopList").setValue(new TypeToken<List<String>>() {
-						private static final long serialVersionUID = 01;}, enabledShops);
-					plugin.updateConfigs();
-				} catch (ObjectMappingException e) {
-					plugin.getLogger().error(e.getLocalizedMessage());
-				}
-			}
-		}
 		File shopConfigFile = new File(plugin.getConfigDir() + File.separator + plugin.getRootNode().getNode("StorageFolder").getString() + File.separator + shopId + ".conf");
 		if(shopConfigFile.exists()) {
 			shopConfigFile.delete();
@@ -135,9 +82,9 @@ public class WorkConfigs extends WorkData {
 					});
 					List<SerializedAuctionStack> toAdd = new ArrayList<SerializedAuctionStack>();
 					for(SerializedAuctionStack serializedAuctionStack : loaded) {
-			            if(serializedAuctionStack.getSerializedItemStack().isPresent()) {
-			            	toAdd.add(serializedAuctionStack);
-			            }
+						if(serializedAuctionStack.getSerializedItemStack().isPresent()) {
+							toAdd.add(serializedAuctionStack);
+						}
 					}
 					plugin.getAuctionItems().addAll(toAdd);
 				} catch (ObjectMappingException e) {
@@ -208,6 +155,17 @@ public class WorkConfigs extends WorkData {
 	@Override
 	public void removeExpireBetAuctionData(UUID owner) {
 		saveExpireBetAuctionData(null);
+	}
+
+	private void loadShop(File shopFile) {
+		ConfigurationLoader<CommentedConfigurationNode> shopConfigLoader = HoconConfigurationLoader.builder().setPath(shopFile.toPath()).build();
+		try {
+			CommentedConfigurationNode shopNode = shopConfigLoader.load();
+			SerializedShop shop = shopNode.getNode("ShopData").getValue(TypeToken.of(SerializedShop.class));
+			plugin.addShop(StringUtils.removeEnd(shopFile.getName(), ".conf"), shop.deserialize());
+		} catch (IOException | ObjectMappingException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

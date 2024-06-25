@@ -268,25 +268,25 @@ public class GenerateLocales {
 	}
 
 	private void checkListText(ConfigurationNode node, List<Text> texts) {
-        if (node.isVirtual()) {
+		if (node.isVirtual()) {
 			save = true;
-            try {
+			try {
 				node.setValue(TypeTokens.LIST_TEXT_TOKEN, texts);
 			} catch (ObjectMappingException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
-        }
+		}
 	}
 	private void checkText(ConfigurationNode node, Text text) {
-        if (node.isVirtual()) {
+		if (node.isVirtual()) {
 			save = true;
-            try {
+			try {
 				node.setValue(TypeTokens.TEXT_TOKEN, text);
 			} catch (ObjectMappingException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
-        }
-    }
+		}
+	}
 	private ConfigurationNode getRuNode(Object... node) {
 		return plugin.getLocales().getLocale(RU_RU).getLocaleNode().getNode(node);
 	}

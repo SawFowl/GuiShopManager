@@ -48,7 +48,7 @@ public class ShopEdit implements CommandExecutor {
 							.build();
 						messages.add(message);
 					}
-			        PaginationList.builder()
+					PaginationList.builder()
 					.title(plugin.getLocales().getLocalizedText(player.getLocale(), "Messages", "ShopListTitle"))
 					.padding(plugin.getLocales().getLocalizedText(player.getLocale(), "Messages", "ShopListPadding"))
 					.contents(messages)
