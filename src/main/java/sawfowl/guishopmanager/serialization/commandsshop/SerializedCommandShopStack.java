@@ -8,6 +8,7 @@ import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @ConfigSerializable
@@ -42,7 +43,7 @@ public class SerializedCommandShopStack implements Serializable {
 	}
 
 	public CommandsList getCommands() {
-		return serializedItemStack.getOrCreateTag().containsTag(GuiShopManager.getInstance().getPluginContainer(), "Commands") ? serializedItemStack.getOrCreateTag().getJsonObject(GuiShopManager.getInstance().getPluginContainer(), "Commands").filter(e -> e.isJsonArray()).map(e -> new CommandsList(e.getAsJsonArray())).orElse(new CommandsList()) : new CommandsList();
+		return serializedItemStack.getOrCreateComponent().containsComponent(GuiShopManager.getInstance().getPluginContainer(), "Commands") ? new CommandsList(serializedItemStack.getOrCreateComponent().getObjectsList(String.class, GuiShopManager.getInstance().getPluginContainer(), "Commands", new ArrayList<>())) : new CommandsList();
 	}
 
 	@Override

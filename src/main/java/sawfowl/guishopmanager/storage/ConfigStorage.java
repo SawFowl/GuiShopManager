@@ -19,8 +19,6 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-import com.google.common.io.Files;
-
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.utils.TypeTokens;
 import sawfowl.localeapi.api.ConfigTypes;
@@ -45,7 +43,7 @@ public class ConfigStorage implements DataStorage {
 		} else auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getRootNode().node("ConfigTypes", "Auction").getString()), plugin.getRootNode().node("ConfigTypes", "Auction").getString(), 2);
 		try {
 			auctionNode = auctionConfigLoader.load();
-			if(!plugin.getRootNode().node("ConfigTypes", "Auction").getString().equals("." + Files.getFileExtension(auctionConfig.get().getName()))) {
+			if(!plugin.getRootNode().node("ConfigTypes", "Auction").getString().equals("." + getExtension(auctionConfig.get().getName()))) {
 				BasicConfigurationNode copy = BasicConfigurationNode.root().from(auctionNode);
 				auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getRootNode().node("ConfigTypes", "Auction").getString()), plugin.getRootNode().node("ConfigTypes", "Auction").getString(), 2);
 				auctionConfigLoader.save(copy);
@@ -81,7 +79,7 @@ public class ConfigStorage implements DataStorage {
 					Shop shop = createConfigLoader(shopFile, 2).loadToReference().referenceTo(SerializedShop.class).get().deserialize();
 					setShopCurrencies(plugin, shop);
 					plugin.addShop(shop.getID(), shop);
-					if(!plugin.getRootNode().node("ConfigTypes", "Shop").getString().equals("." + Files.getFileExtension(shopFile.getName()))) {
+					if(!plugin.getRootNode().node("ConfigTypes", "Shop").getString().equals("." + getExtension(shopFile.getName()))) {
 						shopFile.delete();
 						saveShop(shop.getID());
 					}
@@ -124,7 +122,7 @@ public class ConfigStorage implements DataStorage {
 					setCommandShopCurrencies(plugin, shop);
 					String shopId = shop.getID();
 					plugin.addCommandShopData(shopId, shop);
-					if(!plugin.getRootNode().node("ConfigTypes", "CommandShop").getString().equals("." + Files.getFileExtension(shopFile.getName()))) {
+					if(!plugin.getRootNode().node("ConfigTypes", "CommandShop").getString().equals("." + getExtension(shopFile.getName()))) {
 						shopFile.delete();
 						saveCommandsShop(shop.getID());
 					}
@@ -283,12 +281,26 @@ public class ConfigStorage implements DataStorage {
 	}
 
 	private ConfigurationLoader<? extends ConfigurationNode> createConfigLoader(File file, int itemStackSerializerVariant) {
-		switch (getConfigType("." + Files.getFileExtension(file.getName()))) {
+		switch (getConfigType("." + getExtension(file.getName()))) {
 			case HOCON: return SerializeOptions.createHoconConfigurationLoader(itemStackSerializerVariant).file(file).build();
 			case YAML: return SerializeOptions.createYamlConfigurationLoader(itemStackSerializerVariant).file(file).build();
 			case JSON: return SerializeOptions.createJsonConfigurationLoader(itemStackSerializerVariant).file(file).build();
 			default: return SerializeOptions.createHoconConfigurationLoader(itemStackSerializerVariant).file(file).build();
 		}
+	}
+
+	String getExtension(String fileName) {
+		char ch;
+		int len;
+		if(fileName==null || 
+				(len = fileName.length())==0 ||
+				(ch = fileName.charAt(len-1))=='/' || ch=='\\' ||
+				 ch=='.' )
+			return "";
+		int dotInd = fileName.lastIndexOf('.'),
+			sepInd = Math.max(fileName.lastIndexOf('/'), fileName.lastIndexOf('\\'));
+		if(dotInd<=sepInd) return "";
+		else return fileName.substring(dotInd+1).toLowerCase();
 	}
 
 }

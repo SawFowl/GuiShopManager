@@ -2,7 +2,6 @@ package sawfowl.guishopmanager.serialization.commandsshop;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.CommandException;
@@ -18,8 +17,8 @@ public class CommandsList {
 
 	public CommandsList(){}
 
-	public CommandsList(JsonArray commands) {
-		this.commands = commands.asList().stream().map(e -> e.getAsString()).collect(Collectors.toList());
+	public CommandsList(List<String> commands) {
+		this.commands = commands;
 	}
 
 	public List<String> getCommands() {

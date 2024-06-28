@@ -1,5 +1,6 @@
 package sawfowl.guishopmanager.data.commandshop;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -32,7 +33,7 @@ public class CommandItemData {
 		return price.getBuyPrice().doubleValue() > 0;
 	}
 	public CommandsList getCommands() {
-		return shopStack.getOrCreateTag().containsTag(GuiShopManager.getInstance().getPluginContainer(), "Commands") ? shopStack.getOrCreateTag().getJsonObject(GuiShopManager.getInstance().getPluginContainer(), "Commands").filter(e -> e.isJsonArray()).map(e -> new CommandsList(e.getAsJsonArray())).orElse(new CommandsList()) : new CommandsList();
+		return shopStack.getOrCreateComponent().containsComponent(GuiShopManager.getInstance().getPluginContainer(), "Commands") ? new CommandsList(shopStack.getOrCreateComponent().getObjectsList(String.class, GuiShopManager.getInstance().getPluginContainer(), "Commands", new ArrayList<>())) : new CommandsList();
 	}
 
 }

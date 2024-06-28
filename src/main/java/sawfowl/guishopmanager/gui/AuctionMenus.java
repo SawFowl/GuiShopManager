@@ -29,8 +29,6 @@ import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.plugin.PluginContainer;
 
-import com.google.gson.JsonPrimitive;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 
@@ -74,7 +72,7 @@ public class AuctionMenus {
 				} else {
 					SerializedAuctionStack auctionItem = auctionStacks.get(currentItem);
 					SerializedItemStackJsonNbt configuredStack = new SerializedItemStackJsonNbt(auctionItem.getSerializedItemStack().getItemStack());
-					configuredStack.getOrCreateTag().putJsonElement(getPluginContainer(), "uuid", new JsonPrimitive(auctionItem.getStackUUID().toString()));
+					configuredStack.getOrCreateComponent().putObject(getPluginContainer(), "uuid", auctionItem.getStackUUID().toString());
 					List<Component> itemLore = configuredStack.getItemStack().get(Keys.LORE).orElse(new ArrayList<Component>());
 					if(configuredStack.getItemStack().get(Keys.LORE).isPresent()) {
 						configuredStack.getItemStack().remove(Keys.LORE);
@@ -199,8 +197,10 @@ public class AuctionMenus {
 						}).build());
 					} else if(slotIndex <= 44) {
 						SerializedItemStackJsonNbt itemStack = new SerializedItemStackJsonNbt(slot.peek());
-						if(!itemStack.getOrCreateTag().containsTag(getPluginContainer(), "uuid")) return true;
-						UUID stackUUID = UUID.fromString(itemStack.getOrCreateTag().getString(getPluginContainer(), "uuid").get());
+						if(!itemStack.getOrCreateComponent().containsComponent(getPluginContainer(), "uuid")) return true;
+						String uuid = itemStack.getOrCreateComponent().getObject(getPluginContainer(), "uuid", null);
+						if(uuid == null) return true;
+						UUID stackUUID = UUID.fromString(uuid);
 						if(!plugin.getAuctionItems().containsKey(stackUUID)) {
 							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionItemNotFound"));
 							Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
@@ -567,7 +567,7 @@ public class AuctionMenus {
 		for(SerializedAuctionStack auctionItem : plugin.getAuctionItems().values()) {
 			if(auctionItem.getServerName().equals(serverName) && auctionItem.getOwnerUUID().equals(player.uniqueId())) {
 				SerializedItemStackJsonNbt itemStack = new SerializedItemStackJsonNbt(auctionItem.getSerializedItemStack().getItemStack());
-				itemStack.getOrCreateTag().putJsonElement(getPluginContainer(), "uuid", new JsonPrimitive(auctionItem.getStackUUID().toString()));
+				itemStack.getOrCreateComponent().putObject(getPluginContainer(), "uuid", auctionItem.getStackUUID().toString());
 				menu.inventory().offer(itemStack.getItemStack());
 			}
 		}
@@ -576,8 +576,10 @@ public class AuctionMenus {
 			public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
 				if(menu.inventory().containsChild(slot) && slotIndex <= 53 && slot.totalQuantity() > 0) {
 					SerializedItemStackJsonNbt itemStack = new SerializedItemStackJsonNbt(slot.peek());
-					if(itemStack.getOrCreateTag().containsTag(getPluginContainer(), "uuid")) {
-						UUID uuid = itemStack.getOrCreateTag().getString(getPluginContainer(), "uuid").map(s -> UUID.fromString(s)).orElse(null);
+					if(itemStack.getOrCreateComponent().containsComponent(getPluginContainer(), "uuid")) {
+						String s = itemStack.getOrCreateComponent().getObject(getPluginContainer(), "uuid", null);
+						if(s == null) return true;
+						UUID uuid = UUID.fromString(s);
 						if(uuid != null && plugin.getAuctionItems().containsKey(uuid) && player.inventory().query(QueryTypes.INVENTORY_TYPE.get().of(PrimaryPlayerInventory.class)).freeCapacity() > 0) {
 							slot.clear();
 							ItemStack toOffer = plugin.getAuctionItems().get(uuid).getSerializedItemStack().getItemStack();
@@ -738,7 +740,7 @@ public class AuctionMenus {
 	}
 
 	private boolean checkNbtLength(SerializedAuctionStack auctionStack) {
-		return auctionStack.getSerializedItemStack().getNBT() != null && auctionStack.getSerializedItemStack().getNBT().toString().length() > plugin.getRootNode().node("Auction", "NbtLimit").getInt();
+		return auctionStack.getSerializedItemStack().getComponents() != null && auctionStack.getSerializedItemStack().getComponents().toString().length() > plugin.getRootNode().node("Auction", "NbtLimit").getInt();
 	}
 
 	private PluginContainer getPluginContainer() {
