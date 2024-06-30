@@ -1,5 +1,6 @@
 package sawfowl.guishopmanager.commands.commandshop;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -38,14 +39,14 @@ public class AddCommand extends AbstractPlayerCommand {
 		if(itemStack != null && !itemStack.type().equals(ItemTypes.AIR.get())) {
 			if(context.one(CommandParameters.COMMAND).isPresent()) {
 				String command = context.one(CommandParameters.COMMAND).get();
-				SerializedItemStackJsonNbt serializedItemStack = new SerializedItemStackJsonNbt(itemStack);
-				CommandsList serializedCommandsList = serializedItemStack.getOrCreateTag().containsTag(getContainer(), "Commands") ? serializedItemStack.getOrCreateTag().getJsonObject(getContainer(), "Commands").filter(e -> e.isJsonArray()).map(e -> new CommandsList(e.getAsJsonArray())).orElse(new CommandsList()) : new CommandsList();
-				serializedCommandsList.addCommand(command);
-				serializedItemStack.getOrCreateTag().putJsonElement(getContainer(), "Commands", serializedCommandsList.asJsonArray());
-				itemStack.copyFrom(serializedItemStack.getItemStack());
+				SerializedItemStackJsonNbt shopStack = new SerializedItemStackJsonNbt(itemStack);
+				List<String> serializedCommandsList = shopStack.getOrCreateComponent().containsComponent(GuiShopManager.getInstance().getPluginContainer(), "Commands") ? shopStack.getOrCreateComponent().getObjectsList(String.class, GuiShopManager.getInstance().getPluginContainer(), "Commands", new ArrayList<>()) : new ArrayList<>();
+				serializedCommandsList.add(command);
+				shopStack.getOrCreateComponent().putObject(getContainer(), "Commands", serializedCommandsList);
+				itemStack.copyFrom(shopStack.getItemStack());
 				if(main) {
-					player.setItemInHand(HandTypes.MAIN_HAND, serializedItemStack.getItemStack());
-				} else player.setItemInHand(HandTypes.OFF_HAND, serializedItemStack.getItemStack());
+					player.setItemInHand(HandTypes.MAIN_HAND, shopStack.getItemStack());
+				} else player.setItemInHand(HandTypes.OFF_HAND, shopStack.getItemStack());
 			}
 			player.sendMessage(getComponent(locale, "Messages", "CommandAdded"));
 		} else exception(locale, "Messages", "ItemNotPresent");

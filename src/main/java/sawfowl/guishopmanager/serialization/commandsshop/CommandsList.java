@@ -7,8 +7,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import com.google.gson.JsonArray;
-
 import sawfowl.guishopmanager.GuiShopManager;
 
 public class CommandsList {
@@ -43,12 +41,6 @@ public class CommandsList {
 				}
 			});
 		});
-	}
-
-	public JsonArray asJsonArray() {
-		JsonArray array = new JsonArray();
-		commands.forEach(array::add);
-		return array;
 	}
 
 	@Override

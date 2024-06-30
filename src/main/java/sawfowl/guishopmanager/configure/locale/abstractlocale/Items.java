@@ -1,14 +1,14 @@
-package sawfowl.guishopmanager.configure.abstractlocale;
+package sawfowl.guishopmanager.configure.locale.abstractlocale;
 
 import java.util.List;
 
 import net.kyori.adventure.text.Component;
 
-import sawfowl.localeapi.api.PluginLocale;
+import sawfowl.localeapi.api.LocaleReference;
 
 public interface Items {
 
-	interface Names extends PluginLocale {
+	interface Names extends LocaleReference {
 
 		Component back();
 
@@ -42,7 +42,7 @@ public interface Items {
 
 	}
 
-	interface Lore extends PluginLocale {
+	interface Lore extends LocaleReference {
 
 		List<Component> changePrice();
 

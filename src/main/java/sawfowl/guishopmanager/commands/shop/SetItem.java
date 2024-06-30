@@ -61,7 +61,7 @@ public class SetItem extends AbstractPlayerCommand {
 												shop.getMenus().get(menuId).getItems().put(slot, new ShopItem(itemStack, Arrays.asList(serializedShopPrice)));
 												plugin.getShopStorage().saveShop(shop.getID());
 												//String[] splitedItemID = RegistryTypes.ITEM_TYPE.get().valueKey(itemStack.type()).asString().split(":");
-												Component message = getText(locale, "Messages", "ShopItemAdded").replace(new String[] {"%item%", "%shop%"}, itemStack.type().asComponent().hoverEvent(HoverEvent.showItem(ShowItem.of(Key.key(ItemTypes.registry().valueKey(itemStack.type()).asString()), 1))), shop.getOrDefaultTitle(player.locale())).get();
+												Component message = getText(locale, "Messages", "ShopItemAdded").replace(new String[] {"%item%", "%shop%"}, itemStack.type().asComponent().hoverEvent(HoverEvent.showItem(ShowItem.showItem(Key.key(ItemTypes.registry().valueKey(itemStack.type()).asString()), 1))), shop.getOrDefaultTitle(player.locale())).get();
 												player.sendMessage(message);
 											} else exception(locale, "Messages", "ItemNotPresent");
 										} else exception(locale, "Messages", "ItemNotPresent");
