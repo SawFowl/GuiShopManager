@@ -4,16 +4,16 @@ import net.kyori.adventure.text.Component;
 
 public interface CommandShop {
 
-	Component listTitle();
+	Component title();
 
-	Component listPadding();
+	Component padding();
 
 	Component commandAdded();
 
-	Component listEmpty();
+	Component empty();
 
-	Component listEmptyEditor();
+	Component emptyEditor();
 
-	Component successDelete();
+	Component delete();
 
 }
