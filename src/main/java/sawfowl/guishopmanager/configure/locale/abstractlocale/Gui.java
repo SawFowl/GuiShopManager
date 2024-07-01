@@ -6,6 +6,8 @@ public interface Gui {
 
 	interface Auction {
 
+		Component auction();
+
 		Component bet();
 
 		Component returnItems();

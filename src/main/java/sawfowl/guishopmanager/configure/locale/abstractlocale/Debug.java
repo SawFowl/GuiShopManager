@@ -1,13 +1,15 @@
 package sawfowl.guishopmanager.configure.locale.abstractlocale;
 
+import org.spongepowered.api.item.inventory.ItemStack;
+
 public interface Debug {
 
 	String errorTakeMoney(String player);
 
 	String errorGiveMoney(String player);
 
-	String infoTakeMoney(String player, double removed, double balance);
+	String infoTakeMoney(ItemStack itemStack, String player, double removed, double balance);
 
-	String infoGiveMoney(String player, double added, double balance);
+	String infoGiveMoney(ItemStack itemStack, String player, double added, double balance);
 
 }
