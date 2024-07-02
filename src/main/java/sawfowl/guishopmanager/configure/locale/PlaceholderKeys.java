@@ -18,4 +18,8 @@ public class PlaceholderKeys {
 
 	public static final String BALANCE = "%balance%";
 
+	public static final String SIZE = "%size%";
+
+	public static final String PRICE = "%price%";
+
 }

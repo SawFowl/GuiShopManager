@@ -6,7 +6,7 @@ import net.kyori.adventure.text.Component;
 
 import sawfowl.localeapi.api.LocaleReference;
 
-public interface Messages extends LocaleReference {
+public interface Messages {
 
 	interface Auction extends LocaleReference {
 
@@ -42,20 +42,32 @@ public interface Messages extends LocaleReference {
 
 	}
 
+	interface Exceptions {
+
+		Component noMoney();
+
+		Component noMoneyForFee();
+
+		Component noItems();
+
+		String economyNotFound();
+
+	}
+
+	interface Transactions extends LocaleReference {
+
+		Component itemSell(ItemStack itemStack, double balance);
+
+		Component itemBuy(ItemStack itemStack, double balance);
+
+		Component buyCommands(double removed, double balance);
+
+	}
+
 	Auction auction();
 
-	Component noMoney();
+	Exceptions exceptions();
 
-	Component noMoneyForFee();
-
-	Component noItems();
-
-	Component itemSell(ItemStack itemStack, double balance);
-
-	Component itemBuy(ItemStack itemStack, double balance);
-
-	Component buyCommands(double removed, double balance);
-
-	String economyNotFound();
+	Transactions transactions();
 
 }

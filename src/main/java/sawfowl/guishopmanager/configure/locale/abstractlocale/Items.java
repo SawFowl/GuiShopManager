@@ -2,6 +2,8 @@ package sawfowl.guishopmanager.configure.locale.abstractlocale;
 
 import java.util.List;
 
+import org.spongepowered.api.service.economy.Currency;
+
 import net.kyori.adventure.text.Component;
 
 import sawfowl.localeapi.api.LocaleReference;
@@ -26,9 +28,9 @@ public interface Items {
 
 		Component sellAndBack();
 
-		Component size();
+		Component size(Component size);
 
-		Component price();
+		Component price(Component price);
 
 		Component clear();
 
@@ -48,39 +50,41 @@ public interface Items {
 
 		List<Component> changeSize();
 
+		List<Component> auctionSwitchMode();
+
 		Component transactionVariants();
 
-		Component currentCurrency();
+		Component currency(Currency currency);
 
-		Component currentSize();
+		Component size(int size);
 
-		Component currentSum();
+		Component sum(int size);
 
-		Component price();
+		Component price(Currency currency, double buy, double sell);
 
-		Component commandPrice();
+		Component commandPrice(Currency currency, double price);
 
-		Component auctionPrice();
+		Component auctionPrice(Currency currency, double price, double total);
 
-		Component auctionBet();
+		Component auctionBet(Currency currency, double price, double total);
 
-		Component yourBet();
+		Component yourBet(double size, double total);
 
-		Component tax();
+		Component tax(double size);
 
-		Component fee();
+		Component fee(double size);
+
+		Component allowFree();
 
 		Component switchFree();
 
-		Component auctionSwitchMode();
+		Component seller(String player);
 
-		Component seller();
+		Component expired(Component expired);
 
-		Component expired();
+		Component currentBuyer(String player);
 
-		Component currentBuyer();
-
-		Component currentBet();
+		Component currentBet(double value);
 
 		Component betClick();
 
