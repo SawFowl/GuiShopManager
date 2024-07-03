@@ -10,7 +10,7 @@ import sawfowl.localeapi.api.LocaleReference;
 
 public interface Items {
 
-	interface Names extends LocaleReference {
+	interface Name extends LocaleReference {
 
 		Component back();
 
@@ -92,7 +92,7 @@ public interface Items {
 
 	}
 
-	Names names();
+	Name name();
 
 	Lore lore();
 

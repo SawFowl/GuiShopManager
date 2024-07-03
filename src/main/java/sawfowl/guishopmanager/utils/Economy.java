@@ -20,15 +20,10 @@ import org.spongepowered.api.service.economy.transaction.ResultType;
 import org.spongepowered.api.service.economy.transaction.TransactionResult;
 import org.spongepowered.api.service.economy.transaction.TransferResult;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
-import net.kyori.adventure.text.event.HoverEvent;
-
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionPrice;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 import sawfowl.localeapi.api.TextUtils;
-import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
 
 public class Economy {
 
@@ -60,24 +55,14 @@ public class Economy {
 				TransactionResult result = uOpt.get().deposit(currency, money);
 				if (result.result() == ResultType.SUCCESS) {
 					if(plugin.getRootNode().node("PlayerTransactionMessage").getBoolean()) {
-						player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ItemSell")
-								.replaceText(TextReplacementConfig.builder().match("%item%").replacement(getStackComponent(itemStack)).build())
-								.replaceText(TextReplacementConfig.builder().match("%amount%").replacement(String.valueOf(itemStack.quantity())).build())
-								.replaceText(TextReplacementConfig.builder().match("%added%").replacement(Component.text().append(currency.symbol()).append(Component.text(money.doubleValue()))).build())
-								.replaceText(TextReplacementConfig.builder().match("%balance%").replacement(Component.text().append(currency.symbol()).append(Component.text(getPlayerBalance(player.uniqueId(), currency).doubleValue()))).build()));
+						player.sendMessage(plugin.getLocales().getLocale(player.locale()).messages().shopTransactions().itemSell(itemStack, currency, money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
 					}
 					if(plugin.getRootNode().node("Debug").getBoolean()) {
-						plugin.getLogger().info(TextUtils.clearDecorations(plugin.getLocales().getComponent(player.locale(), "Debug", "InfoTakeItems")
-								.replaceText(TextReplacementConfig.builder().match("%item%").replacement(getStackComponent(itemStack)).build())
-								.replaceText(TextReplacementConfig.builder().match("%amount%").replacement(String.valueOf(itemStack.quantity())).build())
-								.replaceText(TextReplacementConfig.builder().match("%player%").replacement(player.name()).build())
-								.replaceText(TextReplacementConfig.builder().match("%added%").replacement(Component.text().append(currency.symbol()).append(Component.text(money.doubleValue()))).build())
-								.replaceText(TextReplacementConfig.builder().match("%balance%").replacement(Component.text().append(currency.symbol()).append(Component.text(getPlayerBalance(player.uniqueId(), currency).doubleValue()))).build())));
+						plugin.getLogger().info(plugin.getLocales().getSystemLocale().debug().infoGiveMoney(itemStack, player.name(), money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
 					}
 					return true;
 				} else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getRootNode().node("Debug").getBoolean()) {
-					plugin.getLogger().error(TextUtils.clearDecorations(plugin.getLocales().getComponent(player.locale(), "Debug", "ErrorGiveMoney")
-								.replaceText(TextReplacementConfig.builder().match("%player%").replacement(player.name()).build())));
+					plugin.getLogger().error(plugin.getLocales().getSystemLocale().debug().errorGiveMoney(player.name()));
 				} else {
 				}
 				}
@@ -96,8 +81,7 @@ public class Economy {
 				if (result.result() == ResultType.SUCCESS) {
 					return true;
 				} else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getRootNode().node("Debug").getBoolean()) {
-					plugin.getLogger().error(TextUtils.clearDecorations(plugin.getLocales().getComponent(player.locale(), "Messages", "BuyCommands")
-							.replaceText(TextReplacementConfig.builder().match("%player%").replacement(player.name()).build())));
+					plugin.getLogger().error(plugin.getLocales().getSystemLocale().debug().errorGiveMoney(player.name()));
 				} else {
 				}
 				}
@@ -115,24 +99,14 @@ public class Economy {
 				TransactionResult result = uOpt.get().withdraw(currency, money);
 				if (result.result() == ResultType.SUCCESS) {
 					if(plugin.getRootNode().node("PlayerTransactionMessage").getBoolean()) {
-						player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ItemBuy")
-								.replaceText(TextReplacementConfig.builder().match("%item%").replacement(getStackComponent(itemStack)).build())
-								.replaceText(TextReplacementConfig.builder().match("%amount%").replacement(String.valueOf(itemStack.quantity())).build())
-								.replaceText(TextReplacementConfig.builder().match("%removed%").replacement(Component.text().append(currency.symbol()).append(Component.text(money.doubleValue()))).build())
-								.replaceText(TextReplacementConfig.builder().match("%balance%").replacement(Component.text().append(currency.symbol()).append(Component.text(getPlayerBalance(player.uniqueId(), currency).doubleValue()))).build()));
+						player.sendMessage(plugin.getLocales().getLocale(player.locale()).messages().shopTransactions().itemBuy(itemStack, currency, money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
 					}
 					if(plugin.getRootNode().node("Debug").getBoolean()) {
-						plugin.getLogger().info(TextUtils.clearDecorations(plugin.getLocales().getComponent(player.locale(), "Debug", "InfoGiveItems")
-								.replaceText(TextReplacementConfig.builder().match("%item%").replacement(getStackComponent(itemStack)).build())
-								.replaceText(TextReplacementConfig.builder().match("%amount%").replacement(String.valueOf(itemStack.quantity())).build())
-								.replaceText(TextReplacementConfig.builder().match("%player%").replacement(player.name()).build())
-								.replaceText(TextReplacementConfig.builder().match("%removed%").replacement(Component.text().append(currency.symbol()).append(Component.text(money.doubleValue()))).build())
-								.replaceText(TextReplacementConfig.builder().match("%balance%").replacement(Component.text().append(currency.symbol()).append(Component.text(getPlayerBalance(player.uniqueId(), currency).doubleValue()))).build())));
+						plugin.getLogger().info(plugin.getLocales().getSystemLocale().debug().infoTakeMoney(itemStack, player.name(), money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
 					}
 					return true;
 				} else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getRootNode().node("Debug").getBoolean()) {
-					plugin.getLogger().error(TextUtils.clearDecorations(plugin.getLocales().getComponent(player.locale(), "Debug", "ErrorTakeMoney")
-							.replaceText(TextReplacementConfig.builder().match("%player%").replacement(player.name()).build())));
+					plugin.getLogger().error(plugin.getLocales().getSystemLocale().debug().errorTakeMoney(player.name()));
 				} else {
 				}
 				}
@@ -159,41 +133,24 @@ public class Economy {
 			if(!checkPlayerBalance(buyerUUID, currency, money)) return false;
 			TransferResult transferResult = sOpt.get().transfer(bOpt.get(), currency, money);
 			if(plugin.getRootNode().node("Debug").getBoolean()) {
-				plugin.getLogger().info(TextUtils.clearDecorations(plugin.getLocales().getDefaultLocale().getComponent(false, "Debug", "InfoTakeItems")
-						.replaceText(TextReplacementConfig.builder().match("%item%").replacement(getStackComponent(itemStack)).build())
-						.replaceText(TextReplacementConfig.builder().match("%amount%").replacement(String.valueOf(itemStack.quantity())).build())
-						.replaceText(TextReplacementConfig.builder().match("%player%").replacement(bOpt.get().identifier()).build())
-						.replaceText(TextReplacementConfig.builder().match("%added%").replacement(Component.text().append(currency.symbol()).append(Component.text(money.doubleValue()))).build())
-						.replaceText(TextReplacementConfig.builder().match("%balance%").replacement(Component.text().append(currency.symbol()).append(Component.text(getPlayerBalance(buyerUUID, currency).doubleValue()))).build())));
+				plugin.getLogger().info(plugin.getLocales().getSystemLocale().debug().infoGiveMoney(itemStack, bOpt.get().identifier(), money.doubleValue(), getPlayerBalance(bOpt.get().uniqueId(), currency).doubleValue()));
 			}
 			if(transferResult.result() == ResultType.SUCCESS) {
 				if(plugin.getRootNode().node("PlayerTransactionMessage").getBoolean()) {
 					Sponge.server().player(buyerUUID).ifPresent(buyer -> {
-						buyer.sendMessage(plugin.getLocales().getComponent(buyer.locale(), "Messages", "AuctionBuy")
-								.replaceText(TextReplacementConfig.builder().match("%item%").replacement(getStackComponent(itemStack)).build())
-								.replaceText(TextReplacementConfig.builder().match("%amount%").replacement(String.valueOf(itemStack.quantity())).build())
-								.replaceText(TextReplacementConfig.builder().match("%removed%").replacement(Component.text().append(currency.symbol()).append(Component.text(transferResult.amount().doubleValue()))).build())
-								.replaceText(TextReplacementConfig.builder().match("%balance%").replacement(Component.text().append(currency.symbol()).append(Component.text(getPlayerBalance(buyerUUID, currency).doubleValue()))).build())
-								.replaceText(TextReplacementConfig.builder().match("%seller%").replacement(auctionItem.getOwnerName()).build()));
+						buyer.sendMessage(plugin.getLocales().getLocale(buyer).messages().auction().buy(itemStack, currency, transferResult.amount().doubleValue(), getPlayerBalance(buyerUUID, currency).doubleValue(), TextUtils.deserialize(auctionItem.getOwnerName())));
 					});
 				}
 				double finalTax = tax.doubleValue();
 				Sponge.server().player(auctionItem.getOwnerUUID()).ifPresent(seller -> {
-					seller.sendMessage(plugin.getLocales().getComponent(seller.locale(), "Messages", "AuctionSell")
-							.replaceText(TextReplacementConfig.builder().match("%item%").replacement(getStackComponent(itemStack)).build())
-							.replaceText(TextReplacementConfig.builder().match("%amount%").replacement(String.valueOf(itemStack.quantity())).build())
-							.replaceText(TextReplacementConfig.builder().match("%added%").replacement(Component.text().append(currency.symbol()).append(Component.text(transferResult.amount().doubleValue()))).build())
-							.replaceText(TextReplacementConfig.builder().match("%balance%").replacement(Component.text().append(currency.symbol()).append(Component.text(getPlayerBalance(seller.uniqueId(), currency).doubleValue()))).build())
-							.replaceText(TextReplacementConfig.builder().match("%buyer%").replacement(bOpt.get().identifier()).build()));
+					seller.sendMessage(plugin.getLocales().getLocale(seller).messages().auction().sell(itemStack, currency, transferResult.amount().doubleValue(), getPlayerBalance(seller.uniqueId(), currency).doubleValue(), TextUtils.deserialize(bOpt.get().identifier())));
 					if(isTax && finalTax > 0) {
-						seller.sendMessage(plugin.getLocales().getComponent(seller.locale(), "Messages", "Tax")
-								.replaceText(TextReplacementConfig.builder().match("%amount%").replacement(Component.text().append(currency.symbol()).append(Component.text(finalTax))).build()));
+						seller.sendMessage(plugin.getLocales().getLocale(seller).messages().auction().tax(currency, finalTax));
 					}
 				});
 				return true;
 			} else if((transferResult.result() == ResultType.FAILED || transferResult.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getRootNode().node("Debug").getBoolean()) {
-				plugin.getLogger().error(TextUtils.clearDecorations(plugin.getLocales().getDefaultLocale().getComponent(false, "Debug", "ErrorTakeMoney")
-						.replaceText(TextReplacementConfig.builder().match("%player%").replacement(bOpt.get().identifier()).build())));
+				plugin.getLogger().error(plugin.getLocales().getSystemLocale().debug().errorTakeMoney(bOpt.get().identifier()));
 			}
 		} catch (Exception e) {
 		}
@@ -203,7 +160,7 @@ public class Economy {
 	public boolean fee(Player player, BigDecimal money) {
 		if(money.doubleValue() > 0) {
 			if(money.doubleValue() > getPlayerBalance(player.uniqueId(), plugin.getEconomyService().defaultCurrency()).doubleValue()) {
-				player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "NoMoneyForFee"));
+				player.sendMessage(plugin.getLocales().getLocale(player.locale()).messages().exceptions().noMoneyForFee());
 				return false;
 			} else {
 				try {
@@ -237,10 +194,6 @@ public class Economy {
 			if(registry.stream().count() > 0) currencies.addAll(registry.stream().collect(Collectors.toList()));
 		});
 		return !currencies.isEmpty() ? currencies : Arrays.asList(plugin.getEconomyService().defaultCurrency());
-	}
-
-	private Component getStackComponent(ItemStack itemStack) {
-		return itemStack.type().asComponent().hoverEvent(HoverEvent.showItem((new SerializedItemStackJsonNbt(itemStack)).getItemKey(), itemStack.quantity()));
 	}
 
 }

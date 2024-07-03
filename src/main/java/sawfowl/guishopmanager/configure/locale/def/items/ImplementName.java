@@ -5,10 +5,10 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import net.kyori.adventure.text.Component;
 import sawfowl.guishopmanager.configure.locale.PlaceholderKeys;
-import sawfowl.guishopmanager.configure.locale.abstractlocale.Items.Names;
+import sawfowl.guishopmanager.configure.locale.abstractlocale.Items.Name;
 
 @ConfigSerializable
-public class ImplementNames implements Names {
+public class ImplementName implements Name {
 
 	@Setting("Back")
 	private Component back = deserialize("&eBack");
@@ -40,7 +40,7 @@ public class ImplementNames implements Names {
 	private Component auctionAddItem = deserialize("&eSale your item");
 	@Setting("ReturnAuctionItem")
 	private Component returnAuctionItem = deserialize("&eReturn your items");
-	public ImplementNames() {}
+	public ImplementName() {}
 
 	@Override
 	public Component back() {

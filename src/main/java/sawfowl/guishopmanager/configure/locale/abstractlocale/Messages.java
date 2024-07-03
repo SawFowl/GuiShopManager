@@ -1,6 +1,7 @@
 package sawfowl.guishopmanager.configure.locale.abstractlocale;
 
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.service.economy.Currency;
 
 import net.kyori.adventure.text.Component;
 
@@ -12,15 +13,15 @@ public interface Messages {
 
 		Component maxVolume();
 
-		Component buy(ItemStack itemStack, double removed, double balance, Component seller);
+		Component buy(ItemStack itemStack, Currency currency, double removed, double balance, Component seller);
 
-		Component sell(ItemStack itemStack, double added, double balance, Component buyer);
+		Component sell(ItemStack itemStack, Currency currency, double added, double balance, Component buyer);
 
 		Component expired();
 
 		Component betExpired();
 
-		Component tax();
+		Component tax(Currency currency, double amount);
 
 		Component noEmptySlots(int size);
 
@@ -54,13 +55,13 @@ public interface Messages {
 
 	}
 
-	interface Transactions extends LocaleReference {
+	interface ShopTransactions extends LocaleReference {
 
-		Component itemSell(ItemStack itemStack, double balance);
+		Component itemSell(ItemStack itemStack, Currency currency, double added, double balance);
 
-		Component itemBuy(ItemStack itemStack, double balance);
+		Component itemBuy(ItemStack itemStack, Currency currency, double removed, double balance);
 
-		Component buyCommands(double removed, double balance);
+		Component buyCommands(Currency currency, double removed, double balance);
 
 	}
 
@@ -68,6 +69,6 @@ public interface Messages {
 
 	Exceptions exceptions();
 
-	Transactions transactions();
+	ShopTransactions shopTransactions();
 
 }

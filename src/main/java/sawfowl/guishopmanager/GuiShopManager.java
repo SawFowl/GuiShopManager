@@ -56,11 +56,7 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import com.google.inject.Inject;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
-
 import sawfowl.guishopmanager.utils.Economy;
-import sawfowl.guishopmanager.utils.Locales;
 import sawfowl.guishopmanager.utils.MySQL;
 import sawfowl.commandpack.api.CommandPack;
 import sawfowl.commandpack.utils.StorageType;
@@ -68,8 +64,8 @@ import sawfowl.guishopmanager.commands.MainCommand;
 import sawfowl.guishopmanager.commands.auction.Auction;
 import sawfowl.guishopmanager.configure.Expire;
 import sawfowl.guishopmanager.configure.GenerateConfig;
-import sawfowl.guishopmanager.configure.GenerateLocales;
 import sawfowl.guishopmanager.configure.GeneratedFillItems;
+import sawfowl.guishopmanager.configure.Locales;
 import sawfowl.guishopmanager.data.commandshop.CommandShopData;
 import sawfowl.guishopmanager.data.shop.Shop;
 import sawfowl.guishopmanager.gui.AuctionMenus;
@@ -298,8 +294,7 @@ public class GuiShopManager {
 		logger = LogManager.getLogger("GuiShopManager");
 		eventContext = EventContext.builder().add(EventContextKeys.PLUGIN, container).build();
 		localeAPI = event.getLocaleService();
-		locales = new Locales(instance);
-		new GenerateLocales(instance);
+		locales = new Locales(localeAPI);
 		configLoader = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("Config.conf")).build();
 		configLoaderBlackLists = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("AuctionBlackList.conf")).build();
 		loadConfigs();
@@ -311,7 +306,7 @@ public class GuiShopManager {
 		if(generateConfig == null) return;
 		generateConfig.generateBlackList();
 		if(!Sponge.server().serviceProvider().economyService().isPresent()) {
-			logger.error(locales.getComponent(Sponge.server().locale(), "Messages", "EconomyNotFound"));
+			logger.error(locales.getSystemLocale().messages().exceptions().economyNotFound());
 			return;
 		} else economyService  = Sponge.server().serviceProvider().economyService().get();
 		loadExpires();
@@ -578,7 +573,7 @@ public class GuiShopManager {
 				}
 			}
 			if(sendMessage) {
-				player.sendMessage(locales.getComponent(player.locale(), "Messages", "AuctionExpired")
+				player.sendMessage(locales.getLocale(player).messages().auction().expired()
 						.clickEvent(SpongeComponents.executeCallback(cause -> {
 							if(expiredAuctionItems.containsKey(uuid)) {
 								if(!expiredAuctionItems.get(uuid).isEmpty()) {
@@ -587,7 +582,7 @@ public class GuiShopManager {
 									toRemove.addAll(expiredAuctionItems.get(uuid));
 									for(SerializedAuctionStack auctionItem : toRemove) {
 										if(emptySlots <= 0) {
-											player.sendMessage(getLocales().getComponent(player.locale(), "Messages", "NoEmptySlots").replaceText(TextReplacementConfig.builder().match("%value%").replacement(Component.text(expiredAuctionItems.get(uuid).size())).build()));
+											player.sendMessage(locales.getLocale(player).messages().auction().noEmptySlots(expiredAuctionItems.get(uuid).size()));
 											return;
 										}
 										if(auctionItem.getServerName().equals(rootNode.node("Auction", "Server").getString())) {
@@ -615,7 +610,7 @@ public class GuiShopManager {
 				}
 			}
 			if(sendMessage) {
-				player.sendMessage(locales.getComponent(player.locale(), "Messages", "AuctionBetExpired")
+				player.sendMessage(locales.getLocale(player).messages().auction().betExpired()
 						.clickEvent(SpongeComponents.executeCallback(cause -> {
 							if(expiredBetAuctionItems.containsKey(uuid)) {
 								if(!expiredBetAuctionItems.get(uuid).isEmpty()) {
@@ -624,7 +619,7 @@ public class GuiShopManager {
 									toRemove.addAll(expiredBetAuctionItems.get(uuid));
 									for(SerializedAuctionStack auctionItem : toRemove) {
 										if(emptySlots <= 0) {
-											player.sendMessage(getLocales().getComponent(player.locale(), "Messages", "NoEmptySlots").replaceText(TextReplacementConfig.builder().match("%value%").replacement(Component.text(expiredAuctionItems.get(uuid).size())).build()));
+											player.sendMessage(locales.getLocale(player).messages().auction().noEmptySlots(expiredAuctionItems.get(uuid).size()));
 											return;
 										}
 										if(auctionItem.getBetData().getServer().equals(rootNode.node("Auction", "Server").getString())) {

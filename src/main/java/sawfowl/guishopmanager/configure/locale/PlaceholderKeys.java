@@ -22,4 +22,23 @@ public class PlaceholderKeys {
 
 	public static final String PRICE = "%price%";
 
+	public static final String CURRENCY_SYMBOL = "%currency-symbol%";
+
+	public static final String CURRENCY_STYLED_SYMBOL = "%currency-styled-symbol%";
+
+	public static final String CURRENCY_NAME = "%currency-name%";
+
+	public static final String CURRENCY_PLURAL_NAME = "%currency-plural-name%";
+
+	public static final String BUY = "%buy%";
+
+	public static final String SELL = "%sell%";
+
+	public static final String TOTAL = "%total%";
+
+	public static final String EXPIRED = "%expired%";
+
+	public static final String BET = "%bet%";
+
+
 }
