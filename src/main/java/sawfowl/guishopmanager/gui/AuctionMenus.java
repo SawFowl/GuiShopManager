@@ -30,11 +30,13 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.plugin.PluginContainer;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
 
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.configure.FillItems;
+import sawfowl.guishopmanager.configure.locale.abstractlocale.Gui;
+import sawfowl.guishopmanager.configure.locale.abstractlocale.Items;
+import sawfowl.guishopmanager.configure.locale.abstractlocale.Messages;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionPrice;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 import sawfowl.guishopmanager.serialization.auction.SerializedBetData;
@@ -52,7 +54,7 @@ public class AuctionMenus {
 
 	public void createInventory(ServerPlayer player, int page, List<SerializedAuctionStack> auctionStacks) {
 		Component menuTitle = page == 1 ? Component.text("Auction") : Component.text("Auction" + page);
-		menuTitle = page == 1 ? plugin.getLocales().getComponent(player.locale(), "Gui", "Auction") : Component.text(plugin.getLocales().getComponent(player.locale(), "Gui", "Auction") + " || " + page);
+		menuTitle = page == 1 ? getAuctionGui(player).auction() : getAuctionGui(player).auction().append(Component.text(" || " + page));
 		int firstItem = (page * 45) - 45;
 		int currentItem = firstItem;
 		List<Currency> currencies = new ArrayList<Currency>();
@@ -78,15 +80,18 @@ public class AuctionMenus {
 						configuredStack.getItemStack().remove(Keys.LORE);
 					}
 					if(!itemLore.isEmpty()) itemLore.add(Component.empty());
-					itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "BetClick"));
-					itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "BuyClick"));
+					itemLore.add(getItems(player).lore().betClick());
+					itemLore.add(getItems(player).lore().buyClick());
 					itemLore.add(Component.empty());
-					itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "TransactionVariants"));
+					itemLore.add(getItems(player).lore().transactionVariants());
 					if(auctionItem.getPrices().get(0).getBet().doubleValue() > 0) {
-						itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "AuctionBet")
-								.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(auctionItem.getPrices().get(0).getCurrency().displayName()).build())
-								.replaceText(TextReplacementConfig.builder().match("%price%").replacement(Component.text(auctionItem.getPrices().get(0).getBet().doubleValue())).build())
-								.replaceText(TextReplacementConfig.builder().match("%total%").replacement(Component.text(auctionItem.getPrices().get(0).getBet().doubleValue() * configuredStack.getItemStack().quantity())).build()));
+						itemLore.add(
+							getItems(player).lore().auctionBet(
+								auctionItem.getPrices().get(0).getCurrency(),
+								auctionItem.getPrices().get(0).getBet().doubleValue(),
+								auctionItem.getPrices().get(0).getBet().doubleValue() * configuredStack.getItemStack().quantity()
+							)
+						);
 						boolean addEmpty = false;
 						for(SerializedAuctionPrice price : auctionItem.getPrices()) {
 							if(price.getPrice().doubleValue() > 0) {
@@ -99,25 +104,18 @@ public class AuctionMenus {
 					}
 					for(SerializedAuctionPrice price : auctionItem.getPrices()) {
 						if(price.getPrice().doubleValue() > 0) {
-							itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "AuctionPrice")
-									.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(price.getCurrency().displayName()).build())
-									.replaceText(TextReplacementConfig.builder().match("%price%").replacement(Component.text(price.getPrice().doubleValue())).build())
-									.replaceText(TextReplacementConfig.builder().match("%total%").replacement(Component.text(price.getPrice().doubleValue() * configuredStack.getItemStack().quantity())).build()));
+							itemLore.add(getItems(player).lore().auctionPrice(price.getCurrency(), price.getPrice().doubleValue(), price.getPrice().doubleValue() * configuredStack.getItemStack().quantity()));
 						}
 					}
 					itemLore.add(Component.empty());
 					itemLore.add(Component.empty());
-					itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Expired")
-							.replaceText(TextReplacementConfig.builder().match("%expired%").replacement(auctionItem.getExpireTimeFromNow()).build()));
-					itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Seller")
-							.replaceText(TextReplacementConfig.builder().match("%seller%").replacement(Component.text(auctionItem.getOwnerName())).build()));
+					itemLore.add(getItems(player).lore().expired(auctionItem.getExpireTimeFromNow()));
+					itemLore.add(getItems(player).lore().seller(auctionItem.getOwnerName()));
 					if(auctionItem.getBetData() != null) {
 						if(!auctionItem.betIsNull()) {
 							itemLore.add(Component.empty());
-							itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentBuyer")
-									.replaceText(TextReplacementConfig.builder().match("%buyer%").replacement(Component.text(auctionItem.getBetData().getBuyerName())).build()));
-							itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentBet")
-									.replaceText(TextReplacementConfig.builder().match("%bet%").replacement(Component.text().append(auctionItem.getPrices().get(0).getCurrency().symbol()).append(Component.text(auctionItem.getBetData().getMoney().doubleValue()))).build()));
+							itemLore.add(getItems(player).lore().currentBuyer(auctionItem.getBetData().getBuyerName()));
+							itemLore.add(getItems(player).lore().currentBet(auctionItem.getPrices().get(0).getCurrency(), auctionItem.getBetData().getMoney().doubleValue()));
 						}
 					}
 					ItemStack displayStack = configuredStack.getItemStack();
@@ -131,25 +129,24 @@ public class AuctionMenus {
 				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
 				if(id == 45 && page >= 2) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.BACK);
-					itemStack.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Back"));
+					itemStack.offer(Keys.CUSTOM_NAME, getItems(player).name().back());
 					slot.set(itemStack);
 				} else if(id == 47) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.ADD);
-					itemStack.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "AuctionAddItem"));
+					itemStack.offer(Keys.CUSTOM_NAME, getItems(player).name().auctionAddItem());
 					slot.set(itemStack);
 				} else if(id == 49) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.CHANGECURRENCY);
-					itemStack.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "ChangeCurrency"));
-					itemStack.offer(Keys.LORE, Arrays.asList(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentCurrency")
-							.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(currencies.get(editData.priceNumber).pluralDisplayName()).build())));
+					itemStack.offer(Keys.CUSTOM_NAME, getItems(player).name().changeCurrency());
+					itemStack.offer(Keys.LORE, Arrays.asList(getItems(player).lore().currency(currencies.get(editData.priceNumber))));
 					slot.set(itemStack);
 				} else if(id == 51) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.RETURN);
-					itemStack.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "ReturnAuctionItem"));
+					itemStack.offer(Keys.CUSTOM_NAME,  getItems(player).name().returnAuctionItem());
 					slot.set(itemStack);
 				} else if(id == 53 && plugin.getAuctionItems().size() >= (page * 45)) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.NEXT);
-					itemStack.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Next"));
+					itemStack.offer(Keys.CUSTOM_NAME,  getItems(player).name().next());
 					slot.set(itemStack);
 				}
 			}
@@ -166,15 +163,11 @@ public class AuctionMenus {
 					} else if(slotIndex == 47) {
 						int currentSelling = plugin.getExpiredAuctionItems().containsKey(player.uniqueId()) ? plugin.getExpiredAuctionItems().get(player.uniqueId()).size() : 0;
 						for(SerializedAuctionStack auctionItem : plugin.getAuctionItems().values()) {
-							if(auctionItem.getOwnerUUID().equals(player.uniqueId())) {
-								currentSelling++;
-							}
-							if(currentSelling >= 53) {
-								break;
-							}
+							if(auctionItem.getOwnerUUID().equals(player.uniqueId())) currentSelling++;
+							if(currentSelling >= 53) break;
 						}
 						if(currentSelling >= 53) {
-							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionMaxVolume"));
+							player.sendMessage(getMessages(player).maxVolume());
 							return false;
 						}
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
@@ -183,9 +176,8 @@ public class AuctionMenus {
 					} else if(slotIndex == 49) {
 						editData.nextPrice(currencies.size());
 						ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.CHANGECURRENCY);
-						itemStack.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "ChangeCurrency"));
-						itemStack.offer(Keys.LORE, Arrays.asList(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentCurrency")
-								.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(currencies.get(editData.priceNumber).pluralDisplayName()).build())));
+						itemStack.offer(Keys.CUSTOM_NAME,  getItems(player).name().changeCurrency());
+						itemStack.offer(Keys.LORE, Arrays.asList(getItems(player).lore().currency(currencies.get(editData.priceNumber))));
 						slot.set(itemStack);
 					} else if(slotIndex == 51) {
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
@@ -202,13 +194,13 @@ public class AuctionMenus {
 						if(uuid == null) return true;
 						UUID stackUUID = UUID.fromString(uuid);
 						if(!plugin.getAuctionItems().containsKey(stackUUID)) {
-							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionItemNotFound"));
+							player.sendMessage(getMessages(player).itemNotFound());
 							Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
 								slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 							}).build());
 						}
 						if(plugin.getAuctionItems().get(stackUUID).getOwnerUUID().equals(player.uniqueId())) {
-							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionCancelBuy"));
+							player.sendMessage(getMessages(player).cancelBuy());
 							return false;
 						}
 						if(clickType == ClickTypes.CLICK_LEFT.get()) {
@@ -222,7 +214,7 @@ public class AuctionMenus {
 							}
 							if(plugin.getEconomy().checkPlayerBalance(player.uniqueId(), auctionItem.getPrices().get(editData.priceNumber).getCurrency(), auctionItem.getPrices().get(editData.priceNumber).getPrice())) {
 								if(!plugin.getEconomy().auctionTransaction(player.uniqueId(), auctionItem, editData.priceNumber, false)) {
-									player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "NoMoney"));
+									player.sendMessage(getExceptions(player).noMoney());
 									return false;
 								}
 								slot.set(plugin.getFillItems().getItemStack(FillItems.BASIC));
@@ -230,9 +222,7 @@ public class AuctionMenus {
 								plugin.getAuctionStorage().removeAuctionStack(auctionItem.getStackUUID());
 								plugin.getAuctionItems().remove(stackUUID);
 								player.inventory().query(QueryTypes.INVENTORY_TYPE.get().of(PrimaryPlayerInventory.class)).offer(toOffer);
-							} else {
-								player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "NoMoney"));
-							}
+							} else player.sendMessage(getExceptions(player).noMoney());
 						}
 					}
 				}
@@ -250,7 +240,7 @@ public class AuctionMenus {
 	}
 
 	public void editBet(ServerPlayer player, int page, UUID idAuctionItem) {
-		Component menuTitle = plugin.getLocales().getComponent(player.locale(), "Gui", "AuctionBet");
+		Component menuTitle = getAuctionGui(player).bet();
 		EditData editData = new EditData();
 		Currency currency = plugin.getAuctionItems().get(idAuctionItem).getPrices().get(0).getCurrency();
 		editData.itemStack = plugin.getAuctionItems().get(idAuctionItem).getSerializedItemStack().getItemStack();
@@ -268,35 +258,35 @@ public class AuctionMenus {
 				slot.set(getDisplayBetItem(player, betData, editData));
 			} else 
 			if(id <= 8) {
-				Component price = Component.text(" 0.01");
+				Component price = Component.text("0.01");
 				if(id == 1) {
-					price = Component.text(" 0.1");
+					price = Component.text("0.1");
 				} else if(id == 2) {
-					price = Component.text(" 0.5");
+					price = Component.text("0.5");
 				} else if(id == 3) {
-					price = Component.text(" 1");
+					price = Component.text("1");
 				} else if(id == 4) {
-					price = Component.text(" 5");
+					price = Component.text("5");
 				} else if(id == 5) {
-					price = Component.text(" 10");
+					price = Component.text("10");
 				} else if(id == 6) {
-					price = Component.text(" 100");
+					price = Component.text("100");
 				} else if(id == 7) {
-					price = Component.text(" 1000");
+					price = Component.text("1000");
 				} else if(id == 8) {
-					price = Component.text(" 10000");
+					price = Component.text("10000");
 				}
 				ItemStack changePrice = plugin.getFillItems().getItemStack(FillItems.valueOf("CHANGEPRICE" + id));
-				changePrice.offer(Keys.LORE, plugin.getLocales().getComponents(player.locale(), "Lore", "ChangePrice"));
-				changePrice.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Price").replaceText(TextReplacementConfig.builder().match("%value%").replacement(price).build()));
+				changePrice.offer(Keys.LORE, getItems(player).lore().changePrice());
+				changePrice.offer(Keys.CUSTOM_NAME, getItems(player).name().price(price));
 				slot.set(changePrice);
 			} else if(id == 18) {
 				ItemStack back = plugin.getFillItems().getItemStack(FillItems.BACK);
-				back.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Back"));
+				back.offer(Keys.CUSTOM_NAME, getItems(player).name().back());
 				slot.set(back);
 			} else if(id == 26) {
 				ItemStack exit = plugin.getFillItems().getItemStack(FillItems.EXIT);
-				exit.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Exit"));
+				exit.offer(Keys.CUSTOM_NAME, getItems(player).name().exit());
 				slot.set(exit);
 			}
 		}
@@ -306,7 +296,7 @@ public class AuctionMenus {
 				if(menu.inventory().containsChild(slot) && slotIndex <= 26) {
 					if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
 					if(!plugin.getAuctionItems().containsKey(idAuctionItem)) {
-						player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionItemNotFound"));
+						player.sendMessage(getMessages(player).itemNotFound());
 						closePlayerInventory(player);
 						return false;
 					}
@@ -340,9 +330,7 @@ public class AuctionMenus {
 						if(betData.getMoney().doubleValue() > minimalBet.doubleValue() && plugin.getEconomy().checkPlayerBalance(player.uniqueId(), currency, betData.getMoney())) {
 							plugin.getAuctionItems().get(idAuctionItem).setBetData(betData);
 							plugin.getAuctionStorage().saveAuctionStack(plugin.getAuctionItems().get(idAuctionItem));
-						} else {
-							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "BetIsNotSet"));
-						}
+						} else player.sendMessage(getMessages(player).betIsNotSet());
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
 							createInventory(player, page, plugin.getAuctionItems().values().stream().collect(Collectors.toList()));
 						}).build());
@@ -351,9 +339,7 @@ public class AuctionMenus {
 						if(betData.getMoney().doubleValue() > minimalBet.doubleValue() && plugin.getEconomy().checkPlayerBalance(player.uniqueId(), currency, betData.getMoney())) {
 							plugin.getAuctionItems().get(idAuctionItem).setBetData(betData);
 							plugin.getAuctionStorage().saveAuctionStack(plugin.getAuctionItems().get(idAuctionItem));
-						} else {
-							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "BetIsNotSet"));
-						}
+						} else player.sendMessage(getMessages(player).betIsNotSet());
 					}
 					return false;
 				}
@@ -372,7 +358,7 @@ public class AuctionMenus {
 
 	public void editItem(ServerPlayer player, int page) {
 		Component menuTitle = Component.text("Edit auction item");
-		menuTitle = plugin.getLocales().getComponent(player.locale(), "Gui", "EditAuctionItem");
+		menuTitle = getAuctionGui(player).edit();
 		EditData editData = new EditData();
 		List<SerializedAuctionPrice> prices = new ArrayList<SerializedAuctionPrice>();
 		prices.add(new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency()));
@@ -388,60 +374,60 @@ public class AuctionMenus {
 				slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 			}
 			if(id <= 8) {
-				Component price = Component.text(" 0.01");
+				Component price = Component.text("0.01");
 				if(id == 1) {
-					price = Component.text(" 0.1");
+					price = Component.text("0.1");
 				}
 				if(id == 2) {
-					price = Component.text(" 0.5");
+					price = Component.text("0.5");
 				}
 				if(id == 3) {
-					price = Component.text(" 1");
+					price = Component.text("1");
 				}
 				if(id == 4) {
-					price = Component.text(" 5");
+					price = Component.text("5");
 				}
 				if(id == 5) {
-					price = Component.text(" 10");
+					price = Component.text("10");
 				}
 				if(id == 6) {
-					price = Component.text(" 100");
+					price = Component.text("100");
 				}
 				if(id == 7) {
-					price = Component.text(" 1000");
+					price = Component.text("1000");
 				}
 				if(id == 8) {
-					price = Component.text(" 10000");
+					price = Component.text("10000");
 				}
 				ItemStack changePrice = plugin.getFillItems().getItemStack(FillItems.valueOf("CHANGEPRICE" + id));
-				changePrice.offer(Keys.LORE, plugin.getLocales().getComponents(player.locale(), "Lore", "ChangePrice"));
-				changePrice.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Price").replaceText(TextReplacementConfig.builder().match("%value%").replacement(price).build()));
+				changePrice.offer(Keys.LORE, getItems(player).lore().changePrice());
+				changePrice.offer(Keys.CUSTOM_NAME, getItems(player).name().price(price));
 				slot.set(changePrice);
 			}
 			if(id == 18) {
 				ItemStack back = plugin.getFillItems().getItemStack(FillItems.BACK);
-				back.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Back"));
+				back.offer(Keys.CUSTOM_NAME, getItems(player).name().back());
 				slot.set(back);
 			}
 			if(id == 21) {
 				ItemStack clear = plugin.getFillItems().getItemStack(FillItems.CLEAR);
-				clear.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Clear"));
+				clear.offer(Keys.CUSTOM_NAME, getItems(player).name().clear());
 				slot.set(clear);
 			}
 			if(id == 22) {
 				ItemStack switchMode = plugin.getFillItems().getItemStack(FillItems.SWITCHMODE);
-				switchMode.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "SwitchMode"));
-				switchMode.offer(Keys.LORE, plugin.getLocales().getComponents(player.locale(), "Lore", "AuctionSwitchMode"));
+				switchMode.offer(Keys.CUSTOM_NAME, getItems(player).name().switchMode());
+				switchMode.offer(Keys.LORE, getItems(player).lore().auctionSwitchMode());
 				slot.set(switchMode);
 			}
 			if(id == 23) {
 				ItemStack changeCurrency = plugin.getFillItems().getItemStack(FillItems.CHANGECURRENCY);
-				changeCurrency.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "ChangeCurrency"));
+				changeCurrency.offer(Keys.CUSTOM_NAME, getItems(player).name().changeCurrency());
 				slot.set(changeCurrency);
 			}
 			if(id == 26) {
 				ItemStack exit = plugin.getFillItems().getItemStack(FillItems.EXIT);
-				exit.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Exit"));
+				exit.offer(Keys.CUSTOM_NAME, getItems(player).name().exit());
 				slot.set(exit);
 			}
 		}
@@ -494,9 +480,7 @@ public class AuctionMenus {
 						}
 					}
 					if(slotIndex == 21) {
-						for(SerializedAuctionPrice price : prices) {
-							price.setZero();
-						}
+						for(SerializedAuctionPrice price : prices) price.setZero();
 						editData.save = false;
 						menu.inventory().slot(13).get().set(getDisplayItem(player, auctionStack, editData));
 					}
@@ -511,9 +495,7 @@ public class AuctionMenus {
 						} else {
 							if(editData.expire < plugin.getExpiresLastNumber()) {
 								editData.expire++;
-							} else {
-								editData.expire = 0;
-							}
+							} else editData.expire = 0;
 						}
 						menu.inventory().slot(13).get().set(getDisplayItem(player, auctionStack, editData));
 					}
@@ -531,11 +513,11 @@ public class AuctionMenus {
 					if(slot.totalQuantity() > 0 && !prices.isEmpty()) {
 						SerializedItemStackJsonNbt serializedItemStack = new SerializedItemStackJsonNbt(slot.peek());
 						if(plugin.maskIsBlackList(serializedItemStack.getItemTypeAsString()) || plugin.itemIsBlackList(slot.peek())) {
-							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ItemBlocked"));
+							player.sendMessage(getMessages(player).itemBlocked());
 							return false;
 						}
 						if(checkNbtLength(auctionStack)) {
-							player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "LongNBT"));
+							player.sendMessage(getMessages(player).longNBT());
 							return false;
 						}
 						editData.itemStack = slot.peek();
@@ -559,7 +541,7 @@ public class AuctionMenus {
 
 	private void returnItems(ServerPlayer player) {
 		Component menuTitle = Component.text("Return items");
-		menuTitle = plugin.getLocales().getComponent(player.locale(), "Gui", "AuctionReturn");
+		menuTitle = getAuctionGui(player).returnItems();
 		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6).completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
 		InventoryMenu menu = viewableInventory.asMenu();
 		menu.setTitle(menuTitle);
@@ -589,9 +571,7 @@ public class AuctionMenus {
 						}
 					}
 				}
-				if(menu.inventory().totalQuantity() == 0) {
-					closePlayerInventory(player);
-				}
+				if(menu.inventory().totalQuantity() == 0) closePlayerInventory(player);
 				return true;
 			}
 			
@@ -615,24 +595,23 @@ public class AuctionMenus {
 		auctionStack.getPrices().get(editData.priceNumber).setTax(plugin.getExpire(editData.expire).getTax(), auctionStack.getSerializedItemStack().getQuantity());
 		if(auctionStack.getBetData() != null)auctionStack.getBetData().setTax(plugin.getExpire(editData.expire).getTax(), auctionStack.getSerializedItemStack().getQuantity());
 		auctionStack.updateExpires(plugin.getExpire(editData.expire).getTime());
-		lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentCurrency")
-				.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(editData.bet ? auctionStack.getPrices().get(0).getCurrency().pluralDisplayName() : auctionStack.getPrices().get(editData.priceNumber).getCurrency().pluralDisplayName()).build()));
+		lore.add(getItems(player).lore().currency(editData.bet ? auctionStack.getPrices().get(0).getCurrency() : auctionStack.getPrices().get(editData.priceNumber).getCurrency()));
 		if(auctionStack.getPrices().get(0).getBet().doubleValue() > 0) {
 			lore.add(Component.empty());
-			lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "AuctionBet")
-					.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(auctionStack.getPrices().get(0).getCurrency().displayName()).build())
-					.replaceText(TextReplacementConfig.builder().match("%price%").replacement(Component.text(auctionStack.getPrices().get(0).getBet().doubleValue())).build())
-					.replaceText(TextReplacementConfig.builder().match("%total%").replacement(Component.text(auctionStack.getPrices().get(0).getBet().doubleValue() * itemStack.quantity())).build()));
+			lore.add(
+				getItems(player).lore().auctionBet(
+					auctionStack.getPrices().get(0).getCurrency(),
+					auctionStack.getPrices().get(0).getBet().doubleValue(),
+					auctionStack.getPrices().get(0).getBet().doubleValue() * itemStack.quantity()
+				)
+			);
 			lore.add(Component.empty());
 		}
 		boolean addEmpty = false;
 		for(SerializedAuctionPrice price : auctionStack.getPrices()) {
 			if(price.getPrice().doubleValue() > 0) {
 				addEmpty = true;
-				lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "AuctionPrice")
-						.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(price.getCurrency().displayName()).build())
-						.replaceText(TextReplacementConfig.builder().match("%price%").replacement(Component.text(price.getPrice().doubleValue())).build())
-						.replaceText(TextReplacementConfig.builder().match("%total%").replacement(Component.text(price.getPrice().doubleValue() * itemStack.quantity())).build()));
+				lore.add(getItems(player).lore().auctionPrice(price.getCurrency(), price.getPrice().doubleValue(), price.getPrice().doubleValue() * itemStack.quantity()));
 			}
 		}
 		if(plugin.getExpire(editData.expire).isTax()) {
@@ -641,20 +620,15 @@ public class AuctionMenus {
 				addEmpty = false;
 			}
 			if(editData.bet) {
-				lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Tax").replaceText(TextReplacementConfig.builder().match("%size%").replacement(plugin.getEconomyService().defaultCurrency().symbol().append(Component.text(auctionStack.getBetData() == null ? auctionStack.getPrices().get(0).getBetTax() : auctionStack.getBetData().getTax()))).build()));
-			} else {
-				lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Tax").replaceText(TextReplacementConfig.builder().match("%size%").replacement(auctionStack.getPrices().get(editData.priceNumber).getCurrency().symbol().append(Component.text(auctionStack.getPrices().get(editData.priceNumber).getTax()))).build()));
-			}
+				lore.add(getItems(player).lore().tax(auctionStack.getPrices().get(0).getCurrency(), auctionStack.getBetData() == null ? auctionStack.getPrices().get(0).getBetTax() : auctionStack.getBetData().getTax()));
+			} else lore.add(getItems(player).lore().tax(auctionStack.getPrices().get(editData.priceNumber).getCurrency(), auctionStack.getPrices().get(editData.priceNumber).getTax()));
 		}
 		if(plugin.getExpire(editData.expire).isFee()) {
-			if(addEmpty) {
-				lore.add(Component.empty());
-			}
-			lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Fee").replaceText(TextReplacementConfig.builder().match("%size%").replacement(auctionStack.getPrices().get(0).getCurrency().symbol().append(Component.text(plugin.getExpire(editData.expire).getFee()))).build()));
+			if(addEmpty) lore.add(Component.empty());
+			lore.add(getItems(player).lore().fee(auctionStack.getPrices().get(0).getCurrency(), plugin.getExpire(editData.expire).getFee()));
 			lore.add(Component.empty());
 		}
-		lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Expired")
-				.replaceText(TextReplacementConfig.builder().match("%expired%").replacement(auctionStack.getExpireTimeFromNow()).build()));
+		lore.add(getItems(player).lore().expired(auctionStack.getExpireTimeFromNow()));
 		itemStack.offer(Keys.LORE, lore);
 		return itemStack;
 	}
@@ -666,14 +640,11 @@ public class AuctionMenus {
 			itemStack.remove(Keys.LORE);
 			lore.add(Component.empty());
 		}
-		
-		lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "YourBet")
-				.replaceText(TextReplacementConfig.builder().match("%size%").replacement(Component.text().append(betData.getCurrency().symbol()).append(Component.text(betData.getMoney().doubleValue()))).build())
-				.replaceText(TextReplacementConfig.builder().match("%total%").replacement(Component.text().append(betData.getCurrency().symbol()).append(Component.text(betData.getMoney().doubleValue() * itemStack.quantity()))).build()));
+		lore.add(getItems(player).lore().yourBet(betData.getCurrency(), betData.getMoney().doubleValue(), betData.getMoney().doubleValue() * itemStack.quantity()));
 		itemStack.offer(Keys.LORE, lore);
 		if(plugin.getExpire(editData.expire).isTax()) {
 			betData.setTax(plugin.getExpire(editData.expire).getTax(), itemStack.quantity());
-			lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Tax").replaceText(TextReplacementConfig.builder().match("%size%").replacement(Component.text().append(betData.getCurrency().symbol()).append(Component.text(betData.getTax()))).build()));
+			lore.add(getItems(player).lore().tax(betData.getCurrency(), betData.getTax()));
 		}
 		return itemStack;
 	}
@@ -684,9 +655,7 @@ public class AuctionMenus {
 		for(Slot playerSlot : player.inventory().query(QueryTypes.INVENTORY_TYPE.get().of(PrimaryPlayerInventory.class)).slots()) {
 			if(playerSlot.contains(itemStack)) {
 				int difference = itemStack.maxStackQuantity() - playerSlot.peek().quantity();
-				if(playerSlot.peek().quantity() != itemStack.maxStackQuantity()) {
-					value = value + difference;
-				}
+				if(playerSlot.peek().quantity() != itemStack.maxStackQuantity()) value = value + difference;
 			}
 		}
 		BigDecimal requiredMoney = calculateMoney(itemStack, serializedPrice);
@@ -708,15 +677,15 @@ public class AuctionMenus {
 
 	private void addItem(ServerPlayer player, SerializedAuctionStack auctionStack) {
 		if(plugin.maskIsBlackList(new SerializedItemStackPlainNBT(auctionStack.getSerializedItemStack().getItemStack()).getItemTypeAsString()) || plugin.itemIsBlackList(auctionStack.getSerializedItemStack().getItemStack())) {
-			player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ItemBlocked"));
+			player.sendMessage(getMessages(player).itemBlocked());
 			return;
 		}
 		if(player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(auctionStack.getSerializedItemStack().getItemStack())).totalQuantity() < auctionStack.getSerializedItemStack().getQuantity()) {
-			player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ItemNotPresent"));
+			player.sendMessage(plugin.getLocales().getLocale(player).commands().exceptions().itemNotPresent());
 			return;
 		}
 		if(checkNbtLength(auctionStack)) {
-			player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "LongNBT"));
+			player.sendMessage(getMessages(player).longNBT());
 			return;
 		}
 		if(plugin.getExpire(0).isFee()) {
@@ -736,7 +705,7 @@ public class AuctionMenus {
 			plugin.getAuctionStorage().saveAuctionStack(auctionStack);
 		}).plugin(plugin.getPluginContainer()).build());
 		player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(auctionStack.getSerializedItemStack().getItemStack())).poll(auctionStack.getSerializedItemStack().getQuantity());
-		player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AuctionItemAdded"));
+		player.sendMessage(getMessages(player).itemAdded());
 	}
 
 	private boolean checkNbtLength(SerializedAuctionStack auctionStack) {
@@ -745,6 +714,22 @@ public class AuctionMenus {
 
 	private PluginContainer getPluginContainer() {
 		return plugin.getPluginContainer();
+	}
+
+	private Gui.Auction getAuctionGui(ServerPlayer player) {
+		return plugin.getLocales().getLocale(player).gui().auction();
+	}
+
+	private Messages.Auction getMessages(ServerPlayer player) {
+		return plugin.getLocales().getLocale(player).messages().auction();
+	}
+
+	private Messages.Exceptions getExceptions(ServerPlayer player) {
+		return plugin.getLocales().getLocale(player).messages().exceptions();
+	}
+
+	private Items getItems(ServerPlayer player) {
+		return plugin.getLocales().getLocale(player).items();
 	}
 
 	private class EditData {

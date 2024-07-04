@@ -34,7 +34,7 @@ public class AddBlackList extends AbstractPlayerCommand {
 			itemStack = player.itemInHand(HandTypes.OFF_HAND);
 		}
 		if(itemStack == null || itemStack.type() == ItemTypes.AIR) {
-			player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ItemNotPresent"));
+			exception(getExceptions(locale).itemNotPresent());
 		} else {
 			boolean save = context.hasFlag(CommandParameters.MASK) || context.hasFlag(CommandParameters.ITEM);
 			ItemStack toAdd = itemStack.copy();
@@ -42,19 +42,19 @@ public class AddBlackList extends AbstractPlayerCommand {
 			if(context.hasFlag(CommandParameters.MASK)) {
 				if(!plugin.maskIsBlackList(RegistryTypes.ITEM_TYPE.get().valueKey(toAdd.type()).asString())) {
 					plugin.addBlackListMask(toAdd);
-					player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AddedToBlackList"));
+					player.sendMessage(getCommands(locale).auction().addedToBlackList());
 				} else {
-					player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ItemIsAlreadyBlocked"));
+					player.sendMessage(getCommands(locale).auction().allreadyBlocked());
 				}
 			} else if(context.hasFlag(CommandParameters.ITEM)) {
 				if(!plugin.itemIsBlackList(toAdd)) {
 					plugin.addBlackListStack(toAdd);
-					player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "AddedToBlackList"));
+					player.sendMessage(getCommands(locale).auction().addedToBlackList());
 				} else {
-					player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ItemIsAlreadyBlocked"));
+					player.sendMessage(getCommands(locale).auction().allreadyBlocked());
 				}
 			} else {
-				player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "ItemNotPresent"));
+				exception(getExceptions(locale).itemNotPresent());
 			}
 			if(save) plugin.updateConfigs();
 		}

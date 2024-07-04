@@ -20,7 +20,6 @@ import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.util.Ticks;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
 
 import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
 import sawfowl.commandpack.api.data.command.Settings;
@@ -82,14 +81,14 @@ public class AddItem extends AbstractPlayerCommand {
 			} else {
 				if(!betPresent && pricePresent && context.one(CommandParameters.AUCTION_PRICE).get() > 0) {
 					if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && !Permissions.auctionCurrencyPermission(player, plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()), false))) {
-						Component message = getComponent(player.locale(), "Messages", "AuctionBetNotPresent").clickEvent(SpongeComponents.executeCallback(cause -> {
+						Component message = getCommands(locale).auction().betNotPresent().clickEvent(SpongeComponents.executeCallback(cause -> {
 							SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
 							auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
 							SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getRootNode().node("Auction", "Server").getString());
 							run(player, auctionStack);
 						}));
 						player.sendMessage(message);
-						Component message2 = getComponent(player.locale(), "Messages", "AuctionCurrencyNotPresent").replaceText(TextReplacementConfig.builder().match("%currencies%").replacement(currenciesList).build()).clickEvent(SpongeComponents.executeCallback(cause -> {
+						Component message2 = getCommands(locale).auction().currencyNotPresent(currenciesList).clickEvent(SpongeComponents.executeCallback(cause -> {
 							SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
 							auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
 							SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getRootNode().node("Auction", "Server").getString());
@@ -97,7 +96,7 @@ public class AddItem extends AbstractPlayerCommand {
 						}));
 						player.sendMessage(message2);
 					} else {
-						Component message = getComponent(player.locale(), "Messages", "AuctionBetNotPresent").clickEvent(SpongeComponents.executeCallback(cause -> {
+						Component message = getCommands(locale).auction().betNotPresent().clickEvent(SpongeComponents.executeCallback(cause -> {
 							SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()));
 							auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
 							SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getRootNode().node("Auction", "Server").getString());
@@ -106,7 +105,7 @@ public class AddItem extends AbstractPlayerCommand {
 						player.sendMessage(message);
 					}
 				} else if(!pricePresent && betPresent && context.one(CommandParameters.AUCTION_BET).get() > 0) {
-					Component message = getComponent(player.locale(), "Messages", "AuctionPriceNotPresent").clickEvent(SpongeComponents.executeCallback(cause -> {
+					Component message = getCommands(locale).auction().priceNotPresent().clickEvent(SpongeComponents.executeCallback(cause -> {
 						SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
 						auctionPrice.setBet(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_BET).get()));
 						SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getRootNode().node("Auction", "Server").getString());
@@ -115,7 +114,7 @@ public class AddItem extends AbstractPlayerCommand {
 					player.sendMessage(message);
 				} else if(context.one(CommandParameters.AUCTION_PRICE).get() > 0 && context.one(CommandParameters.AUCTION_BET).get() > 0) {
 					if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && !Permissions.auctionCurrencyPermission(player, plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()), false))) {
-						Component message = getComponent(player.locale(), "Messages", "AuctionPriceNotPresent").clickEvent(SpongeComponents.executeCallback(cause -> {
+						Component message = getCommands(locale).auction().priceNotPresent().clickEvent(SpongeComponents.executeCallback(cause -> {
 							SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
 							auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
 							auctionPrice.setBet(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_BET).get()));
@@ -137,7 +136,7 @@ public class AddItem extends AbstractPlayerCommand {
 					}
 				} else if(context.one(CommandParameters.AUCTION_BET).get() <= 0 && context.one(CommandParameters.AUCTION_PRICE).get() > 0) {
 					if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && !Permissions.auctionCurrencyPermission(player, plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()), false))) {
-						Component message = getComponent(player.locale(), "Messages", "AuctionCurrencyNotPresent").replaceText(TextReplacementConfig.builder().match("%currencies%").replacement(currenciesList).build()).clickEvent(SpongeComponents.executeCallback(cause -> {
+						Component message = getCommands(locale).auction().currencyNotPresent(currenciesList).clickEvent(SpongeComponents.executeCallback(cause -> {
 							SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
 							auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
 							SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getRootNode().node("Auction", "Server").getString());
@@ -158,7 +157,6 @@ public class AddItem extends AbstractPlayerCommand {
 				}
 			}
 		}
-	
 	}
 
 	@Override
@@ -179,9 +177,9 @@ public class AddItem extends AbstractPlayerCommand {
 	@Override
 	public List<ParameterSettings> getArguments() {
 		return Arrays.asList(
-			ParameterSettings.of(CommandParameters.AUCTION_BET, true, "Messages", "AuctionZeroOrNullPrices"),
-			ParameterSettings.of(CommandParameters.AUCTION_PRICE, true, "Messages", "AuctionZeroOrNullPrices"),
-			ParameterSettings.of(CommandParameters.CURRENCY, true, "Messages", "AuctionZeroOrNullPrices")
+			ParameterSettings.of(CommandParameters.AUCTION_BET, true, locale -> getExceptions(locale).zeroOrNullPrices()),
+			ParameterSettings.of(CommandParameters.AUCTION_PRICE, true, locale -> getExceptions(locale).zeroOrNullPrices()),
+			ParameterSettings.of(CommandParameters.CURRENCY, true, locale -> getExceptions(locale).currencyNotPresent())
 		);
 	}
 
@@ -192,15 +190,15 @@ public class AddItem extends AbstractPlayerCommand {
 
 	private void run(ServerPlayer player, SerializedAuctionStack auctionStack) {
 		if(plugin.maskIsBlackList(auctionStack.getSerializedItemStack().getItemTypeAsString()) || plugin.itemIsBlackList(auctionStack.getSerializedItemStack().getItemStack())) {
-			player.sendMessage(getComponent(player.locale(), "Messages", "ItemBlocked"));
+			player.sendMessage(plugin.getLocales().getLocale(player).messages().auction().itemBlocked());
 			return;
 		}
 		if(player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(auctionStack.getSerializedItemStack().getItemStack())).totalQuantity() < auctionStack.getSerializedItemStack().getQuantity()) {
-			player.sendMessage(getComponent(player.locale(), "Messages", "ItemNotPresent"));
+			player.sendMessage(getExceptions(player).itemNotPresent());
 			return;
 		}
 		if(checkNbtLength(auctionStack)) {
-			player.sendMessage(getComponent(player.locale(), "Messages", "LongNBT"));
+			player.sendMessage(plugin.getLocales().getLocale(player).messages().auction().longNBT());
 			return;
 		}
 		if(plugin.getExpire(0).isFee()) {
@@ -220,7 +218,7 @@ public class AddItem extends AbstractPlayerCommand {
 			plugin.getAuctionStorage().saveAuctionStack(auctionStack);
 		}).plugin(plugin.getPluginContainer()).build());
 		player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(auctionStack.getSerializedItemStack().getItemStack())).poll(auctionStack.getSerializedItemStack().getQuantity());
-		player.sendMessage(getComponent(player.locale(), "Messages", "AuctionItemAdded"));
+		player.sendMessage(plugin.getLocales().getLocale(player).messages().auction().itemAdded());
 	}
 
 	private boolean checkNbtLength(SerializedAuctionStack auctionStack) {

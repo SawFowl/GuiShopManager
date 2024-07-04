@@ -27,29 +27,32 @@ public class ImplementLore implements Lore {
 	private Component transactionVariants = deserialize("&eTransaction variants: ▼");
 	@Setting("Currency")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private Component currency = deserialize("&eCurrent currency: &a%currency-styled-symbol%");
+	private Component currency = deserialize("&eCurrent currency: &a%currency-name%");
 	@Setting("Size")
 	private Component size = deserialize("&eSelected size: &a%size%");
 	@Setting("Sum")
-	private Component sum = deserialize("&eTotal: &a%size%");
+	private Component sum = deserialize("&eTotal: %currency-styled-symbol%%size%");
 	@Setting("Price")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private Component price = deserialize("&eCurrency: &a%currency-styled-symbol%&e. Buy: &a%buy%&e. Sell: &a%sell%");
+	private Component price = deserialize("&eCurrency: %currency-styled-symbol%&e. Buy: &a%buy%&e. Sell: &a%sell%");
 	@Setting("CommandPrice")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private Component commandPrice = deserialize("&eCurrency: &a%currency-styled-symbol%&e. Buy: &a%buyprice%&e.");
+	private Component commandPrice = deserialize("&eCurrency: %currency-styled-symbol%&e. Buy: &a%buyprice%&e.");
 	@Setting("AuctionPrice")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private Component auctionPrice = deserialize("&eCurrency: &a%currency-styled-symbol%&e. Price for one: &a%price%&e. Total: &a%total%");
+	private Component auctionPrice = deserialize("&eCurrency: %currency-styled-symbol%&e. Price for one: &a%price%&e. Total: &a%total%");
 	@Setting("AuctionBet")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private Component auctionBet = deserialize("&eCurrency: &a%currency-styled-symbol%&e. Bet for one: &a%price%&e. Total: &a%total%");
+	private Component auctionBet = deserialize("&eCurrency: %currency-styled-symbol%&e. Bet for one: &a%price%&e. Total: &a%total%");
 	@Setting("YourBet")
-	private Component yourBet = deserialize("&eYour bet: &a%size%. Total: &a%total%");
+	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
+	private Component yourBet = deserialize("&eYour bet: %currency-styled-symbol%%size%. Total: %currency-styled-symbol%%total%");
 	@Setting("Tax")
-	private Component tax = deserialize("&eTax: &a%size%");
+	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
+	private Component tax = deserialize("&eTax: %currency-styled-symbol%%size%");
 	@Setting("Fee")
-	private Component fee = deserialize("&eFee: &a%size%");
+	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
+	private Component fee = deserialize("&eFee: %currency-styled-symbol%%size%");
 	@Setting("AllowFree")
 	private Component allowFree = deserialize("&eAvailable for free");
 	@Setting("SwitchFree")
@@ -61,7 +64,8 @@ public class ImplementLore implements Lore {
 	@Setting("CurrentBuyer")
 	private Component currentBuyer = deserialize("&eCurrent buyer at the bet: &b%player%&e.");
 	@Setting("CurrentBet")
-	private Component currentBet = deserialize("&eCurrent bet: &a%bet%&e.");
+	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
+	private Component currentBet = deserialize("&eCurrent bet: %currency-styled-symbol%%bet%&e.");
 	@Setting("BetClick")
 	private Component betClick = deserialize("&dLeft click &f- &dset your bet");
 	@Setting("BuyClick")
@@ -99,8 +103,8 @@ public class ImplementLore implements Lore {
 	}
 
 	@Override
-	public Component sum(int size) {
-		return replace(this.sum, PlaceholderKeys.SIZE, size);
+	public Component sum(Currency currency, double size) {
+		return Text.of(this.sum).replace(PlaceholderKeys.CURRENCY_SYMBOL, currency.symbol()).replace(PlaceholderKeys.CURRENCY_STYLED_SYMBOL, currency.symbol().color(currency.displayName().color()).style(currency.displayName().style())).replace(PlaceholderKeys.CURRENCY_NAME, currency.displayName()).replace(PlaceholderKeys.CURRENCY_PLURAL_NAME, currency.pluralDisplayName()).replace(PlaceholderKeys.SIZE, size).get();
 	}
 
 	@Override
@@ -124,18 +128,18 @@ public class ImplementLore implements Lore {
 	}
 
 	@Override
-	public Component yourBet(double size, double total) {
-		return Text.of(yourBet).replace(PlaceholderKeys.SIZE, size).replace(PlaceholderKeys.TOTAL, total).get();
+	public Component yourBet(Currency currency, double size, double total) {
+		return Text.of(yourBet).replace(PlaceholderKeys.CURRENCY_SYMBOL, currency.symbol()).replace(PlaceholderKeys.CURRENCY_STYLED_SYMBOL, currency.symbol().color(currency.displayName().color()).style(currency.displayName().style())).replace(PlaceholderKeys.CURRENCY_NAME, currency.displayName()).replace(PlaceholderKeys.CURRENCY_PLURAL_NAME, currency.pluralDisplayName()).replace(PlaceholderKeys.SIZE, size).replace(PlaceholderKeys.TOTAL, total).get();
 	}
 
 	@Override
-	public Component tax(double size) {
-		return replace(tax, PlaceholderKeys.SIZE, size);
+	public Component tax(Currency currency, double size) {
+		return Text.of(tax).replace(PlaceholderKeys.CURRENCY_SYMBOL, currency.symbol()).replace(PlaceholderKeys.CURRENCY_STYLED_SYMBOL, currency.symbol().color(currency.displayName().color()).style(currency.displayName().style())).replace(PlaceholderKeys.CURRENCY_NAME, currency.displayName()).replace(PlaceholderKeys.CURRENCY_PLURAL_NAME, currency.pluralDisplayName()).replace(PlaceholderKeys.SIZE, size).get();
 	}
 
 	@Override
-	public Component fee(double size) {
-		return replace(fee, PlaceholderKeys.SIZE, size);
+	public Component fee(Currency currency, double size) {
+		return Text.of(fee).replace(PlaceholderKeys.CURRENCY_SYMBOL, currency.symbol()).replace(PlaceholderKeys.CURRENCY_STYLED_SYMBOL, currency.symbol().color(currency.displayName().color()).style(currency.displayName().style())).replace(PlaceholderKeys.CURRENCY_NAME, currency.displayName()).replace(PlaceholderKeys.CURRENCY_PLURAL_NAME, currency.pluralDisplayName()).replace(PlaceholderKeys.SIZE, size).get();
 	}
 
 	@Override
@@ -164,8 +168,8 @@ public class ImplementLore implements Lore {
 	}
 
 	@Override
-	public Component currentBet(double bet) {
-		return replace(currentBet, PlaceholderKeys.BET, bet);
+	public Component currentBet(Currency currency, double bet) {
+		return Text.of(currentBet).replace(PlaceholderKeys.CURRENCY_SYMBOL, currency.symbol()).replace(PlaceholderKeys.CURRENCY_STYLED_SYMBOL, currency.symbol().color(currency.displayName().color()).style(currency.displayName().style())).replace(PlaceholderKeys.CURRENCY_NAME, currency.displayName()).replace(PlaceholderKeys.CURRENCY_PLURAL_NAME, currency.pluralDisplayName()).replace(PlaceholderKeys.BET, bet).get();
 	}
 
 	@Override

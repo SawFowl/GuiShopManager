@@ -55,7 +55,7 @@ public interface Messages {
 
 	}
 
-	interface ShopTransactions extends LocaleReference {
+	interface Shop extends LocaleReference {
 
 		Component itemSell(ItemStack itemStack, Currency currency, double added, double balance);
 
@@ -63,12 +63,14 @@ public interface Messages {
 
 		Component buyCommands(Currency currency, double removed, double balance);
 
+		Component shopNotExists(String shop);
+
 	}
 
 	Auction auction();
 
 	Exceptions exceptions();
 
-	ShopTransactions shopTransactions();
+	Shop shop();
 
 }

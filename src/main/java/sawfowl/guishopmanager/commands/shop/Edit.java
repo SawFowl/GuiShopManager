@@ -36,22 +36,22 @@ public class Edit extends AbstractPlayerCommand {
 				List<Component> messages = new ArrayList<Component>();
 				for(Shop shop1 : plugin.getAllShops()) {
 					final ServerPlayer fPlayer = player;
-					Component hover = plugin.getLocales().getComponent(player.locale(), "Hover", "OpenShopEdit");
+					Component hover = getCommands(locale).shop().openForEdit();
 					Component message = shop1.getOrDefaultTitle(player.locale()).clickEvent(SpongeComponents.executeCallback(cause -> {
 						run(fPlayer, shop);
 					})).hoverEvent(HoverEvent.showText(hover));
 					messages.add(message);
 				}
 				PaginationList.builder()
-				.title(plugin.getLocales().getComponent(player.locale(), "Messages", "ShopListTitle"))
-				.padding(plugin.getLocales().getComponent(player.locale(), "Messages", "ShopListPadding"))
+				.title(getCommands(locale).shop().title())
+				.padding(getCommands(locale).shop().padding())
 				.contents(messages)
 				.linesPerPage(10)
 				.sendTo(player);
 			} else {
 				run(player, shop);
 			}
-		} else exception(player, "Messages", "ShopListEmptyEditor");
+		} else exception(getCommands(locale).shop().listEmptyEditor());
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class Edit extends AbstractPlayerCommand {
 
 	@Override
 	public List<ParameterSettings> getArguments() {
-		return Arrays.asList(ParameterSettings.of(CommandParameters.SHOP, false, "Messages", "ShopIDNotPresent"));
+		return Arrays.asList(ParameterSettings.of(CommandParameters.SHOP, false, locale -> getExceptions(locale).shopNotPresent()));
 	}
 
 	private void run(ServerPlayer player, Shop shop) {

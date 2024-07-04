@@ -30,7 +30,7 @@ public class Create extends AbstractPlayerCommand {
 	public void execute(CommandContext context, ServerPlayer player, Locale locale) throws CommandException {
 		String shopID = TextUtils.clearDecorations(context.one(CommandParameters.SHOP_ID).get().toLowerCase());
 		if(plugin.commandShopExists(shopID)) {
-			player.sendMessage(getComponent(locale, "Messages", "ShopIDAlreadyExists"));
+			exception(getExceptions(locale).shopAlreadyExists());
 		} else {
 			CommandShopData shop = new CommandShopData(Component.text(shopID));
 			shop.addMenu(1, new CommandShopMenuData());
@@ -56,7 +56,7 @@ public class Create extends AbstractPlayerCommand {
 
 	@Override
 	public List<ParameterSettings> getArguments() {
-		return Arrays.asList(ParameterSettings.of(CommandParameters.SHOP_ID, false, false, new Object[] {"Messages", "ShopIDNotPresent"}));
+		return Arrays.asList(ParameterSettings.of(CommandParameters.SHOP_ID, false, false, locale -> getExceptions(locale).shopNotPresent()));
 	}
 
 }

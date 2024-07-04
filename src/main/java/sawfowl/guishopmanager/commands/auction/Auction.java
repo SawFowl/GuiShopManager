@@ -41,11 +41,11 @@ public class Auction extends AbstractCommand {
 	public void execute(CommandContext context, Audience audience, Locale locale, boolean isPlayer) throws CommandException {
 		if(isPlayer) {
 			ServerPlayer player = getPlayer(context).orElse((ServerPlayer) audience);
-			if(!((ServerPlayer) audience).hasPermission(Permissions.AUCTION_OPEN_OTHER) && !((ServerPlayer) audience).uniqueId().equals(player.uniqueId())) exception(locale, "Messages", "DontOpenOther");
+			if(!((ServerPlayer) audience).hasPermission(Permissions.AUCTION_OPEN_OTHER) && !((ServerPlayer) audience).uniqueId().equals(player.uniqueId())) exception(getExceptions(locale).dontOpenOther());
 			plugin.getAuctionMenus().createInventory(player, 1, plugin.getAuctionItems().values().stream().collect(Collectors.toList()));
 		} else {
 			ServerPlayer player = getPlayer(context).orElse(null);
-			if(player == null) exception(locale, "Messages", "PlayerIsNotPresent");
+			if(player == null) exception(getExceptions(locale).playerIsNotPresent());
 			plugin.getAuctionMenus().createInventory(player, 1, plugin.getAuctionItems().values().stream().collect(Collectors.toList()));
 		}
 	}
@@ -62,7 +62,7 @@ public class Auction extends AbstractCommand {
 
 	@Override
 	public List<ParameterSettings> getArguments() {
-		return Arrays.asList(ParameterSettings.of(CommandParameters.PLAYER_FOR_AUCTION, false, "Messages", "PlayerIsNotPresent"));
+		return Arrays.asList(ParameterSettings.of(CommandParameters.PLAYER_FOR_AUCTION, false, locale -> getExceptions(locale).playerIsNotPresent()));
 	}
 
 	@Override

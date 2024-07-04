@@ -4,23 +4,19 @@ import net.kyori.adventure.text.Component;
 
 public interface Exceptions {
 
-	Component onlyPlayer();
-
 	Component playerIsNotPresent();
 
 	Component itemNotPresent();
 
 	Component zeroOrNullPrices();
 
+	Component currencyNotPresent();
+
 	Component dontOpenOther();
 
-	Component shopIDNotPresent();
+	Component shopNotPresent();
 
-	Component shopIDAlreadyExists();
-
-	Component shopIDNotExists();
-
-	Component invalidShopID();
+	Component shopAlreadyExists();
 
 	Component menuNotPresent();
 

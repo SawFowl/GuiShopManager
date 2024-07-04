@@ -12,11 +12,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 
 import sawfowl.guishopmanager.configure.locale.PlaceholderKeys;
-import sawfowl.guishopmanager.configure.locale.abstractlocale.Messages.ShopTransactions;
+import sawfowl.guishopmanager.configure.locale.abstractlocale.Messages.Shop;
 import sawfowl.localeapi.api.Text;
 
 @ConfigSerializable
-public class ImplementShopTransactions implements ShopTransactions {
+public class ImplementShop implements Shop {
 
 	@Setting("ItemSell")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
@@ -27,7 +27,8 @@ public class ImplementShopTransactions implements ShopTransactions {
 	@Setting("BuyCommands")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
 	private Component buyCommands = deserialize("&aYou paid %removed% to execute console commands. Your balance %balance%.");
-	public ImplementShopTransactions() {}
+	private Component shopNotExists = deserialize("&cThere is no shop with id = " + PlaceholderKeys.SHOP);
+	public ImplementShop() {}
 
 	@Override
 	public Component itemSell(ItemStack itemStack, Currency currency, double added, double balance) {
@@ -42,6 +43,11 @@ public class ImplementShopTransactions implements ShopTransactions {
 	@Override
 	public Component buyCommands(Currency currency, double removed, double balance) {
 		return Text.of(buyCommands).replace(PlaceholderKeys.CURRENCY_SYMBOL, currency.symbol()).replace(PlaceholderKeys.CURRENCY_STYLED_SYMBOL, currency.symbol().color(currency.displayName().color()).style(currency.displayName().style())).replace(PlaceholderKeys.CURRENCY_NAME, currency.displayName()).replace(PlaceholderKeys.CURRENCY_PLURAL_NAME, currency.pluralDisplayName()).replace(PlaceholderKeys.REMOVED, removed).replace(PlaceholderKeys.BALANCE, balance).get();
+	}
+
+	@Override
+	public Component shopNotExists(String shop) {
+		return replace(shopNotExists, PlaceholderKeys.SHOP, shop);
 	}
 
 }

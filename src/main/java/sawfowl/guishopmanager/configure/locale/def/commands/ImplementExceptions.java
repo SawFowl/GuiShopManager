@@ -11,24 +11,20 @@ import sawfowl.localeapi.api.TextUtils;
 @ConfigSerializable
 public class ImplementExceptions implements Exceptions {
 
-	@Setting("OnlyPlayer")
-	private Component onlyPlayer = TextUtils.deserializeLegacy("&cThis command can only be executed by the player.");
 	@Setting("PlayerIsNotPresent")
 	private Component playerIsNotPresent = TextUtils.deserializeLegacy("&cYou need to be a player or specify the player's nickname.");
 	@Setting("ItemNotPresent")
 	private Component itemNotPresent = TextUtils.deserializeLegacy("&cPlease present the item ┬──┬ ノ(゜-゜ノ)");
 	@Setting("ZeroOrNullPrices")
 	private Component zeroOrNullPrices = TextUtils.deserializeLegacy("&cYou cannot sell an item without a price/bet or with a zero price/bet. One of the values must be greater than zero.");
+	@Setting("CurrencyNotPresent")
+	private Component currencyNotPresent = TextUtils.deserializeLegacy("&cYou must specify the currency.");
 	@Setting("DontOpenOther")
 	private Component dontOpenOther = TextUtils.deserializeLegacy("&cYou can not open the menu to another player.");
-	@Setting("ShopIDNotPresent")
-	private Component shopIDNotPresent = TextUtils.deserializeLegacy("&cShop id not specified.");
-	@Setting("ShopIDAlreadyExists")
-	private Component shopIDAlreadyExists = TextUtils.deserializeLegacy("&cA shop with this id already exists.");
-	@Setting("ShopIDNotExists")
-	private Component shopIDNotExists = TextUtils.deserializeLegacy("&cThere is no shop with this id.");
-	@Setting("InvalidShopID")
-	private Component invalidShopID = TextUtils.deserializeLegacy("&cAn invalid shop name has been entered.");
+	@Setting("ShopNotPresent")
+	private Component shopNotPresent = TextUtils.deserializeLegacy("&cShop id not specified.");
+	@Setting("ShopAlreadyExists")
+	private Component shopAlreadyExists = TextUtils.deserializeLegacy("&cA shop with this id already exists.");
 	@Setting("MenuNotPresent")
 	private Component menuNotPresent = TextUtils.deserializeLegacy("&cMenu number not specified.");
 	@Setting("InvalidMenuId")
@@ -52,11 +48,6 @@ public class ImplementExceptions implements Exceptions {
 	public ImplementExceptions() {}
 
 	@Override
-	public Component onlyPlayer() {
-		return onlyPlayer;
-	}
-
-	@Override
 	public Component playerIsNotPresent() {
 		return playerIsNotPresent;
 	}
@@ -72,28 +63,23 @@ public class ImplementExceptions implements Exceptions {
 	}
 
 	@Override
+	public Component currencyNotPresent() {
+		return currencyNotPresent;
+	}
+
+	@Override
 	public Component dontOpenOther() {
 		return dontOpenOther;
 	}
 
 	@Override
-	public Component shopIDNotPresent() {
-		return shopIDNotPresent;
+	public Component shopNotPresent() {
+		return shopNotPresent;
 	}
 
 	@Override
-	public Component shopIDAlreadyExists() {
-		return shopIDAlreadyExists;
-	}
-
-	@Override
-	public Component shopIDNotExists() {
-		return shopIDNotExists;
-	}
-
-	@Override
-	public Component invalidShopID() {
-		return invalidShopID;
+	public Component shopAlreadyExists() {
+		return shopAlreadyExists;
 	}
 
 	@Override

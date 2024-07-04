@@ -58,7 +58,7 @@ public interface Items {
 
 		Component size(int size);
 
-		Component sum(int size);
+		Component sum(Currency currency, double size);
 
 		Component price(Currency currency, double buy, double sell);
 
@@ -68,11 +68,11 @@ public interface Items {
 
 		Component auctionBet(Currency currency, double price, double total);
 
-		Component yourBet(double size, double total);
+		Component yourBet(Currency currency, double size, double total);
 
-		Component tax(double size);
+		Component tax(Currency currency, double size);
 
-		Component fee(double size);
+		Component fee(Currency currency, double size);
 
 		Component allowFree();
 
@@ -84,7 +84,7 @@ public interface Items {
 
 		Component currentBuyer(String player);
 
-		Component currentBet(double value);
+		Component currentBet(Currency currency, double value);
 
 		Component betClick();
 

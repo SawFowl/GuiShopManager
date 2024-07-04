@@ -8,7 +8,7 @@ public interface Auction extends LocaleReference {
 
 	Component addedToBlackList();
 
-	Component itemIsAlreadyBlocked();
+	Component allreadyBlocked();
 
 	Component betNotPresent();
 

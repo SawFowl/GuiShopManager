@@ -55,7 +55,7 @@ public class Economy {
 				TransactionResult result = uOpt.get().deposit(currency, money);
 				if (result.result() == ResultType.SUCCESS) {
 					if(plugin.getRootNode().node("PlayerTransactionMessage").getBoolean()) {
-						player.sendMessage(plugin.getLocales().getLocale(player.locale()).messages().shopTransactions().itemSell(itemStack, currency, money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
+						player.sendMessage(plugin.getLocales().getLocale(player.locale()).messages().shop().itemSell(itemStack, currency, money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
 					}
 					if(plugin.getRootNode().node("Debug").getBoolean()) {
 						plugin.getLogger().info(plugin.getLocales().getSystemLocale().debug().infoGiveMoney(itemStack, player.name(), money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
@@ -99,7 +99,7 @@ public class Economy {
 				TransactionResult result = uOpt.get().withdraw(currency, money);
 				if (result.result() == ResultType.SUCCESS) {
 					if(plugin.getRootNode().node("PlayerTransactionMessage").getBoolean()) {
-						player.sendMessage(plugin.getLocales().getLocale(player.locale()).messages().shopTransactions().itemBuy(itemStack, currency, money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
+						player.sendMessage(plugin.getLocales().getLocale(player.locale()).messages().shop().itemBuy(itemStack, currency, money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
 					}
 					if(plugin.getRootNode().node("Debug").getBoolean()) {
 						plugin.getLogger().info(plugin.getLocales().getSystemLocale().debug().infoTakeMoney(itemStack, player.name(), money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));

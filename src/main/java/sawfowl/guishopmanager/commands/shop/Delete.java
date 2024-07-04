@@ -31,16 +31,10 @@ public class Delete extends AbstractCommand {
 	@Override
 	public void execute(CommandContext context, Audience audience, Locale locale, boolean isPlayer) throws CommandException {
 		if(context.one(CommandParameters.SHOP).isPresent()) {
-			Shop shop = context.one(CommandParameters.SHOP).orElse(null);
-			if(shop != null) {
-				plugin.removeShop(shop.getID());
-				audience.sendMessage(getComponent(locale, "Messages", "SuccessDelete"));
-			} else {
-				audience.sendMessage(getComponent(locale, "Messages", "ShopIDNotExists"));
-			}
-		} else {
-			audience.sendMessage(getComponent(locale, "Messages", "ShopIDNotPresent"));
-		}
+			Shop shop = context.one(CommandParameters.SHOP).get();
+			plugin.removeShop(shop.getID());
+			audience.sendMessage(getCommands(locale).shop().delete());
+		} else exception(getExceptions(locale).shopNotPresent());
 	}
 
 	@Override
@@ -55,7 +49,7 @@ public class Delete extends AbstractCommand {
 
 	@Override
 	public List<ParameterSettings> getArguments() {
-		return Arrays.asList(ParameterSettings.of(CommandParameters.SHOP, false, "Messages", "ShopIDNotPresent"));
+		return Arrays.asList(ParameterSettings.of(CommandParameters.SHOP, false, locale -> getExceptions(locale).shopNotPresent()));
 	}
 
 }

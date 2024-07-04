@@ -33,8 +33,8 @@ public class Delete extends AbstractCommand {
 		CommandShopData shop = context.one(CommandParameters.COMMAND_SHOP).orElse(null);
 		if(shop != null) {
 			plugin.removeCommandShopData(shop.getID());
-			audience.sendMessage(getComponent(locale, "Messages", "SuccessDelete"));
-		} else exception(locale, "Messages", "ShopIDNotExists");
+			audience.sendMessage(getCommands(locale).commandShop().delete());
+		} else exception(getExceptions(locale).shopNotPresent());
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class Delete extends AbstractCommand {
 
 	@Override
 	public List<ParameterSettings> getArguments() {
-		return Arrays.asList(ParameterSettings.of(CommandParameters.COMMAND_SHOP, false, false, new Object[] {"Messages", "ShopIDNotPresent"}));
+		return Arrays.asList(ParameterSettings.of(CommandParameters.COMMAND_SHOP, false, false, locale -> getExceptions(locale).shopNotPresent()));
 	}
 
 }

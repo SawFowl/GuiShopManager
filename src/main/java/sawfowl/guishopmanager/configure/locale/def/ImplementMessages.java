@@ -13,8 +13,8 @@ public class ImplementMessages implements Messages {
 	private ImplementAuction auction = new ImplementAuction();
 	@Setting("Exceptions")
 	private ImplementExceptions exceptions = new ImplementExceptions();
-	@Setting("ShopTransactions")
-	private ImplementShopTransactions shopTransactions = new ImplementShopTransactions();
+	@Setting("Shop")
+	private ImplementShop shopTransactions = new ImplementShop();
 	public ImplementMessages() {}
 
 	@Override
@@ -28,7 +28,7 @@ public class ImplementMessages implements Messages {
 	}
 
 	@Override
-	public ShopTransactions shopTransactions() {
+	public Shop shop() {
 		return shopTransactions;
 	}
 

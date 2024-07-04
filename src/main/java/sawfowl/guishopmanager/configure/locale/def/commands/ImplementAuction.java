@@ -28,7 +28,7 @@ public class ImplementAuction implements Auction {
 	}
 
 	@Override
-	public Component itemIsAlreadyBlocked() {
+	public Component allreadyBlocked() {
 		return itemIsAlreadyBlocked;
 	}
 

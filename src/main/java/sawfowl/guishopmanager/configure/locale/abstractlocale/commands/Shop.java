@@ -10,9 +10,9 @@ public interface Shop extends LocaleReference {
 
 	Component delete();
 
-	Component listTitle();
+	Component title();
 
-	Component listPadding();
+	Component padding();
 
 	Component translateAdded();
 

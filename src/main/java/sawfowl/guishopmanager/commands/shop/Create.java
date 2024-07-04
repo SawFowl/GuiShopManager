@@ -42,8 +42,8 @@ public class Create extends AbstractPlayerCommand {
 				shop.addMenu(1, new ShopMenuData());
 				plugin.addShop(shopID, shop);
 				plugin.getShopMenu().createInventoryToEditor(plugin.getShop(shopID).getShopMenuData(1), player, shopID, 1);
-			} else exception(locale, "Messages", "ShopIDAlreadyExists");
-		} else exception(locale, "Messages", "ShopIDNotPresent");
+			} else exception(getExceptions(locale).shopAlreadyExists());
+		} else exception(getExceptions(locale).shopNotPresent());
 	
 	}
 
@@ -64,7 +64,7 @@ public class Create extends AbstractPlayerCommand {
 
 	@Override
 	public List<ParameterSettings> getArguments() {
-		return Arrays.asList(ParameterSettings.of(CommandParameters.SHOP_ID, false, "Messages", "ShopIDNotPresent"));
+		return Arrays.asList(ParameterSettings.of(CommandParameters.SHOP_ID, false, locale -> getExceptions(locale).shopNotPresent()));
 	}
 
 }

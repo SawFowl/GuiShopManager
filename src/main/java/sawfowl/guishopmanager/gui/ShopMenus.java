@@ -25,10 +25,12 @@ import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.util.Ticks;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.configure.FillItems;
+import sawfowl.guishopmanager.configure.locale.abstractlocale.Gui;
+import sawfowl.guishopmanager.configure.locale.abstractlocale.Items;
+import sawfowl.guishopmanager.configure.locale.abstractlocale.Messages;
 import sawfowl.guishopmanager.data.shop.ShopItem;
 import sawfowl.guishopmanager.data.shop.ShopMenuData;
 import sawfowl.guishopmanager.serialization.shop.SerializedShopPrice;
@@ -57,13 +59,9 @@ public class ShopMenus {
 						itemStack.remove(Keys.LORE);
 						itemLore.add(Component.empty());
 					}
-					itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "TransactionVariants"));
-					
+					itemLore.add(getItems(player).lore().transactionVariants());
 					for(SerializedShopPrice serializablePrice : shopItemStack.getPrices()) {
-						itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Price")
-								.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(serializablePrice.getCurrency().displayName()).build())
-								.replaceText(TextReplacementConfig.builder().match("%buyprice%").replacement(Component.text(serializablePrice.getBuyPrice().doubleValue())).build())
-								.replaceText(TextReplacementConfig.builder().match("%sellprice%").replacement(Component.text(serializablePrice.getSellPrice().doubleValue())).build()));
+						itemLore.add(getItems(player).lore().price(serializablePrice.getCurrency(), serializablePrice.getBuyPrice().doubleValue(), serializablePrice.getSellPrice().doubleValue()));
 						itemLore.add(Component.empty());
 					}
 					itemStack.offer(Keys.LORE, itemLore);
@@ -73,12 +71,12 @@ public class ShopMenus {
 				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
 				if(id == 45 && plugin.getShop(shopId).hasPreviousExist(menuId)) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.BACK);
-					itemStack.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Back"));
+					itemStack.offer(Keys.CUSTOM_NAME, getItems(player).name().back());
 					slot.set(itemStack);
 				}
 				if(id == 53) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.NEXT);
-					itemStack.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Next"));
+					itemStack.offer(Keys.CUSTOM_NAME, getItems(player).name().next());
 					slot.set(itemStack);
 				}
 			}
@@ -154,12 +152,9 @@ public class ShopMenus {
 						itemStack.remove(Keys.LORE);
 						itemLore.add(Component.empty());
 					}
-					itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "TransactionVariants"));
+					itemLore.add(getItems(player).lore().transactionVariants());
 					for(SerializedShopPrice serializablePrice : shopItemStack.getPrices()) {
-						itemLore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Price")
-								.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(serializablePrice.getCurrency().displayName()).build())
-								.replaceText(TextReplacementConfig.builder().match("%buyprice%").replacement(Component.text(serializablePrice.getBuyPrice().doubleValue())).build())
-								.replaceText(TextReplacementConfig.builder().match("%sellprice%").replacement(Component.text(serializablePrice.getSellPrice().doubleValue())).build()));
+						itemLore.add(getItems(player).lore().price(serializablePrice.getCurrency(), serializablePrice.getBuyPrice().doubleValue(), serializablePrice.getSellPrice().doubleValue()));
 					}
 					itemLore.add(Component.empty());
 					itemStack.offer(Keys.LORE, itemLore);
@@ -169,12 +164,12 @@ public class ShopMenus {
 				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
 				if(id == 45 && plugin.getShop(shopId).hasPreviousExist(menuId)) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.BACK);
-					itemStack.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Back"));
+					itemStack.offer(Keys.CUSTOM_NAME, getItems(player).name().back());
 					slot.set(itemStack);
 				}
 				if(id == 53 && plugin.getShop(shopId).hasNextExist(menuId) && !plugin.getShop(shopId).getShopMenuData(menuId + 1).isEmpty()) {
 					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.NEXT);
-					itemStack.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Next"));
+					itemStack.offer(Keys.CUSTOM_NAME, getItems(player).name().next());
 					slot.set(itemStack);
 				}
 			}
@@ -242,13 +237,9 @@ public class ShopMenus {
 				}
 			}
 		}
-		if(buy) {
-			menuTitle = plugin.getLocales().getComponent(player.locale(), "Gui", "EditBuyItem");
-		} else {
-			menuTitle = plugin.getLocales().getComponent(player.locale(), "Gui", "EditSellItem");
-		}
+		menuTitle = buy ? getGui(player).editBuy() : getGui(player).editSell();
 		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X3)
-				.completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
+			.completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
 		InventoryMenu menu = viewableInventory.asMenu();
 		menu.setReadOnly(true);
 		menu.setTitle(menuTitle);
@@ -258,50 +249,50 @@ public class ShopMenus {
 				slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 			}
 			if(id <= 8) {
-				Component price = Component.text(" 0.01");
+				Component price = Component.text("0.01");
 				if(id == 1) {
-					price = Component.text(" 0.1");
+					price = Component.text("0.1");
 				} else if(id == 2) {
-					price = Component.text(" 0.5");
+					price = Component.text("0.5");
 				} else if(id == 3) {
-					price = Component.text(" 1");
+					price = Component.text("1");
 				} else if(id == 4) {
-					price = Component.text(" 5");
+					price = Component.text("5");
 				} else if(id == 5) {
-					price = Component.text(" 10");
+					price = Component.text("10");
 				} else if(id == 6) {
-					price = Component.text(" 100");
+					price = Component.text("100");
 				} else if(id == 7) {
-					price = Component.text(" 1000");
+					price = Component.text("1000");
 				} else if(id == 8) {
-					price = Component.text(" 10000");
+					price = Component.text("10000");
 				}
 				ItemStack changePrice = plugin.getFillItems().getItemStack(FillItems.valueOf("CHANGEPRICE" + id));
-				changePrice.offer(Keys.LORE, plugin.getLocales().getComponents(player.locale(), "Lore", "ChangePrice"));
-				changePrice.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Price").replaceText(TextReplacementConfig.builder().match("%value%").replacement(price).build()));
+				changePrice.offer(Keys.LORE, getItems(player).lore().changePrice());
+				changePrice.offer(Keys.CUSTOM_NAME, getItems(player).name().price(price));
 				slot.set(changePrice);
 			} else if(id == 13 && itemStack != null) {
 				editData.itemStack = itemStack;
 				slot.offer(updateDisplayItemEdit(player, prices, editData));
 			} else if(id == 18) {
 				ItemStack back = plugin.getFillItems().getItemStack(FillItems.BACK);
-				back.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Back"));
+				back.offer(Keys.CUSTOM_NAME, getItems(player).name().back());
 				slot.set(back);
 			} else if(id == 21) {
 				ItemStack clear = plugin.getFillItems().getItemStack(FillItems.CLEAR);
-				clear.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Clear"));
+				clear.offer(Keys.CUSTOM_NAME, getItems(player).name().clear());
 				slot.set(clear);
 			} else if(id == 22) {
 				ItemStack switchMode = plugin.getFillItems().getItemStack(FillItems.SWITCHMODE);
-				switchMode.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "SwitchMode"));
+				switchMode.offer(Keys.CUSTOM_NAME, getItems(player).name().switchMode());
 				slot.set(switchMode);
 			} else if(id == 23) {
 				ItemStack changeCurrency = plugin.getFillItems().getItemStack(FillItems.CHANGECURRENCY);
-				changeCurrency.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "ChangeCurrency"));
+				changeCurrency.offer(Keys.CUSTOM_NAME, getItems(player).name().changeCurrency());
 				slot.set(changeCurrency);
 			} else if(id == 26) {
 				ItemStack exit = plugin.getFillItems().getItemStack(FillItems.EXIT);
-				exit.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Exit"));
+				exit.offer(Keys.CUSTOM_NAME, getItems(player).name().exit());
 				slot.set(exit);
 			}
 		}
@@ -335,7 +326,7 @@ public class ShopMenus {
 						menu.inventory().slot(13).get().set(updateDisplayItemEdit(player, prices, editData));
 					} else if(slotIndex == 18) {
 						if(!plugin.shopExists(shopId)) {
-							player.sendMessage(Component.text().append(plugin.getLocales().getComponent(player.locale(), "Messages", "ShopIDNotExists").append(Component.text(" " + shopId))));
+							player.sendMessage(getMessages(player).shopNotExists(shopId));
 							player.closeInventory();
 						}
 						if(editData.remove) {
@@ -366,7 +357,7 @@ public class ShopMenus {
 						menu.inventory().slot(13).get().set(updateDisplayItemEdit(player, prices, editData));
 					} else if(slotIndex == 26) {
 						if(!plugin.shopExists(shopId)) {
-							player.sendMessage(Component.text().append(plugin.getLocales().getComponent(player.locale(), "Messages", "ShopIDNotExists").append(Component.text(" " + shopId))));
+							player.sendMessage(getMessages(player).shopNotExists(shopId));
 							closePlayerInventory(player);
 							return false;
 						}
@@ -420,7 +411,7 @@ public class ShopMenus {
 				}
 			}
 		}
-		menuTitle = plugin.getLocales().getComponent(player.locale(), "Gui", (buy ? "EditBuyTransaction" : "EditSellTransaction"));
+		menuTitle = buy ? getGui(player).buyTransaction() : getGui(player).sellTransaction();
 		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X3).completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();
 		InventoryMenu menu = viewableInventory.asMenu();
 		menu.setTitle(menuTitle);
@@ -429,25 +420,25 @@ public class ShopMenus {
 			int id = slot.get(Keys.SLOT_INDEX).get();
 			if(id != 13) slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 			if(id <= 8) {
-				Component size = Component.text(" 1");
+				Component size = Component.text("1");
 				if(id == 1) {
-					size = Component.text(" 2");
+					size = Component.text("2");
 				} else if(id == 2) {
-					size = Component.text(" 4");
+					size = Component.text("4");
 				} else if(id == 3) {
-					size = Component.text(" 8");
+					size = Component.text("8");
 				} else if(id == 4) {
-					size = Component.text(" 16");
+					size = Component.text("16");
 				} else if(id == 5) {
-					size = Component.text(" 32");
+					size = Component.text("32");
 				} else if(id == 6) {
-					size = Component.text(" 64");
+					size = Component.text("64");
 				} else if(id == 7) {
-					size = Component.text(" 128");
-				} else if(id == 8) size = Component.text(" MAX");
+					size = Component.text("128");
+				} else if(id == 8) size = Component.text("MAX");
 				ItemStack changeSize = plugin.getFillItems().getItemStack(FillItems.valueOf("CHANGESIZE" + id));
-				changeSize.offer(Keys.LORE, plugin.getLocales().getComponents(player.locale(), "Lore", "ChangeSize"));
-				changeSize.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Size").replaceText(TextReplacementConfig.builder().match("%value%").replacement(size).build()));
+				changeSize.offer(Keys.LORE, getItems(player).lore().changeSize());
+				changeSize.offer(Keys.CUSTOM_NAME, getItems(player).name().size(size));
 				slot.set(changeSize);
 			} else if(id == 13 && itemStack != null) {
 				editData.itemStack = itemStack;
@@ -455,31 +446,31 @@ public class ShopMenus {
 			} else if(id == 18) {
 				ItemStack back = plugin.getFillItems().getItemStack(FillItems.BACK);
 				if(buy) {
-					back.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "BuyAndBack"));
+					back.offer(Keys.CUSTOM_NAME, getItems(player).name().buyAndBack());
 				} else {
-					back.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "SellAndBack"));
+					back.offer(Keys.CUSTOM_NAME, getItems(player).name().sellAndBack());
 				}
 				slot.set(back);
 			} else if(id == 21) {
 				ItemStack clear = plugin.getFillItems().getItemStack(FillItems.CLEAR);
-				clear.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Clear"));
+				clear.offer(Keys.CUSTOM_NAME, getItems(player).name().clear());
 				slot.set(clear);
 			} else if(id == 22) {
 				ItemStack switchMode = plugin.getFillItems().getItemStack(FillItems.SWITCHMODE);
-				switchMode.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "SwitchMode"));
+				switchMode.offer(Keys.CUSTOM_NAME, getItems(player).name().switchMode());
 				slot.set(switchMode);
 			} else if(id == 23) {
 				ItemStack changeCurrency = plugin.getFillItems().getItemStack(FillItems.CHANGECURRENCY);
-				changeCurrency.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "ChangeCurrency"));
+				changeCurrency.offer(Keys.CUSTOM_NAME, getItems(player).name().changeCurrency());
 				slot.set(changeCurrency);
 			} else if(id == 26) {
 				if(buy) {
 					ItemStack buyItem = plugin.getFillItems().getItemStack(FillItems.BUY);
-					buyItem.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Buy"));
+					buyItem.offer(Keys.CUSTOM_NAME, getItems(player).name().buy());
 					slot.set(buyItem);
 				} else {
 					ItemStack sellItem = plugin.getFillItems().getItemStack(FillItems.SELL);
-					sellItem.offer(Keys.CUSTOM_NAME, plugin.getLocales().getComponent(player.locale(), "FillItems", "Sell"));
+					sellItem.offer(Keys.CUSTOM_NAME, getItems(player).name().sell());
 					slot.set(sellItem);
 				}
 			}
@@ -532,7 +523,7 @@ public class ShopMenus {
 						if(editData.size > 0) {
 							if(buy) {
 								if(!plugin.getEconomy().checkPlayerBalance(player.uniqueId(), prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice().multiply(BigDecimal.valueOf(editData.itemStack.quantity()))) || !plugin.getEconomy().removeFromPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice(), editData.itemStack)) {
-									player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "NoMoney"));
+									player.sendMessage(getExceptions(player).noMoney());
 									return false;
 								}
 								editData.itemStack.setQuantity(editData.size);
@@ -569,7 +560,7 @@ public class ShopMenus {
 							if(buy) {
 								if(plugin.getEconomy().checkPlayerBalance(player.uniqueId(), prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice().multiply(BigDecimal.valueOf(editData.itemStack.quantity()))) && plugin.getEconomy().removeFromPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice(), editData.itemStack)) {
 									player.inventory().offer(editData.itemStack.copy());
-								} else player.sendMessage(plugin.getLocales().getComponent(player.locale(), "Messages", "NoMoney"));
+								} else player.sendMessage(getExceptions(player).noMoney());
 							} else {
 								if(plugin.getEconomy().addToPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getSellPrice(), editData.itemStack)) player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(editData.itemStack)).poll(editData.itemStack.quantity());
 							}
@@ -595,13 +586,9 @@ public class ShopMenus {
 			itemStack.remove(Keys.LORE);
 			lore.add(Component.empty());
 		}
-		lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentCurrency")
-				.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(prices.get(editData.priceNumber).getCurrency().pluralDisplayName()).build()));
+		lore.add(getItems(player).lore().currency(prices.get(editData.priceNumber).getCurrency()));
 		for(SerializedShopPrice price : prices) {
-			lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Price")
-					.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(price.getCurrency().displayName()).build())
-					.replaceText(TextReplacementConfig.builder().match("%buyprice%").replacement(Component.text(price.getBuyPrice().doubleValue())).build())
-					.replaceText(TextReplacementConfig.builder().match("%sellprice%").replacement(Component.text(price.getSellPrice().doubleValue())).build()));
+			lore.add(getItems(player).lore().price(price.getCurrency(), price.getBuyPrice().doubleValue(), price.getSellPrice().doubleValue()));
 		}
 		itemStack.offer(Keys.LORE, lore);
 		return itemStack;
@@ -614,24 +601,14 @@ public class ShopMenus {
 			itemStack.remove(Keys.LORE);
 			lore.add(Component.empty());
 		}
-		lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentCurrency")
-				.replaceText(TextReplacementConfig.builder().match("%currency%")
-						.replacement(prices.get(editData.priceNumber).getCurrency().pluralDisplayName()).build()));
-		lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentSize")
-				.replaceText(TextReplacementConfig.builder().match("%size%").replacement(Component.text(editData.size)).build()));
+		lore.add(getItems(player).lore().currency(prices.get(editData.priceNumber).getCurrency()));
+		lore.add(getItems(player).lore().size(editData.size));
 		if(editData.buy) {
-			lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentSum")
-					.replaceText(TextReplacementConfig.builder().match("%size%").replacement(prices.get(editData.priceNumber).getCurrency().symbol().append(Component.text(prices.get(editData.priceNumber).getBuyPrice().multiply(BigDecimal.valueOf(editData.size)).doubleValue()))).build()));
-		} else {
-			lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "CurrentSum")
-					.replaceText(TextReplacementConfig.builder().match("%size%").replacement(prices.get(editData.priceNumber).getCurrency().symbol().append(Component.text(prices.get(editData.priceNumber).getSellPrice().multiply(BigDecimal.valueOf(editData.size)).doubleValue()))).build()));
-		}
+			lore.add(getItems(player).lore().sum(prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice().multiply(BigDecimal.valueOf(editData.size)).doubleValue()));
+		} else lore.add(getItems(player).lore().sum(prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getSellPrice().multiply(BigDecimal.valueOf(editData.size)).doubleValue()));
 		for(SerializedShopPrice price : prices) {
 			if(price.getBuyPrice().doubleValue() > 0 || price.getSellPrice().doubleValue() > 0) {
-				lore.add(plugin.getLocales().getComponent(player.locale(), "Lore", "Price")
-						.replaceText(TextReplacementConfig.builder().match("%currency%").replacement(price.getCurrency().displayName()).build())
-						.replaceText(TextReplacementConfig.builder().match("%buyprice%").replacement(Component.text(price.getBuyPrice().doubleValue())).build())
-						.replaceText(TextReplacementConfig.builder().match("%sellprice%").replacement(Component.text(price.getSellPrice().doubleValue())).build()));
+				lore.add(getItems(player).lore().price(price.getCurrency(), price.getBuyPrice().doubleValue(), price.getSellPrice().doubleValue()));
 			}
 		}
 		itemStack.offer(Keys.LORE, lore);
@@ -676,6 +653,22 @@ public class ShopMenus {
 		Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(4)).plugin(plugin.getPluginContainer()).execute(() -> {
 			player.closeInventory();
 		}).build());
+	}
+
+	private Gui.Shop getGui(ServerPlayer player) {
+		return plugin.getLocales().getLocale(player).gui().shop();
+	}
+
+	private Messages.Shop getMessages(ServerPlayer player) {
+		return plugin.getLocales().getLocale(player).messages().shop();
+	}
+
+	private Messages.Exceptions getExceptions(ServerPlayer player) {
+		return plugin.getLocales().getLocale(player).messages().exceptions();
+	}
+
+	private Items getItems(ServerPlayer player) {
+		return plugin.getLocales().getLocale(player).items();
 	}
 
 	private class EditData {

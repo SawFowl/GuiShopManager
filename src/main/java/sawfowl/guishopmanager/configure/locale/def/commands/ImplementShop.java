@@ -42,12 +42,12 @@ public class ImplementShop implements Shop {
 	}
 
 	@Override
-	public Component listTitle() {
+	public Component title() {
 		return listTitle;
 	}
 
 	@Override
-	public Component listPadding() {
+	public Component padding() {
 		return listPadding;
 	}
 

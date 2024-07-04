@@ -16,7 +16,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.commands.AbstractPlayerCommand;
-import sawfowl.guishopmanager.serialization.commandsshop.CommandsList;
 import sawfowl.guishopmanager.utils.CommandParameters;
 import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
 
@@ -48,8 +47,8 @@ public class AddCommand extends AbstractPlayerCommand {
 					player.setItemInHand(HandTypes.MAIN_HAND, shopStack.getItemStack());
 				} else player.setItemInHand(HandTypes.OFF_HAND, shopStack.getItemStack());
 			}
-			player.sendMessage(getComponent(locale, "Messages", "CommandAdded"));
-		} else exception(locale, "Messages", "ItemNotPresent");
+			player.sendMessage(getCommands(locale).commandShop().commandAdded());
+		} else exception(getExceptions(locale).itemNotPresent());
 	}
 
 	@Override
@@ -69,7 +68,7 @@ public class AddCommand extends AbstractPlayerCommand {
 
 	@Override
 	public List<ParameterSettings> getArguments() {
-		return Arrays.asList(ParameterSettings.of(CommandParameters.COMMAND, false, new Object[] {}));
+		return Arrays.asList(ParameterSettings.of(CommandParameters.COMMAND, false, null));
 	}
 
 }

@@ -15,10 +15,7 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.economy.Currency;
 
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.event.HoverEvent.ShowItem;
 
 import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
 import sawfowl.guishopmanager.GuiShopManager;
@@ -60,19 +57,18 @@ public class SetItem extends AbstractPlayerCommand {
 												serializedShopPrice.setBuyOrSellPrice(sellPrice, false, true);
 												shop.getMenus().get(menuId).getItems().put(slot, new ShopItem(itemStack, Arrays.asList(serializedShopPrice)));
 												plugin.getShopStorage().saveShop(shop.getID());
-												//String[] splitedItemID = RegistryTypes.ITEM_TYPE.get().valueKey(itemStack.type()).asString().split(":");
-												Component message = getText(locale, "Messages", "ShopItemAdded").replace(new String[] {"%item%", "%shop%"}, itemStack.type().asComponent().hoverEvent(HoverEvent.showItem(ShowItem.showItem(Key.key(ItemTypes.registry().valueKey(itemStack.type()).asString()), 1))), shop.getOrDefaultTitle(player.locale())).get();
+												Component message = getCommands(locale).shop().itemAdded(itemStack, shop.getOrDefaultTitle(locale));
 												player.sendMessage(message);
-											} else exception(locale, "Messages", "ItemNotPresent");
-										} else exception(locale, "Messages", "ItemNotPresent");
-									} else exception(locale, "Messages", "SellPriceNotPresent");
-								} else exception(locale, "Messages", "BuyPriceNotPresent");
-							} else exception(locale, "Messages", "InvalidSlot");
-						} else exception(locale, "Messages", "SlotNotPresent");
-					} else exception(locale, "Messages", "InvalidMenuId");
-				} else exception(locale, "Messages", "MenuNotPresent");
-			} else exception(locale, "Messages", "ShopIDNotPresent");
-		} else exception(locale, "Messages", "ShopListEmptyEditor");
+											} else exception(getExceptions(locale).itemNotPresent());
+										} else exception(getExceptions(locale).itemNotPresent());
+									} else exception(getExceptions(locale).sellPriceNotPresent());
+								} else exception(getExceptions(locale).buyPriceNotPresent());
+							} else exception(getExceptions(locale).invalidSlot());
+						} else exception(getExceptions(locale).slotNotPresent());
+					} else exception(getExceptions(locale).invalidMenuId());
+				} else exception(getExceptions(locale).menuNotPresent());
+			} else exception(getExceptions(locale).shopNotPresent());
+		} else exception(getCommands(locale).shop().listEmptyEditor());
 	}
 
 	@Override
@@ -97,12 +93,12 @@ public class SetItem extends AbstractPlayerCommand {
 	@Override
 	public List<ParameterSettings> getArguments() {
 		return Arrays.asList(
-			ParameterSettings.of(CommandParameters.SHOP, false, "Messages", "ShopIDNotPresent"),
-			ParameterSettings.of(CommandParameters.SHOP_MENU_NUMBER, false, "Messages", "MenuNotPresent"),
-			ParameterSettings.of(CommandParameters.SLOT, false, "Messages", "SlotNotPresent"),
-			ParameterSettings.of(CommandParameters.SHOP_BUY_PRICE, false, "Messages", "BuyPriceNotPresent"),
-			ParameterSettings.of(CommandParameters.SHOP_SELL_PRICE, false, "Messages", "SellPriceNotPresent"),
-			ParameterSettings.of(CommandParameters.CURRENCY, false, new Object[] {})
+			ParameterSettings.of(CommandParameters.SHOP, false, locale -> getExceptions(locale).shopNotPresent()),
+			ParameterSettings.of(CommandParameters.SHOP_MENU_NUMBER, false, locale -> getExceptions(locale).menuNotPresent()),
+			ParameterSettings.of(CommandParameters.SLOT, false, locale -> getExceptions(locale).slotNotPresent()),
+			ParameterSettings.of(CommandParameters.SHOP_BUY_PRICE, false, locale -> getExceptions(locale).buyPriceNotPresent()),
+			ParameterSettings.of(CommandParameters.SHOP_SELL_PRICE, false, locale -> getExceptions(locale).sellPriceNotPresent()),
+			ParameterSettings.of(CommandParameters.CURRENCY, false, locale -> getExceptions(locale).currencyNotPresent())
 		);
 	}
 

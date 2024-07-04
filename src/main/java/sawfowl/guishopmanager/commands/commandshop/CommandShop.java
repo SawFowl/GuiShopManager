@@ -44,30 +44,26 @@ public class CommandShop extends AbstractCommand {
 	@Override
 	public void execute(CommandContext context, Audience src, Locale locale, boolean isPlayer) throws CommandException {
 		if(plugin.commandShopsEmpty()) {
-			src.sendMessage(getComponent(locale, "Messages", "ShopListEmpty"));
+			src.sendMessage(getCommands(locale).shop().listEmpty());
 		} else {
 			if(context.one(CommandParameters.COMMAND_SHOP).isPresent()) {
-				CommandShopData shop = context.one(CommandParameters.COMMAND_SHOP).orElse(null);
+				CommandShopData shop = context.one(CommandParameters.COMMAND_SHOP).get();
 				ServerPlayer srcPlayer = (src instanceof ServerPlayer) ? (ServerPlayer) src : null;
-				if(shop == null) {
-					src.sendMessage(getComponent(locale, "Messages", "ShopIDNotExists"));
+				if(context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).isPresent()) {
+					if(context.cause().hasPermission(Permissions.COMMANDSSHOP_OPEN_OTHER) || context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).get().uniqueId().equals((src instanceof ServerPlayer) ? ((ServerPlayer) src).uniqueId() : null)) {
+						run(context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).get(), shop);
+					} else exception(getExceptions(locale).dontOpenOther());
 				} else {
-					if(context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).isPresent()) {
-						if(context.cause().hasPermission(Permissions.COMMANDSSHOP_OPEN_OTHER) || context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).get().uniqueId().equals((src instanceof ServerPlayer) ? ((ServerPlayer) src).uniqueId() : null)) {
-							run(context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).get(), shop);
-						} else exception(locale, "Messages", "DontOpenOther");
-					} else {
-						if(srcPlayer != null) {
-							run(srcPlayer, shop);
-						} else exception(locale, "Messages", "PlayerIsNotPresent");
-					}
+					if(srcPlayer != null) {
+						run(srcPlayer, shop);
+					} else exception(getExceptions(locale).playerIsNotPresent());
 				}
 			} else {
 				List<Component> messages = new ArrayList<Component>();
 				ServerPlayer srcPlayer = (src instanceof ServerPlayer) ? (ServerPlayer) src : null;
 				ServerPlayer player = null;
 				if(srcPlayer == null && !context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).isPresent()) {
-					exception(locale, "Messages", "PlayerIsNotPresent");
+					exception(getExceptions(locale).playerIsNotPresent());
 				} else if(srcPlayer != null) {
 					if(!context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).isPresent()) {
 						player = srcPlayer;
@@ -76,14 +72,14 @@ public class CommandShop extends AbstractCommand {
 							player = srcPlayer;
 						} else {
 							if(!srcPlayer.hasPermission(Permissions.COMMANDSSHOP_OPEN_OTHER)) {
-								srcPlayer.sendMessage(getComponent(srcPlayer.locale(), "Messages", "DontOpenOther"));
+								srcPlayer.sendMessage(getExceptions(locale).dontOpenOther());
 							}
 						}
 					}
 				} else if(srcPlayer == null && context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).isPresent()) {
 					player = context.one(CommandParameters.PLAYER_FOR_COMMANDSHOP).get();
 				}
-				Component hover = getComponent(locale, "Hover", "OpenShop");
+				Component hover = getCommands(locale).shop().open();
 				for(CommandShopData shop : plugin.getAllCommandShops()) {
 					final ServerPlayer fPlayer = player;
 					Component message = shop.getOrDefaultTitle(locale).clickEvent(SpongeComponents.executeCallback(cause -> {
@@ -92,8 +88,8 @@ public class CommandShop extends AbstractCommand {
 					messages.add(message);
 				}
 				PaginationList.builder()
-				.title(getComponent(locale, "Messages", "ShopListTitle"))
-				.padding(getComponent(locale, "Messages", "ShopListPadding"))
+				.title(getCommands(locale).commandShop().title())
+				.padding(getCommands(locale).commandShop().padding())
 				.contents(messages)
 				.linesPerPage(10)
 				.sendTo(player);
@@ -114,8 +110,8 @@ public class CommandShop extends AbstractCommand {
 	@Override
 	public List<ParameterSettings> getArguments() {
 		return Arrays.asList(
-			ParameterSettings.of(CommandParameters.COMMAND_SHOP, false, "Messages", "ShopIDNotExists"),
-			ParameterSettings.of(CommandParameters.PLAYER_FOR_COMMANDSHOP, false, "Messages", "PlayerIsNotPresent")
+			ParameterSettings.of(CommandParameters.COMMAND_SHOP, false, locale -> getExceptions(locale).shopNotPresent()),
+			ParameterSettings.of(CommandParameters.PLAYER_FOR_COMMANDSHOP, false, locale -> getExceptions(locale).playerIsNotPresent())
 		);
 	}
 

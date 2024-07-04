@@ -37,20 +37,16 @@ public class Translate extends AbstractCommand {
 	@Override
 	public void execute(CommandContext context, Audience audience, Locale localeSrc, boolean isPlayer) throws CommandException {
 		if(context.one(CommandParameters.COMMAND_SHOP).isPresent()) {
-			CommandShopData shop = context.one(CommandParameters.COMMAND_SHOP).orElse(null);
-			if(shop != null) {
-				if(context.one(CommandParameters.LOCALE).isPresent()) {
-					Locale locale = context.one(CommandParameters.LOCALE).orElse(null);
-					if(locale != null) {
-						if(context.one(CommandParameters.TRANSLATE).isPresent()) {
-							shop.addTitle(locale.toLanguageTag(), LegacyComponentSerializer.legacyAmpersand().deserialize(context.one(CommandParameters.TRANSLATE).get()));
-							plugin.getCommandsShopStorage().saveCommandsShop(shop.getID());
-							audience.sendMessage(getComponent(localeSrc, "Messages", "TranslateAdded"));
-						} else exception(localeSrc, "Messages", "TranslateNotPresent");
-					} else exception(localeSrc, "Messages", "LocaleNotExist");
-				} else exception(localeSrc, "Messages", "LocaleNotPresent");
-			} else exception(localeSrc, "Messages", "ShopIDNotExists");
-		} else exception(localeSrc, "Messages", "ShopIDNotPresent");
+			CommandShopData shop = context.one(CommandParameters.COMMAND_SHOP).get();
+			if(context.one(CommandParameters.LOCALE).isPresent()) {
+				Locale locale = context.one(CommandParameters.LOCALE).get();
+				if(context.one(CommandParameters.TRANSLATE).isPresent()) {
+					shop.addTitle(locale.toLanguageTag(), LegacyComponentSerializer.legacyAmpersand().deserialize(context.one(CommandParameters.TRANSLATE).get()));
+					plugin.getCommandsShopStorage().saveCommandsShop(shop.getID());
+					audience.sendMessage(getCommands(localeSrc).shop().translateAdded());
+				} else exception(getExceptions(localeSrc).translateNotPresent());
+			} else exception(getExceptions(localeSrc).localeNotPresent());
+		} else exception(localeSrc, getExceptions(localeSrc).shopNotPresent());
 	}
 
 	@Override
@@ -66,9 +62,9 @@ public class Translate extends AbstractCommand {
 	@Override
 	public List<ParameterSettings> getArguments() {
 		return Arrays.asList(
-			ParameterSettings.of(CommandParameters.COMMAND_SHOP, false, "Messages", "ShopIDNotPresent"),
-			ParameterSettings.of(CommandParameters.LOCALE, false, "Messages", "LocaleNotPresent"),
-			ParameterSettings.of(CommandParameters.TRANSLATE, false, "Messages", "TranslateNotPresent")
+			ParameterSettings.of(CommandParameters.COMMAND_SHOP, false, locale -> getExceptions(locale).shopNotPresent()),
+			ParameterSettings.of(CommandParameters.LOCALE, false, locale -> getExceptions(locale).localeNotPresent()),
+			ParameterSettings.of(CommandParameters.TRANSLATE, false, locale -> getExceptions(locale).translateNotPresent())
 		);
 	}
 

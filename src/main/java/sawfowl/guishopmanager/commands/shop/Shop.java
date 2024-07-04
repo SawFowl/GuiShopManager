@@ -50,28 +50,25 @@ public class Shop extends AbstractCommand implements CommandExecutor  {
 	@Override
 	public void execute(CommandContext context, Audience audience, Locale locale, boolean isPlayer) throws CommandException {
 		if(plugin.shopsEmpty()) {
-			audience.sendMessage(plugin.getLocales().getComponent(((LocaleSource) audience).locale(), "Messages", "ShopListEmpty"));
+			exception(getCommands(locale).shop().listEmpty());
 		} else {
 			if(context.one(CommandParameters.SHOP).isPresent()) {
-				sawfowl.guishopmanager.data.shop.Shop shop = context.one(CommandParameters.SHOP).orElse(null);
+				sawfowl.guishopmanager.data.shop.Shop shop = context.one(CommandParameters.SHOP).get();
 				ServerPlayer srcPlayer = (audience instanceof ServerPlayer) ? (ServerPlayer) audience : null;
-				if(shop == null) {
-					audience.sendMessage(plugin.getLocales().getComponent(((LocaleSource) audience).locale(), "Messages", "ShopIDNotExists"));
-				} else {
-					if(context.one(CommandParameters.PLAYER_FOR_SHOP).isPresent()) {
-						if(context.cause().hasPermission(Permissions.SHOP_OPEN_OTHER) || context.one(CommandParameters.PLAYER_FOR_SHOP).get().uniqueId().equals((audience instanceof ServerPlayer) ? ((ServerPlayer) audience).uniqueId() : null)) {
-							run(context.one(CommandParameters.PLAYER_FOR_SHOP).get(), shop);
-						} else {
-							audience.sendMessage(plugin.getLocales().getComponent(((LocaleSource) audience).locale(), "Messages", "DontOpenOther"));
-						}
+				if(context.one(CommandParameters.PLAYER_FOR_SHOP).isPresent()) {
+					if(context.cause().hasPermission(Permissions.SHOP_OPEN_OTHER) || context.one(CommandParameters.PLAYER_FOR_SHOP).get().uniqueId().equals((audience instanceof ServerPlayer) ? ((ServerPlayer) audience).uniqueId() : null)) {
+						run(context.one(CommandParameters.PLAYER_FOR_SHOP).get(), shop);
 					} else {
-						if(srcPlayer != null) {
-							run(srcPlayer, shop);
-						} else {
-							audience.sendMessage(plugin.getLocales().getComponent(((LocaleSource) audience).locale(), "Messages", "PlayerIsNotPresent"));
-						}
+						audience.sendMessage(getExceptions(locale).dontOpenOther());
+					}
+				} else {
+					if(srcPlayer != null) {
+						run(srcPlayer, shop);
+					} else {
+						audience.sendMessage(getExceptions(locale).playerIsNotPresent());
 					}
 				}
+			
 			} else {
 				List<Component> messages = new ArrayList<Component>();
 				ServerPlayer srcPlayer = isPlayer ? (ServerPlayer) audience : null;
@@ -86,14 +83,14 @@ public class Shop extends AbstractCommand implements CommandExecutor  {
 							player = srcPlayer;
 						} else {
 							if(!srcPlayer.hasPermission(Permissions.SHOP_OPEN_OTHER)) {
-								srcPlayer.sendMessage(plugin.getLocales().getComponent(srcPlayer.locale(), "Messages", "DontOpenOther"));
+								srcPlayer.sendMessage(getExceptions(locale).dontOpenOther());
 							}
 						}
 					}
 				} else if(srcPlayer == null && context.one(CommandParameters.PLAYER_FOR_SHOP).isPresent()) {
 					player = context.one(CommandParameters.PLAYER_FOR_SHOP).get();
 				}
-				Component hover = plugin.getLocales().getComponent(((LocaleSource) audience).locale(), "Hover", "OpenShop");
+				Component hover = getCommands(locale).shop().open();
 				for(sawfowl.guishopmanager.data.shop.Shop shop : plugin.getAllShops()) {
 					final ServerPlayer fPlayer = player;
 					Component message = shop.getOrDefaultTitle(((LocaleSource) audience).locale()).clickEvent(SpongeComponents.executeCallback(cause -> {
@@ -102,8 +99,8 @@ public class Shop extends AbstractCommand implements CommandExecutor  {
 					messages.add(message);
 				}
 				PaginationList.builder()
-				.title(plugin.getLocales().getComponent(((LocaleSource) audience).locale(), "Messages", "ShopListTitle"))
-				.padding(plugin.getLocales().getComponent(((LocaleSource) audience).locale(), "Messages", "ShopListPadding"))
+				.title(getCommands(locale).shop().title())
+				.padding(getCommands(locale).shop().padding())
 				.contents(messages)
 				.linesPerPage(10)
 				.sendTo(audience);
@@ -124,8 +121,8 @@ public class Shop extends AbstractCommand implements CommandExecutor  {
 	@Override
 	public List<ParameterSettings> getArguments() {
 		return Arrays.asList(
-			ParameterSettings.of(CommandParameters.SHOP, false, "Messages", "ShopIDNotPresent"),
-			ParameterSettings.of(CommandParameters.PLAYER_FOR_SHOP, false, "Messages", "PlayerIsNotPresent")
+			ParameterSettings.of(CommandParameters.SHOP, false, locale -> getExceptions(locale).shopNotPresent()),
+			ParameterSettings.of(CommandParameters.PLAYER_FOR_SHOP, false, locale -> getExceptions(locale).playerIsNotPresent())
 		);
 	}
 
