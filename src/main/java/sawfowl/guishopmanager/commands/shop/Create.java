@@ -9,7 +9,6 @@ import org.spongepowered.api.command.Command.Parameterized;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 import net.kyori.adventure.text.Component;
 
@@ -32,11 +31,7 @@ public class Create extends AbstractPlayerCommand {
 	public void execute(CommandContext context, ServerPlayer player, Locale locale) throws CommandException {
 		if(context.one(CommandParameters.SHOP_ID).isPresent()) {
 			String shopID = TextUtils.clearDecorations(context.one(CommandParameters.SHOP_ID).get().toLowerCase());
-			try {
-				if(!plugin.getRootNode().node("Aliases", "Shop", "List").empty() && plugin.getRootNode().node("Aliases", "Shop", "List").getList(String.class).stream().map(String::toLowerCase).collect(Collectors.toList()).contains(shopID)) exception(locale, "Messages", "InvalidShopID");
-			} catch (SerializationException e) {
-				plugin.getLogger().error(e.getLocalizedMessage());
-			}
+			if(!plugin.getConfig().getAliases().getShop().getList().isEmpty() && plugin.getConfig().getAliases().getShop().getList().stream().map(String::toLowerCase).collect(Collectors.toList()).contains(shopID)) exception(getExceptions(locale).shopNotPresent());
 			if(!plugin.shopExists(shopID)) {
 				Shop shop = new Shop(Component.text(shopID));
 				shop.addMenu(1, new ShopMenuData());

@@ -1,4 +1,4 @@
-package sawfowl.guishopmanager.utils;
+ package sawfowl.guishopmanager.utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -54,14 +54,14 @@ public class Economy {
 				money = money.multiply(BigDecimal.valueOf(itemStack.quantity()));
 				TransactionResult result = uOpt.get().deposit(currency, money);
 				if (result.result() == ResultType.SUCCESS) {
-					if(plugin.getRootNode().node("PlayerTransactionMessage").getBoolean()) {
+					if(plugin.getConfig().isPlayerTransactionMessage()) {
 						player.sendMessage(plugin.getLocales().getLocale(player.locale()).messages().shop().itemSell(itemStack, currency, money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
 					}
-					if(plugin.getRootNode().node("Debug").getBoolean()) {
+					if(plugin.getConfig().isDebugEconomy()) {
 						plugin.getLogger().info(plugin.getLocales().getSystemLocale().debug().infoGiveMoney(itemStack, player.name(), money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
 					}
 					return true;
-				} else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getRootNode().node("Debug").getBoolean()) {
+				} else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getConfig().isDebugEconomy()) {
 					plugin.getLogger().error(plugin.getLocales().getSystemLocale().debug().errorGiveMoney(player.name()));
 				} else {
 				}
@@ -80,7 +80,7 @@ public class Economy {
 				TransactionResult result = uOpt.get().withdraw(currency, money);
 				if (result.result() == ResultType.SUCCESS) {
 					return true;
-				} else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getRootNode().node("Debug").getBoolean()) {
+				} else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getConfig().isDebugEconomy()) {
 					plugin.getLogger().error(plugin.getLocales().getSystemLocale().debug().errorGiveMoney(player.name()));
 				} else {
 				}
@@ -98,14 +98,14 @@ public class Economy {
 				money = money.multiply(BigDecimal.valueOf(itemStack.quantity()));
 				TransactionResult result = uOpt.get().withdraw(currency, money);
 				if (result.result() == ResultType.SUCCESS) {
-					if(plugin.getRootNode().node("PlayerTransactionMessage").getBoolean()) {
+					if(plugin.getConfig().isPlayerTransactionMessage()) {
 						player.sendMessage(plugin.getLocales().getLocale(player.locale()).messages().shop().itemBuy(itemStack, currency, money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
 					}
-					if(plugin.getRootNode().node("Debug").getBoolean()) {
+					if(plugin.getConfig().isDebugEconomy()) {
 						plugin.getLogger().info(plugin.getLocales().getSystemLocale().debug().infoTakeMoney(itemStack, player.name(), money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
 					}
 					return true;
-				} else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getRootNode().node("Debug").getBoolean()) {
+				} else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getConfig().isDebugEconomy()) {
 					plugin.getLogger().error(plugin.getLocales().getSystemLocale().debug().errorTakeMoney(player.name()));
 				} else {
 				}
@@ -132,11 +132,11 @@ public class Economy {
 			if(isTax) money = money.subtract(tax);
 			if(!checkPlayerBalance(buyerUUID, currency, money)) return false;
 			TransferResult transferResult = sOpt.get().transfer(bOpt.get(), currency, money);
-			if(plugin.getRootNode().node("Debug").getBoolean()) {
+			if(plugin.getConfig().isDebugEconomy()) {
 				plugin.getLogger().info(plugin.getLocales().getSystemLocale().debug().infoGiveMoney(itemStack, bOpt.get().identifier(), money.doubleValue(), getPlayerBalance(bOpt.get().uniqueId(), currency).doubleValue()));
 			}
 			if(transferResult.result() == ResultType.SUCCESS) {
-				if(plugin.getRootNode().node("PlayerTransactionMessage").getBoolean()) {
+				if(plugin.getConfig().isPlayerTransactionMessage()) {
 					Sponge.server().player(buyerUUID).ifPresent(buyer -> {
 						buyer.sendMessage(plugin.getLocales().getLocale(buyer).messages().auction().buy(itemStack, currency, transferResult.amount().doubleValue(), getPlayerBalance(buyerUUID, currency).doubleValue(), TextUtils.deserialize(auctionItem.getOwnerName())));
 					});
@@ -149,7 +149,7 @@ public class Economy {
 					}
 				});
 				return true;
-			} else if((transferResult.result() == ResultType.FAILED || transferResult.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getRootNode().node("Debug").getBoolean()) {
+			} else if((transferResult.result() == ResultType.FAILED || transferResult.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getConfig().isDebugEconomy()) {
 				plugin.getLogger().error(plugin.getLocales().getSystemLocale().debug().errorTakeMoney(bOpt.get().identifier()));
 			}
 		} catch (Exception e) {

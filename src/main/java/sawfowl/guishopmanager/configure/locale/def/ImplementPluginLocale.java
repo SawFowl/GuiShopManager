@@ -4,6 +4,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import sawfowl.guishopmanager.configure.locale.abstractlocale.Commands;
+import sawfowl.guishopmanager.configure.locale.abstractlocale.Comments;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.Debug;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.Gui;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.Items;
@@ -23,6 +24,8 @@ public class ImplementPluginLocale implements AbstractLocale {
 	private ImplementItems items = new ImplementItems();
 	@Setting("Messages")
 	private ImplementMessages messages = new ImplementMessages();
+	@Setting("Comments")
+	private ImplementComments comments = new ImplementComments();
 	public ImplementPluginLocale() {}
 
 	@Override
@@ -48,6 +51,11 @@ public class ImplementPluginLocale implements AbstractLocale {
 	@Override
 	public Messages messages() {
 		return messages;
+	}
+
+	@Override
+	public Comments comments() {
+		return comments;
 	}
 
 }

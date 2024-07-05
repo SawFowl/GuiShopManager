@@ -45,7 +45,7 @@ public class MySqlStorage extends Thread implements DBStorage {
 	private Connection syncConnection;
 	public MySqlStorage(GuiShopManager instance) {
 		plugin = instance;
-		prefix = plugin.getRootNode().node("MySQL", "Prefix").getString();
+		prefix = plugin.getConfig().getMySQL().getPrefix();
 		createTables();
 		sync();
 	}
@@ -75,7 +75,7 @@ public class MySqlStorage extends Thread implements DBStorage {
 			plugin.getLogger().error(createCommandsShopsTable);
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
-		if(plugin.getRootNode().node("Auction", "Enable").getBoolean()) {
+		if(plugin.getConfig().getAuction().isEnable()) {
 			try {
 				Statement statement = createStatement();
 				statement.execute(createAuctionTable);
@@ -323,7 +323,7 @@ public class MySqlStorage extends Thread implements DBStorage {
 
 	@Override
 	public Format getFormat() {
-		return Format.find(plugin.getRootNode().node("ConfigTypes", "SqlFormat").getString());
+		return Format.find(plugin.getConfig().getConfigType().getSqlFormat());
 	}
 
 	private void loadActualAuctionData() {
@@ -418,7 +418,6 @@ public class MySqlStorage extends Thread implements DBStorage {
 	}
 
 	public void sync() {
-		if(plugin.getRootNode().node("MySQL", "SyncInterval").getInt(5) < 1) return;
 		if(task != null) {
 			task.cancel();
 			task = null;
@@ -427,9 +426,9 @@ public class MySqlStorage extends Thread implements DBStorage {
 	}
 
 	private ScheduledTask syncTask() {
-		return Sponge.asyncScheduler().submit(Task.builder().plugin(plugin.getPluginContainer()).interval(plugin.getRootNode().node("MySQL", "SyncInterval").getInt(5), TimeUnit.SECONDS).execute(() -> {
+		return Sponge.asyncScheduler().submit(Task.builder().plugin(plugin.getPluginContainer()).interval(plugin.getConfig().getMySQL().getSyncInterval(), TimeUnit.SECONDS).execute(() -> {
 			try {
-				if(plugin.getRootNode().node("Auction", "Enable").getBoolean() && (plugin.getAuctionStorage().getClass() == MySqlStorage.this.getClass())  || plugin.getAuctionStorage() instanceof MySqlStorage) {
+				if(plugin.getConfig().getAuction().isEnable() && (plugin.getAuctionStorage().getClass() == MySqlStorage.this.getClass())  || plugin.getAuctionStorage() instanceof MySqlStorage) {
 					syncAuction();
 					syncAuctionExpired();
 					syncAuctionExpiredBet();

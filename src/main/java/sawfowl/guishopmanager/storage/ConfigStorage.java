@@ -40,12 +40,12 @@ public class ConfigStorage implements DataStorage {
 		Optional<File> auctionConfig = Stream.of(plugin.getConfigDir().toFile().listFiles()).filter(file -> file.getName().contains("Auction")).findFirst();
 		if(auctionConfig.isPresent()) {
 			auctionConfigLoader = createConfigLoader(auctionConfig.get(), 2);
-		} else auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getRootNode().node("ConfigTypes", "Auction").getString()), plugin.getRootNode().node("ConfigTypes", "Auction").getString(), 2);
+		} else auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getConfig().getConfigType().getAuction()), plugin.getConfig().getConfigType().getAuction(), 2);
 		try {
 			auctionNode = auctionConfigLoader.load();
-			if(!plugin.getRootNode().node("ConfigTypes", "Auction").getString().equals("." + getExtension(auctionConfig.get().getName()))) {
+			if(!plugin.getConfig().getConfigType().getAuction().equals("." + getExtension(auctionConfig.get().getName()))) {
 				BasicConfigurationNode copy = BasicConfigurationNode.root().from(auctionNode);
-				auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getRootNode().node("ConfigTypes", "Auction").getString()), plugin.getRootNode().node("ConfigTypes", "Auction").getString(), 2);
+				auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getConfig().getConfigType().getAuction()), plugin.getConfig().getConfigType().getAuction(), 2);
 				auctionConfigLoader.save(copy);
 				auctionNode = auctionConfigLoader.load();
 				auctionConfig.get().delete();
@@ -55,14 +55,13 @@ public class ConfigStorage implements DataStorage {
 		} catch (IOException e) {
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
-		plugin.getRootNode().node("Auction", "Server").getString();
 	}
 
 	@Override
 	public void saveShop(String shopId) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			try {
-				createConfigLoader(plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "Shops").getString() + File.separator + shopId + plugin.getRootNode().node("ConfigTypes", "Shop").getString()), plugin.getRootNode().node("ConfigTypes", "Shop").getString(), 2).loadToReference().referenceTo(SerializedShop.class).setAndSave(plugin.getShop(shopId).serialize());
+				createConfigLoader(plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getShops() + File.separator + shopId + plugin.getConfig().getConfigType().getShops()), plugin.getConfig().getConfigType().getShops(), 2).loadToReference().referenceTo(SerializedShop.class).setAndSave(plugin.getShop(shopId).serialize());
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
@@ -72,14 +71,14 @@ public class ConfigStorage implements DataStorage {
 	@Override
 	public void loadShops() {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			File shopsFolder = plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "Shops").getString()).toFile();
+			File shopsFolder = plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getShops()).toFile();
 			if(!shopsFolder.exists()) return;
 			for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().endsWith(".conf") || file.getName().endsWith(".json") || file.getName().endsWith(".yml"))).collect(Collectors.toList())) {
 				try {
 					Shop shop = createConfigLoader(shopFile, 2).loadToReference().referenceTo(SerializedShop.class).get().deserialize();
 					setShopCurrencies(plugin, shop);
 					plugin.addShop(shop.getID(), shop);
-					if(!plugin.getRootNode().node("ConfigTypes", "Shop").getString().equals("." + getExtension(shopFile.getName()))) {
+					if(!plugin.getConfig().getConfigType().getShops().equals("." + getExtension(shopFile.getName()))) {
 						shopFile.delete();
 						saveShop(shop.getID());
 					}
@@ -94,7 +93,7 @@ public class ConfigStorage implements DataStorage {
 	@Override
 	public void deleteShop(String shopId) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			File shopsFolder = plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "Shops").getString()).toFile();
+			File shopsFolder = plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getShops()).toFile();
 			if(!shopsFolder.exists()) return;
 			Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().equals(shopId + ".conf") || file.getName().equals(shopId + ".json") || file.getName().equals(shopId + ".yml"))).forEach(File::delete);
 		});
@@ -104,7 +103,7 @@ public class ConfigStorage implements DataStorage {
 	public void saveCommandsShop(String shopId) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			try {
-				createConfigLoader(plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "CommandsShops").getString() + File.separator + shopId + plugin.getRootNode().node("ConfigTypes", "CommandShop").getString()), plugin.getRootNode().node("ConfigTypes", "CommandShop").getString(), 2).loadToReference().referenceTo(SerializedCommandShop.class).setAndSave(plugin.getCommandShopData(shopId).serialize());
+				createConfigLoader(plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getCommandsShops() + File.separator + shopId + plugin.getConfig().getConfigType().getCommandsShops()), plugin.getConfig().getConfigType().getCommandsShops(), 2).loadToReference().referenceTo(SerializedCommandShop.class).setAndSave(plugin.getCommandShopData(shopId).serialize());
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
@@ -114,7 +113,7 @@ public class ConfigStorage implements DataStorage {
 	@Override
 	public void loadCommandsShops() {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			File shopsFolder = plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "CommandsShops").getString()).toFile();
+			File shopsFolder = plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getCommandsShops()).toFile();
 			if(!shopsFolder.exists()) return;
 			for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().endsWith(".conf") || file.getName().endsWith(".json") || file.getName().endsWith(".yml"))).collect(Collectors.toList())) {
 				try {
@@ -122,7 +121,7 @@ public class ConfigStorage implements DataStorage {
 					setCommandShopCurrencies(plugin, shop);
 					String shopId = shop.getID();
 					plugin.addCommandShopData(shopId, shop);
-					if(!plugin.getRootNode().node("ConfigTypes", "CommandShop").getString().equals("." + getExtension(shopFile.getName()))) {
+					if(!plugin.getConfig().getConfigType().getCommandsShops().equals("." + getExtension(shopFile.getName()))) {
 						shopFile.delete();
 						saveCommandsShop(shop.getID());
 					}
@@ -136,7 +135,7 @@ public class ConfigStorage implements DataStorage {
 	@Override
 	public void deleteCommandsShop(String shopId) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			File shopsFolder = plugin.getConfigDir().resolve(plugin.getRootNode().node("StorageFolders", "CommandsShops").getString()).toFile();
+			File shopsFolder = plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getCommandsShops()).toFile();
 			if(!shopsFolder.exists()) return;
 			Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().equals(shopId + ".conf") || file.getName().equals(shopId + ".json") || file.getName().equals(shopId + ".yml"))).forEach(File::delete);
 		});

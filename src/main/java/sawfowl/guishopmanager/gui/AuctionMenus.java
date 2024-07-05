@@ -49,7 +49,7 @@ public class AuctionMenus {
 	private String serverName;
 	public AuctionMenus(GuiShopManager instance) {
 		plugin = instance;
-		serverName = plugin.getRootNode().node("Auction", "Server").getString();
+		serverName = plugin.getConfig().getAuction().getServer();
 	}
 
 	public void createInventory(ServerPlayer player, int page, List<SerializedAuctionStack> auctionStacks) {
@@ -709,7 +709,7 @@ public class AuctionMenus {
 	}
 
 	private boolean checkNbtLength(SerializedAuctionStack auctionStack) {
-		return auctionStack.getSerializedItemStack().getComponents() != null && auctionStack.getSerializedItemStack().getComponents().toString().length() > plugin.getRootNode().node("Auction", "NbtLimit").getInt();
+		return auctionStack.getSerializedItemStack().getComponents() != null && auctionStack.getSerializedItemStack().getComponents().toString().length() > plugin.getConfig().getAuction().getComponentLimit();
 	}
 
 	private PluginContainer getPluginContainer() {

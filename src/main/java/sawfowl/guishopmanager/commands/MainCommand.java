@@ -39,7 +39,7 @@ public class MainCommand extends AbstractCommand {
 		List<Component> messages = new ArrayList<Component>();
 		if(isPlayer) {
 			ServerPlayer player = (ServerPlayer) audience;
-			if(plugin.getRootNode().node("Auction", "Enable").getBoolean()) {
+			if(plugin.getConfig().getAuction().isEnable()) {
 				if(player.hasPermission(Permissions.AUCTION_OPEN_SELF)) {
 					if(player.hasPermission(Permissions.AUCTION_OPEN_OTHER)) {
 						messages.add(deserialize("&a/guishopmanager auction &e<Player>").clickEvent(ClickEvent.suggestCommand("/guishopmanager auction")).hoverEvent(HoverEvent.showText(getComponent(locale, "Hover", "RunCommand"))));
@@ -104,7 +104,7 @@ public class MainCommand extends AbstractCommand {
 				.linesPerPage(7)
 				.sendTo(player);
 		} else {
-			if(plugin.getRootNode().node("Auction", "Enable").getBoolean()) {
+			if(plugin.getConfig().getAuction().isEnable()) {
 				messages.add(deserialize("&a/guishopmanager auction &e<Player>"));
 				messages.add(deserialize("&a/guishopmanager auction additem &c<Bet> <Price> &e<Currency>"));
 				messages.add(deserialize("&a/guishopmanager auction blacklist &e<flags [mask | item]>"));
@@ -153,7 +153,7 @@ public class MainCommand extends AbstractCommand {
 
 	@Override
 	public Parameterized build() {
-		return plugin.getRootNode().node("Auction", "Enable").getBoolean()
+		return plugin.getConfig().getAuction().isEnable()
 				?
 				builder()
 					.addChild(new Auction(plugin).build(), "auction", "market")

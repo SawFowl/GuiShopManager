@@ -3,6 +3,7 @@ package sawfowl.guishopmanager.gui;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -25,6 +26,7 @@ import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.util.Ticks;
 
 import net.kyori.adventure.text.Component;
+
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.configure.FillItems;

@@ -14,4 +14,6 @@ public interface AbstractLocale extends LocaleReference {
 
 	Messages messages();
 
+	Comments comments();
+
 }

@@ -49,8 +49,9 @@ import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.loader.ConfigurationLoader;
-import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.reference.ConfigurationReference;
+import org.spongepowered.configurate.reference.ValueReference;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
@@ -63,9 +64,10 @@ import sawfowl.commandpack.utils.StorageType;
 import sawfowl.guishopmanager.commands.MainCommand;
 import sawfowl.guishopmanager.commands.auction.Auction;
 import sawfowl.guishopmanager.configure.Expire;
-import sawfowl.guishopmanager.configure.GenerateConfig;
 import sawfowl.guishopmanager.configure.GeneratedFillItems;
 import sawfowl.guishopmanager.configure.Locales;
+import sawfowl.guishopmanager.configure.config.BlackList;
+import sawfowl.guishopmanager.configure.config.Config;
 import sawfowl.guishopmanager.data.commandshop.CommandShopData;
 import sawfowl.guishopmanager.data.shop.Shop;
 import sawfowl.guishopmanager.gui.AuctionMenus;
@@ -90,10 +92,10 @@ public class GuiShopManager {
 	private Path defaultConfig;
 	private Path configDir;
 	private File configFile;
-	private ConfigurationLoader<CommentedConfigurationNode> configLoader;
-	private CommentedConfigurationNode rootNode;
-	private ConfigurationLoader<CommentedConfigurationNode> configLoaderBlackLists;
-	private CommentedConfigurationNode blackListNode;
+	private ConfigurationReference<CommentedConfigurationNode> configReference;
+	private ValueReference<Config, CommentedConfigurationNode> config;
+	private ConfigurationReference<CommentedConfigurationNode> configReferenceBlackLists;
+	private ValueReference<BlackList, CommentedConfigurationNode> configBlackLists;
 	private Logger logger;
 	private static PluginContainer container;
 	private static EconomyService economyService;
@@ -111,7 +113,6 @@ public class GuiShopManager {
 	private MySQL mySQL;
 	private Economy economy;
 	private Locales locales;
-	private GenerateConfig generateConfig;
 
 	private Map<String, Shop> shops = new HashMap<String, Shop>();
 	private Map<String, CommandShopData> commandShops = new HashMap<String, CommandShopData>();
@@ -119,7 +120,6 @@ public class GuiShopManager {
 	private Map<UUID, Set<SerializedAuctionStack>> expiredAuctionItems = new HashMap<UUID, Set<SerializedAuctionStack>>();
 	private Map<UUID, Set<SerializedAuctionStack>> expiredBetAuctionItems = new HashMap<UUID, Set<SerializedAuctionStack>>();
 	private List<Expire> expires = new ArrayList<Expire>();
-	private List<String> blackListMasks = new ArrayList<String>();
 	private List<SerializedItemStackPlainNBT> blackListStacks = new ArrayList<SerializedItemStackPlainNBT>();
 
 	//private ScheduledTask updateAuctionTask;
@@ -143,11 +143,11 @@ public class GuiShopManager {
 	public Path getConfigDir() {
 		return configDir;
 	}
-	public CommentedConfigurationNode getRootNode() {
-		return rootNode;
+	public Config getConfig() {
+		return config.get();
 	}
-	public CommentedConfigurationNode getBlackListNode() {
-		return blackListNode;
+	public BlackList getBlackList() {
+		return configBlackLists.get();
 	}
 	public PluginContainer getPluginContainer() {
 		return container;
@@ -258,29 +258,20 @@ public class GuiShopManager {
 		return expires.size() - 1;
 	}
 	public void setBlackListMasks(List<String> blackListMasks) {
-		this.blackListMasks = blackListMasks;
+		getBlackList().setMasks(blackListMasks);
 	}
 	public void addBlackListMask(ItemStack itemStack) {
-		blackListMasks.add(itemStack.type().toString());
-		try {
-			blackListNode.node("MasksList").setList(String.class, blackListMasks);
-		} catch (SerializationException e) {
-			logger.error(e.getLocalizedMessage());
-		}
+		getBlackList().getMasks().add(itemStack.type().toString().toLowerCase());
 	}
 	public void addBlackListStack(ItemStack itemStack) {
 		blackListStacks.add(new SerializedItemStackPlainNBT(itemStack));
-		try {
-			blackListNode.node("StacksList").setList(SerializedItemStackJsonNbt.class, blackListStacks.stream().map(s -> s.toSerializedItemStackJsonNbt()).toList());
-		} catch (SerializationException e) {
-			logger.error(e.getLocalizedMessage());
-		}
+		getBlackList().getItems().add(new SerializedItemStackJsonNbt(itemStack));
 	}
 	public void setBlackListStacks(List<SerializedItemStackPlainNBT> blackListStacks) {
 		this.blackListStacks = blackListStacks;
 	}
 	public boolean maskIsBlackList(String check) {
-		return blackListMasks.toString().contains(check) || blackListMasks.toString().contains(check.split(":")[1]);
+		return getBlackList().getMasks().contains(check) || getBlackList().getMasks().contains(check.split(":")[1]);
 	}
 	public boolean itemIsBlackList(ItemStack check) {
 		SerializedItemStackPlainNBT serializedItemStack = new SerializedItemStackPlainNBT(check);
@@ -295,16 +286,21 @@ public class GuiShopManager {
 		eventContext = EventContext.builder().add(EventContextKeys.PLUGIN, container).build();
 		localeAPI = event.getLocaleService();
 		locales = new Locales(localeAPI);
-		configLoader = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("Config.conf")).build();
-		configLoaderBlackLists = SerializeOptions.createHoconConfigurationLoader(2).path(configDir.resolve("AuctionBlackList.conf")).build();
+		try {
+			configReference = SerializeOptions.createHoconConfigurationLoader(1).path(configDir.resolve("Config.conf")).build().loadToReference();
+			config = configReference.referenceTo(Config.class);
+			configReference.save();
+			configReferenceBlackLists = SerializeOptions.createHoconConfigurationLoader(1).path(configDir.resolve("BlackList.conf")).build().loadToReference();
+			configBlackLists = configReferenceBlackLists.referenceTo(BlackList.class);
+			configReferenceBlackLists.save();
+		} catch (ConfigurateException e) {
+			logger.error(e.getLocalizedMessage());
+		}
 		loadConfigs();
-		generateConfig = new GenerateConfig(instance);
 	}
 
 	@Listener
 	public void getCommandPackAPI(CommandPack.PostAPI event) {
-		if(generateConfig == null) return;
-		generateConfig.generateBlackList();
 		if(!Sponge.server().serviceProvider().economyService().isPresent()) {
 			logger.error(locales.getSystemLocale().messages().exceptions().economyNotFound());
 			return;
@@ -326,8 +322,8 @@ public class GuiShopManager {
 			if(!expiredBetAuctionItems.isEmpty()) Sponge.server().onlinePlayers().forEach(this::checkExpiredBet);
 		}).build());
 		event.getAPI().registerCommand(new MainCommand(instance));
-		if(rootNode.node("Aliases", "Shop", "Enable").getBoolean()) new sawfowl.guishopmanager.commands.shop.Shop(instance).register(event.getAPI());
-		if(rootNode.node("Aliases", "Auction", "Enable").getBoolean()) new Auction(instance).register(event.getAPI());
+		if(getConfig().getAliases().getShop().isEnable()) new sawfowl.guishopmanager.commands.shop.Shop(instance).register(event.getAPI());
+		if(getConfig().getAliases().getAuction().isEnable() && getConfig().getAuction().isEnable()) new Auction(instance).register(event.getAPI());
 	}
 
 	@Listener
@@ -345,8 +341,7 @@ public class GuiShopManager {
 		shops.clear();
 		shopStorage.loadShops();
 		commandsShopStorage.loadCommandsShops();
-		if(rootNode.node("Auction", "Enable").getBoolean()) auctionStorage.loadAuction();
-		//updateAuctionData();
+		if(getConfig().getAuction().isEnable()) auctionStorage.loadAuction();
 	}
 
 	private void setWorkDataClasses() {
@@ -354,156 +349,152 @@ public class GuiShopManager {
 		if(mySQL != null) {
 			mySQL = null;
 		}
-		if(rootNode.node("SplitStorage", "Enable").getBoolean()) {
-			if(rootNode.node("MySQL", "Enable").getBoolean()) {
+		if(getConfig().getSplitStorage().isEnable()) {
+			if(getConfig().getMySQL().isEnable()) {
 				createMySQLConnect();
-				switch(StorageType.getType(rootNode.node("SplitStorage", "Auction").getString())) {
+				switch(StorageType.getType(getConfig().getSplitStorage().getAuction())) {
 					case H2:
 						auctionStorage = new H2Storage(instance);
-						if(StorageType.getType(rootNode.node("SplitStorage", "Shops").getString()) == StorageType.H2) {
+						if(StorageType.getType(getConfig().getSplitStorage().getShops()) == StorageType.H2) {
 							shopStorage = auctionStorage;
-							if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.H2) {
+							if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.H2) {
 								commandsShopStorage = shopStorage;
-							} else if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.MYSQL) {
+							} else if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.MYSQL) {
 								commandsShopStorage = new MySqlStorage(instance);
 							} else commandsShopStorage = new ConfigStorage(instance);
-						} else if(StorageType.getType(rootNode.node("SplitStorage", "Shops").getString()) == StorageType.MYSQL) {
+						} else if(StorageType.getType(getConfig().getSplitStorage().getShops()) == StorageType.MYSQL) {
 							shopStorage = new MySqlStorage(instance);
-							if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.H2) {
+							if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.H2) {
 								commandsShopStorage = new H2Storage(instance);
-							} else if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.MYSQL) {
+							} else if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.MYSQL) {
 								commandsShopStorage = shopStorage;
 							} else commandsShopStorage = new ConfigStorage(instance);
 						} else {
 							shopStorage = new ConfigStorage(instance);
-							if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.H2) {
+							if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.H2) {
 								commandsShopStorage = auctionStorage;
-							} else if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.MYSQL) {
+							} else if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.MYSQL) {
 								commandsShopStorage = new MySqlStorage(instance);
 							} else commandsShopStorage = shopStorage;
 						}
 						break;
 					case MYSQL:
 						auctionStorage = new MySqlStorage(instance);
-						if(StorageType.getType(rootNode.node("SplitStorage", "Shops").getString()) == StorageType.H2) {
+						if(StorageType.getType(getConfig().getSplitStorage().getShops()) == StorageType.H2) {
 							shopStorage = new H2Storage(instance);
-							if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.H2) {
+							if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.H2) {
 								commandsShopStorage = shopStorage;
-							} else if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.MYSQL) {
+							} else if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.MYSQL) {
 								commandsShopStorage = auctionStorage;
 							} else commandsShopStorage = new ConfigStorage(instance);
-						} else if(StorageType.getType(rootNode.node("SplitStorage", "Shops").getString()) == StorageType.MYSQL) {
+						} else if(StorageType.getType(getConfig().getSplitStorage().getShops()) == StorageType.MYSQL) {
 							shopStorage = new MySqlStorage(instance);
-							if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.H2) {
+							if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.H2) {
 								commandsShopStorage = new H2Storage(instance);
-							} else if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.MYSQL) {
+							} else if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.MYSQL) {
 								commandsShopStorage = shopStorage;
 							} else commandsShopStorage = new ConfigStorage(instance);
 						} else {
 							shopStorage = new ConfigStorage(instance);
-							if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.H2) {
+							if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.H2) {
 								commandsShopStorage = new H2Storage(instance);
-							} else if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.MYSQL) {
+							} else if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.MYSQL) {
 								commandsShopStorage = auctionStorage;
 							} else commandsShopStorage = shopStorage;
 						}
 						break;
 					default:
 						auctionStorage = new ConfigStorage(instance);
-						if(StorageType.getType(rootNode.node("SplitStorage", "Shops").getString()) == StorageType.H2) {
+						if(StorageType.getType(getConfig().getSplitStorage().getShops()) == StorageType.H2) {
 							shopStorage = new H2Storage(instance);
-							if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.H2) {
+							if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.H2) {
 								commandsShopStorage = shopStorage;
-							} else if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.MYSQL) {
+							} else if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.MYSQL) {
 								commandsShopStorage = new MySqlStorage(instance);
 							} else commandsShopStorage = auctionStorage;
-						} else if(StorageType.getType(rootNode.node("SplitStorage", "Shops").getString()) == StorageType.MYSQL) {
+						} else if(StorageType.getType(getConfig().getSplitStorage().getShops()) == StorageType.MYSQL) {
 							shopStorage = new MySqlStorage(instance);
-							if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.H2) {
+							if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.H2) {
 								commandsShopStorage = new H2Storage(instance);
-							} else if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.MYSQL) {
+							} else if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.MYSQL) {
 								commandsShopStorage = shopStorage;
 							} else commandsShopStorage = auctionStorage;
 						} else {
 							shopStorage = auctionStorage;
-							if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.H2) {
+							if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.H2) {
 								commandsShopStorage = new H2Storage(instance);
-							} else if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.MYSQL) {
+							} else if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.MYSQL) {
 								commandsShopStorage = new MySqlStorage(instance);
 							} else commandsShopStorage = auctionStorage;
 						}
 						break;
 				}
-			} else switch(StorageType.getType(rootNode.node("SplitStorage", "Auction").getString())) {
+			} else switch(StorageType.getType(getConfig().getSplitStorage().getAuction())) {
 				case H2:
 					auctionStorage = new H2Storage(instance);
-					if(StorageType.getType(rootNode.node("SplitStorage", "Shops").getString()) == StorageType.H2) {
+					if(StorageType.getType(getConfig().getSplitStorage().getShops()) == StorageType.H2) {
 						shopStorage = auctionStorage;
-						if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.H2) {
+						if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.H2) {
 							commandsShopStorage = shopStorage;
 						} else commandsShopStorage = new ConfigStorage(instance);
 					} else {
 						shopStorage = new ConfigStorage(instance);
-						if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.H2) {
+						if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.H2) {
 							commandsShopStorage = auctionStorage;
 						} else commandsShopStorage = shopStorage;
 					}
 					break;
 				default:
 					auctionStorage = new ConfigStorage(instance);
-					if(StorageType.getType(rootNode.node("SplitStorage", "Shops").getString()) == StorageType.H2) {
+					if(StorageType.getType(getConfig().getSplitStorage().getShops()) == StorageType.H2) {
 						shopStorage = new H2Storage(instance);
-						if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.H2) {
+						if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.H2) {
 							commandsShopStorage = shopStorage;
 						} else commandsShopStorage = auctionStorage;
 					} else {
 						shopStorage = auctionStorage;
-						if(StorageType.getType(rootNode.node("SplitStorage", "CommandsShops").getString()) == StorageType.H2) {
+						if(StorageType.getType(getConfig().getSplitStorage().getCommandsShops()) == StorageType.H2) {
 							commandsShopStorage = new H2Storage(instance);
 						} else commandsShopStorage = shopStorage;
 					}
 					break;
 			}
-		} else if(rootNode.node("MySQL", "Enable").getBoolean()) {
+		} else if(getConfig().getMySQL().isEnable()) {
 			createMySQLConnect();
 			shopStorage = commandsShopStorage = auctionStorage = new MySqlStorage(instance);
 		} else shopStorage = commandsShopStorage = auctionStorage = new ConfigStorage(instance);
-		if(rootNode.node("MySQL", "Enable").getBoolean()) {
+		if(getConfig().getMySQL().isEnable()) {
 			createMySQLConnect();
 		}
 		if(shopStorage instanceof ConfigStorage) {
-			File folder = configDir.resolve(rootNode.node("StorageFolders", "Shops").getString()).toFile();
+			File folder = configDir.resolve(getConfig().getStorageFolders().getShops()).toFile();
 			if(!folder.exists() || !folder.isDirectory()) folder.mkdir();
 		}
 		if(commandsShopStorage instanceof ConfigStorage) {
-			File folder = configDir.resolve(rootNode.node("StorageFolders", "CommandsShops").getString()).toFile();
+			File folder = configDir.resolve(getConfig().getStorageFolders().getCommandsShops()).toFile();
 			if(!folder.exists() || !folder.isDirectory()) folder.mkdir();
 		}
 	}
 
 	private void createMySQLConnect() {
 		mySQL = new MySQL(
-				instance,
-				rootNode.node("MySQL", "Host").getString(),
-				rootNode.node("MySQL", "Port").getString(),
-				rootNode.node("MySQL", "DataBase").getString(),
-				rootNode.node("MySQL", "User").getString(),
-				rootNode.node("MySQL", "Password").getString(),
-				rootNode.node("MySQL", "SSL").getString());
+			instance,
+			getConfig().getMySQL().getHost(),
+			getConfig().getMySQL().getPort(),
+			getConfig().getMySQL().getDataBase(),
+			getConfig().getMySQL().getUser(),
+			getConfig().getMySQL().getPassword(),
+			getConfig().getMySQL().getSsl()
+		);
 		if(mySQL.getOrOpenConnection() == null) mySQL = null;
 	}
 
 	private void loadExpires() {
-		for(int i = 1 ;  ; i++) {
-			if(rootNode.node("Auction", "Expire", String.valueOf(i)).virtual()) {
-				break;
-			}
-			expires.add(new Expire(rootNode.node("Auction", "Expire", String.valueOf(i), "Time").getInt(), rootNode.node("Auction", "Expire", String.valueOf(i), "Tax", "Size").getDouble(), rootNode.node("Auction", "Expire", String.valueOf(i), "Fee", "Size").getDouble(), rootNode.node("Auction", "Expire", String.valueOf(i), "Tax", "Enable").getBoolean(), rootNode.node("Auction", "Expire", String.valueOf(i), "Fee", "Enable").getBoolean()));
-		}
+		expires.addAll(getConfig().getAuction().getExpire().stream().map(e -> new Expire(e.getTime(), e.getTax().getSize(), e.getFee().getSize(), e.getTax().isEnable(), e.getFee().isEnable())).toList());
 	}
 
 	private void updateAuctionData() {
-		if(rootNode.node("Auction", "Enable").getBoolean()) {
+		if(getConfig().getAuction().isEnable()) {
 			if(!auctionItems.isEmpty()) {
 				Map<UUID, SerializedAuctionStack> items = new HashMap<UUID, SerializedAuctionStack>();
 				items.putAll(auctionItems);
@@ -511,7 +502,7 @@ public class GuiShopManager {
 					if(auctionItem.isExpired()) {
 						auctionItems.remove(auctionItem.getStackUUID());
 						auctionStorage.removeAuctionStack(auctionItem.getStackUUID());
-						if(!auctionItem.betIsNull() && auctionItem.getBetData().getServer().equals(rootNode.node("Auction", "Server").getString()) && economy.checkPlayerBalance(auctionItem.getBetData().getBuyerUUID(), auctionItem.getBetData().getCurrency(), auctionItem.getBetData().getMoney().multiply(BigDecimal.valueOf(auctionItem.getSerializedItemStack().getQuantity())))) {
+						if(!auctionItem.betIsNull() && auctionItem.getBetData().getServer().equals(getConfig().getAuction().getServer()) && economy.checkPlayerBalance(auctionItem.getBetData().getBuyerUUID(), auctionItem.getBetData().getCurrency(), auctionItem.getBetData().getMoney().multiply(BigDecimal.valueOf(auctionItem.getSerializedItemStack().getQuantity())))) {
 							UUID uuid = auctionItem.getBetData().getBuyerUUID();
 							economy.auctionTransaction(uuid, auctionItem, 0, true);
 							auctionItem.setOwner(uuid, auctionItem.getBetData().getBuyerName());
@@ -567,7 +558,7 @@ public class GuiShopManager {
 			UUID uuid = player.uniqueId();
 			boolean sendMessage = false;
 			for(SerializedAuctionStack auctionStack : expiredAuctionItems.get(uuid)) {
-				if(auctionStack.getServerName().equals(rootNode.node("Auction", "Server").getString())) {
+				if(auctionStack.getServerName().equals(getConfig().getAuction().getServer())) {
 					sendMessage = true;
 					break;
 				}
@@ -585,7 +576,7 @@ public class GuiShopManager {
 											player.sendMessage(locales.getLocale(player).messages().auction().noEmptySlots(expiredAuctionItems.get(uuid).size()));
 											return;
 										}
-										if(auctionItem.getServerName().equals(rootNode.node("Auction", "Server").getString())) {
+										if(auctionItem.getServerName().equals(getConfig().getAuction().getServer())) {
 											emptySlots--;
 											player.inventory().query(QueryTypes.INVENTORY_TYPE.get().of(PrimaryPlayerInventory.class)).offer(auctionItem.getSerializedItemStack().getItemStack());
 											expiredAuctionItems.get(uuid).remove(auctionItem);
@@ -604,7 +595,7 @@ public class GuiShopManager {
 			UUID uuid = player.uniqueId();
 			boolean sendMessage = false;
 			for(SerializedAuctionStack auctionStack : expiredBetAuctionItems.get(uuid)) {
-				if(auctionStack.getBetData().getServer().equals(rootNode.node("Auction", "Server").getString())) {
+				if(auctionStack.getBetData().getServer().equals(getConfig().getAuction().getServer())) {
 					sendMessage = true;
 					break;
 				}
@@ -622,7 +613,7 @@ public class GuiShopManager {
 											player.sendMessage(locales.getLocale(player).messages().auction().noEmptySlots(expiredAuctionItems.get(uuid).size()));
 											return;
 										}
-										if(auctionItem.getBetData().getServer().equals(rootNode.node("Auction", "Server").getString())) {
+										if(auctionItem.getBetData().getServer().equals(getConfig().getAuction().getServer())) {
 											emptySlots--;
 											player.inventory().query(QueryTypes.INVENTORY_TYPE.get().of(PrimaryPlayerInventory.class)).offer(auctionItem.getSerializedItemStack().getItemStack());
 											expiredBetAuctionItems.get(uuid).remove(auctionItem);
@@ -637,18 +628,15 @@ public class GuiShopManager {
 	}
 
 	public void updateConfigs() {
-		try {
-			configLoaderBlackLists.save(blackListNode);
-			configLoader.save(rootNode);
-		} catch (IOException e) {
-			logger.error(e.getLocalizedMessage());
-		}
+		configBlackLists.setAndSave(getBlackList());
 	}
 
 	public void loadConfigs() {
 		try {
-			rootNode = configLoader.load();
-			blackListNode = configLoaderBlackLists.load();
+			configReference = SerializeOptions.createHoconConfigurationLoader(1).path(configDir.resolve("Config.conf")).build().loadToReference();
+			config = configReference.referenceTo(Config.class);
+			configReferenceBlackLists = SerializeOptions.createHoconConfigurationLoader(1).path(configDir.resolve("BlackList.conf")).build().loadToReference();
+			configBlackLists = configReferenceBlackLists.referenceTo(BlackList.class);
 		} catch (IOException e) {
 			logger.error(e.getLocalizedMessage());
 		}

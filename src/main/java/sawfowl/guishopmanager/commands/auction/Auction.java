@@ -1,5 +1,6 @@
 package sawfowl.guishopmanager.commands.auction;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -9,9 +10,9 @@ import org.spongepowered.api.command.Command.Parameterized;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 import net.kyori.adventure.audience.Audience;
+
 import sawfowl.commandpack.api.CommandPack;
 import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
 import sawfowl.commandpack.api.data.command.Settings;
@@ -67,15 +68,11 @@ public class Auction extends AbstractCommand {
 
 	@Override
 	public Settings applyCommandSettings() {
-		try {
-			aliases = plugin.getRootNode().node("Aliases", "Auction", "List").getList(String.class);
-			if(!aliases.isEmpty()) {
-				command = aliases.get(0);
-				aliases.remove(0);
-				if(!aliases.isEmpty()) return Settings.builder().setAliases(aliases).build();
-			}
-		} catch (SerializationException e) {
-			e.printStackTrace();
+		aliases = new ArrayList<>(plugin.getConfig().getAliases().getAuction().getList());
+		if(!aliases.isEmpty()) {
+			command = aliases.get(0);
+			aliases.remove(0);
+			if(!aliases.isEmpty()) return Settings.builder().setAliases(aliases).build();
 		}
 		return null;
 	}

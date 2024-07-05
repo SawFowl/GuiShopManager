@@ -31,7 +31,7 @@ public class H2Storage extends Thread implements DBStorage {
 	private Statement statement;
 	public H2Storage(GuiShopManager instance) {
 		plugin = instance;
-		prefix = plugin.getRootNode().node("MySQL", "Prefix").getString();
+		prefix = plugin.getConfig().getMySQL().getPrefix();
 		try {
 			statement = createStatement();
 		} catch (SQLException e) {
@@ -59,7 +59,7 @@ public class H2Storage extends Thread implements DBStorage {
 			plugin.getLogger().error(createCommandsShopsTable);
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
-		if(plugin.getRootNode().node("Auction", "Enable").getBoolean()) {
+		if(plugin.getConfig().getAuction().isEnable()) {
 			try {
 				getStatement().execute(createAuctionTable);
 				getStatement().execute(createAuctionExpiredTable);
@@ -281,7 +281,7 @@ public class H2Storage extends Thread implements DBStorage {
 
 	@Override
 	public Format getFormat() {
-		return Format.find(plugin.getRootNode().node("ConfigTypes", "SqlFormat").getString());
+		return Format.find(plugin.getConfig().getConfigType().getSqlFormat());
 	}
 
 	private void loadActualAuctionData() {

@@ -21,7 +21,7 @@ public class Locales {
 		this.localeService = localeService;
 		localeService.localesExist(pluginid);
 		localeService.createPluginLocale(pluginid, ConfigTypes.HOCON, org.spongepowered.api.util.locale.Locales.DEFAULT);
-		localeService.createPluginLocale(pluginid, ConfigTypes.HOCON, org.spongepowered.api.util.locale.Locales.RU_RU);
+		localeService.createPluginLocale(pluginid, ConfigTypes.YAML, org.spongepowered.api.util.locale.Locales.RU_RU);
 		localeService.setDefaultReference(GuiShopManager.getInstance().getPluginContainer(), ImplementPluginLocale.class);
 		generateDefault();
 		generateRu();

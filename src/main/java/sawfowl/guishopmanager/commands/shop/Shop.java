@@ -13,7 +13,6 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.util.locale.LocaleSource;
-import org.spongepowered.configurate.serialize.SerializationException;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -128,15 +127,11 @@ public class Shop extends AbstractCommand implements CommandExecutor  {
 
 	@Override
 	public Settings applyCommandSettings() {
-		try {
-			aliases = plugin.getRootNode().node("Aliases", "Shop", "List").getList(String.class);
-			if(!aliases.isEmpty()) {
-				command = aliases.get(0);
-				aliases.remove(0);
-				if(!aliases.isEmpty()) return Settings.builder().setAliases(aliases).build();
-			}
-		} catch (SerializationException e) {
-			e.printStackTrace();
+		aliases = new ArrayList<>(plugin.getConfig().getAliases().getShop().getList());
+		if(!aliases.isEmpty()) {
+			command = aliases.get(0);
+			aliases.remove(0);
+			if(!aliases.isEmpty()) return Settings.builder().setAliases(aliases).build();
 		}
 		return null;
 	}
