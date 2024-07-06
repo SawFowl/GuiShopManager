@@ -16,4 +16,10 @@ public interface Commands {
 
 	Component run();
 
+	Component title();
+
+	Component padding();
+
+	Component reload();
+
 }

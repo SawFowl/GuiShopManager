@@ -43,7 +43,7 @@ public class ConfigStorage implements DataStorage {
 		} else auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getConfig().getConfigType().getAuction()), plugin.getConfig().getConfigType().getAuction(), 2);
 		try {
 			auctionNode = auctionConfigLoader.load();
-			if(!plugin.getConfig().getConfigType().getAuction().equals("." + getExtension(auctionConfig.get().getName()))) {
+			if(auctionConfig.isPresent() && !plugin.getConfig().getConfigType().getAuction().equals("." + getExtension(auctionConfig.get().getName()))) {
 				BasicConfigurationNode copy = BasicConfigurationNode.root().from(auctionNode);
 				auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getConfig().getConfigType().getAuction()), plugin.getConfig().getConfigType().getAuction(), 2);
 				auctionConfigLoader.save(copy);

@@ -8,6 +8,7 @@ import org.spongepowered.configurate.ConfigurateException;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.AbstractLocale;
 import sawfowl.guishopmanager.configure.locale.def.ImplementPluginLocale;
+import sawfowl.guishopmanager.configure.locale.ru.ImplementRuPluginLocale;
 import sawfowl.localeapi.api.ConfigTypes;
 import sawfowl.localeapi.api.LocaleService;
 import sawfowl.localeapi.api.PluginLocale;
@@ -58,12 +59,12 @@ public class Locales {
 	}
 
 	private void generateRu() {
-		/*if(getPluginLocale(org.spongepowered.api.util.locale.Locales.RU_RU).getLocaleRootNode().empty()) try {
+		if(getPluginLocale(org.spongepowered.api.util.locale.Locales.RU_RU).getLocaleRootNode().empty()) try {
 			getPluginLocale(org.spongepowered.api.util.locale.Locales.RU_RU).setLocaleReference(ImplementRuPluginLocale.class);
 			getPluginLocale(org.spongepowered.api.util.locale.Locales.RU_RU).saveLocaleNode();
 		} catch (ConfigurateException e) {
 			e.printStackTrace();
-		}*/
+		}
 	}
 
 	private PluginLocale getPluginLocale(Locale locale) {

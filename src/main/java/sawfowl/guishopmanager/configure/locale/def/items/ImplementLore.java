@@ -18,7 +18,7 @@ import sawfowl.localeapi.api.Text;
 public class ImplementLore implements Lore {
 
 	@Setting("ChangePrice")
-	private List<Component> changePrice = Arrays.asList(deserialize("&aLeft click will increase the price "), deserialize("&aRight click will decrease the price "));
+	private List<Component> changePrice = Arrays.asList(deserialize("&aLeft click will increase the price"), deserialize("&aRight click will decrease the price"));
 	@Setting("ChangeSize")
 	private List<Component> changeSize = Arrays.asList(deserialize("&aLeft click will increase the size"), deserialize("&aRight click will decrease the size"));
 	@Setting("AuctionSwitchMode")
@@ -34,16 +34,16 @@ public class ImplementLore implements Lore {
 	private Component sum = deserialize("&eTotal: %currency-styled-symbol%%size%");
 	@Setting("Price")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private Component price = deserialize("&eCurrency: %currency-styled-symbol%&e. Buy: &a%buy%&e. Sell: &a%sell%");
+	private Component price = deserialize("&eCurrency: %currency-name%&e. Buy: &a%buy%&e. Sell: &a%sell%");
 	@Setting("CommandPrice")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private Component commandPrice = deserialize("&eCurrency: %currency-styled-symbol%&e. Buy: &a%buyprice%&e.");
+	private Component commandPrice = deserialize("&eCurrency: %currency-name%&e. Buy: &a%buyprice%&e.");
 	@Setting("AuctionPrice")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private Component auctionPrice = deserialize("&eCurrency: %currency-styled-symbol%&e. Price for one: &a%price%&e. Total: &a%total%");
+	private Component auctionPrice = deserialize("&eCurrency: %currency-name%&e. Price for one: &a%price%&e. Total: &a%total%");
 	@Setting("AuctionBet")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private Component auctionBet = deserialize("&eCurrency: %currency-styled-symbol%&e. Bet for one: &a%price%&e. Total: &a%total%");
+	private Component auctionBet = deserialize("&eCurrency: %currency-name%&e. Bet for one: &a%price%&e. Total: &a%total%");
 	@Setting("YourBet")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
 	private Component yourBet = deserialize("&eYour bet: %currency-styled-symbol%%size%. Total: %currency-styled-symbol%%total%");

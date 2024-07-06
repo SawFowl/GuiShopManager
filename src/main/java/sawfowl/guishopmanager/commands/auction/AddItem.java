@@ -27,7 +27,6 @@ import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.commands.AbstractPlayerCommand;
 import sawfowl.guishopmanager.utils.CommandParameters;
-import sawfowl.localeapi.api.TextUtils;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionPrice;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 
@@ -45,117 +44,73 @@ public class AddItem extends AbstractPlayerCommand {
 		} else if(!player.itemInHand(HandTypes.OFF_HAND).isEmpty()) {
 			itemStack = player.itemInHand(HandTypes.OFF_HAND);
 		}
+		if(itemStack == null || itemStack.type() == ItemTypes.AIR.get()) exception(plugin.getLocales().getLocale(locale).commands().exceptions().itemNotPresent());
 		ItemStack toAdd = itemStack;
 		boolean betPresent = context.one(CommandParameters.AUCTION_BET).isPresent();
 		boolean pricePresent = context.one(CommandParameters.AUCTION_PRICE).isPresent();
-		boolean currencyPresent = context.one(CommandParameters.CURRENCY).isPresent();
-		if(currencyPresent) {
-			for(Currency currency : plugin.getEconomy().getCurrencies()) {
-				if(TextUtils.clearDecorations(currency.displayName()).equalsIgnoreCase(context.one(CommandParameters.CURRENCY).get()) || TextUtils.clearDecorations(currency.displayName()).equalsIgnoreCase(context.one(CommandParameters.CURRENCY).get()) || TextUtils.clearDecorations(currency.symbol()).equalsIgnoreCase(context.one(CommandParameters.CURRENCY).get())) {
-					currencyPresent = true;
-					break;
-				} else {
-					currencyPresent = false;
-				}
-			}
-		}
-		Component currenciesList = Component.text().append(plugin.getEconomyService().defaultCurrency().displayName()).build();
-		if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && Permissions.auctionCurrencyPermission(player, plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()), false))) {
-			int currentCurrency = 1;
-			for(Currency currency : plugin.getEconomy().getCurrencies()) {
-				if(Permissions.auctionCurrencyPermission(player, currency, false) && !currency.equals(plugin.getEconomyService().defaultCurrency())) {
-					if(currentCurrency < plugin.getEconomy().getCurrencies().size()) {
-						currenciesList = currenciesList.append(Component.text(", ")).append(currency.displayName());
-					} else {
-						currenciesList = currenciesList.append(currency.displayName()).append(Component.text("."));
-					}
-				}
-				currentCurrency++;
-			}
-		}
-		if(itemStack == null || itemStack.type() == ItemTypes.AIR.get()) {
-			exception(locale, "Messages", "ItemNotPresent");
-		} else {
-			if(!betPresent && !pricePresent || (!pricePresent && context.one(CommandParameters.AUCTION_BET).get() <= 0) || (!betPresent && context.one(CommandParameters.AUCTION_PRICE).get() <= 0) || (context.one(CommandParameters.AUCTION_BET).get() <= 0 && context.one(CommandParameters.AUCTION_PRICE).get() <= 0)) {
-				exception(locale, "Messages", "AuctionZeroOrNullPrices");
-			} else {
-				if(!betPresent && pricePresent && context.one(CommandParameters.AUCTION_PRICE).get() > 0) {
-					if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && !Permissions.auctionCurrencyPermission(player, plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()), false))) {
-						Component message = getCommands(locale).auction().betNotPresent().clickEvent(SpongeComponents.executeCallback(cause -> {
-							SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
-							auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
-							SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getConfig().getAuction().getServer());
-							run(player, auctionStack);
-						}));
-						player.sendMessage(message);
-						Component message2 = getCommands(locale).auction().currencyNotPresent(currenciesList).clickEvent(SpongeComponents.executeCallback(cause -> {
-							SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
-							auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
-							SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getConfig().getAuction().getServer());
-							run(player, auctionStack);
-						}));
-						player.sendMessage(message2);
-					} else {
-						Component message = getCommands(locale).auction().betNotPresent().clickEvent(SpongeComponents.executeCallback(cause -> {
-							SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()));
-							auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
-							SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getConfig().getAuction().getServer());
-							run(player, auctionStack);
-						}));
-						player.sendMessage(message);
-					}
-				} else if(!pricePresent && betPresent && context.one(CommandParameters.AUCTION_BET).get() > 0) {
-					Component message = getCommands(locale).auction().priceNotPresent().clickEvent(SpongeComponents.executeCallback(cause -> {
-						SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
-						auctionPrice.setBet(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_BET).get()));
-						SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getConfig().getAuction().getServer());
-						run(player, auctionStack);
-					}));
-					player.sendMessage(message);
-				} else if(context.one(CommandParameters.AUCTION_PRICE).get() > 0 && context.one(CommandParameters.AUCTION_BET).get() > 0) {
-					if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && !Permissions.auctionCurrencyPermission(player, plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()), false))) {
-						Component message = getCommands(locale).auction().priceNotPresent().clickEvent(SpongeComponents.executeCallback(cause -> {
-							SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
-							auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
-							auctionPrice.setBet(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_BET).get()));
-							SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getConfig().getAuction().getServer());
-							run(player, auctionStack);
-						}));
-						player.sendMessage(message);
-					} else {
-						SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()));
-						auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getConfig().getAuction().getServer());
-						if(auctionPrice.getCurrency().equals(plugin.getEconomyService().defaultCurrency())) {
-							auctionStack.getPrices().get(0).setBet(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_BET).get()));
-						} else {
-							SerializedAuctionPrice betPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
-							betPrice.setBet(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_BET).get()));
-							auctionStack.getPrices().add(betPrice);
-						}
-						run(player, auctionStack);
-					}
-				} else if(context.one(CommandParameters.AUCTION_BET).get() <= 0 && context.one(CommandParameters.AUCTION_PRICE).get() > 0) {
-					if(!currencyPresent || (!plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()).equals(plugin.getEconomyService().defaultCurrency()) && !Permissions.auctionCurrencyPermission(player, plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()), false))) {
-						Component message = getCommands(locale).auction().currencyNotPresent(currenciesList).clickEvent(SpongeComponents.executeCallback(cause -> {
-							SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
-							auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
-							SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getConfig().getAuction().getServer());
-							run(player, auctionStack);
-						}));
-						player.sendMessage(message);
-					} else {
-						SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).get()));
-						auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
-						SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getConfig().getAuction().getServer());
-						run(player, auctionStack);
-					}
-				} else if(context.one(CommandParameters.AUCTION_BET).get() > 0 && context.one(CommandParameters.AUCTION_PRICE).get() <= 0) {
-					SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
-					auctionPrice.setBet(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_BET).get()));
+		boolean currencyPresent = context.one(CommandParameters.AUCTION_CURRENCY).isPresent();
+		if(!betPresent) exception(plugin.getLocales().getLocale(locale).commands().exceptions().zeroOrNullPrices());
+		double bet = context.one(CommandParameters.AUCTION_BET).get();
+		double price = context.one(CommandParameters.AUCTION_PRICE).orElse(0d);
+		if(bet == 0 && price == 0) exception(plugin.getLocales().getLocale(locale).commands().exceptions().zeroOrNullPrices());
+		if(!pricePresent || price == 0) {
+			if(currencyPresent) {
+				Component message = getCommands(locale).auction().priceNotPresent().clickEvent(SpongeComponents.executeCallback(cause -> {
+					SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(context.one(CommandParameters.AUCTION_CURRENCY).get());
+					auctionPrice.setBet(BigDecimal.valueOf(bet));
 					SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getConfig().getAuction().getServer());
 					run(player, auctionStack);
+				}));
+				player.sendMessage(message);
+			} else {
+				Component currenciesList = Component.text().append(plugin.getEconomyService().defaultCurrency().displayName()).build();
+				if(!currencyPresent) {
+					int currentCurrency = 1;
+					for(Currency currency : plugin.getEconomy().getCurrencies()) {
+						if(Permissions.auctionCurrencyPermission(player, currency, false) && !currency.equals(plugin.getEconomyService().defaultCurrency())) {
+							if(currentCurrency < plugin.getEconomy().getCurrencies().size()) {
+								currenciesList = currenciesList.append(Component.text(", ")).append(currency.displayName());
+							} else currenciesList = currenciesList.append(currency.displayName()).append(Component.text("."));
+						}
+						currentCurrency++;
+					}
+				}
+				Component message = getCommands(locale).auction().currencyNotPresent(currenciesList).clickEvent(SpongeComponents.executeCallback(cause -> {
+					player.sendMessage(getCommands(locale).auction().priceNotPresent().clickEvent(SpongeComponents.executeCallback(cause2 -> {
+						SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
+						auctionPrice.setBet(BigDecimal.valueOf(bet));
+						SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getConfig().getAuction().getServer());
+						run(player, auctionStack);
+					})));
+				}));
+				player.sendMessage(message);
+			}
+		} else if(!currencyPresent) {
+			Component currenciesList = Component.text().append(plugin.getEconomyService().defaultCurrency().displayName()).build();
+			if(!currencyPresent) {
+				int currentCurrency = 1;
+				for(Currency currency : plugin.getEconomy().getCurrencies()) {
+					if(Permissions.auctionCurrencyPermission(player, currency, false) && !currency.equals(plugin.getEconomyService().defaultCurrency())) {
+						if(currentCurrency < plugin.getEconomy().getCurrencies().size()) {
+							currenciesList = currenciesList.append(Component.text(", ")).append(currency.displayName());
+						} else currenciesList = currenciesList.append(currency.displayName()).append(Component.text("."));
+					}
+					currentCurrency++;
 				}
 			}
+			Component message = getCommands(locale).auction().currencyNotPresent(currenciesList).clickEvent(SpongeComponents.executeCallback(cause -> {
+				SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(plugin.getEconomyService().defaultCurrency());
+				auctionPrice.setPrice(BigDecimal.valueOf(context.one(CommandParameters.AUCTION_PRICE).get()));
+				SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getConfig().getAuction().getServer());
+				run(player, auctionStack);
+			}));
+			player.sendMessage(message);
+		} else {
+			SerializedAuctionPrice auctionPrice = new SerializedAuctionPrice(context.one(CommandParameters.AUCTION_CURRENCY).get());
+			auctionPrice.setPrice(BigDecimal.valueOf(price));
+			auctionPrice.setBet(BigDecimal.valueOf(bet));
+			SerializedAuctionStack auctionStack = new SerializedAuctionStack(toAdd, Arrays.asList(auctionPrice), player.uniqueId(), player.name(), time(), plugin.getConfig().getAuction().getServer());
+			run(player, auctionStack);
 		}
 	}
 
@@ -179,7 +134,7 @@ public class AddItem extends AbstractPlayerCommand {
 		return Arrays.asList(
 			ParameterSettings.of(CommandParameters.AUCTION_BET, true, locale -> getExceptions(locale).zeroOrNullPrices()),
 			ParameterSettings.of(CommandParameters.AUCTION_PRICE, true, locale -> getExceptions(locale).zeroOrNullPrices()),
-			ParameterSettings.of(CommandParameters.CURRENCY, true, locale -> getExceptions(locale).currencyNotPresent())
+			ParameterSettings.of(CommandParameters.AUCTION_CURRENCY, true, locale -> getExceptions(locale).currencyNotPresent())
 		);
 	}
 
@@ -189,16 +144,16 @@ public class AddItem extends AbstractPlayerCommand {
 	}
 
 	private void run(ServerPlayer player, SerializedAuctionStack auctionStack) {
-		if(plugin.maskIsBlackList(auctionStack.getSerializedItemStack().getItemTypeAsString()) || plugin.itemIsBlackList(auctionStack.getSerializedItemStack().getItemStack())) {
-			player.sendMessage(plugin.getLocales().getLocale(player).messages().auction().itemBlocked());
-			return;
-		}
 		if(player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(auctionStack.getSerializedItemStack().getItemStack())).totalQuantity() < auctionStack.getSerializedItemStack().getQuantity()) {
 			player.sendMessage(getExceptions(player).itemNotPresent());
 			return;
 		}
+		if(plugin.maskIsBlackList(auctionStack.getSerializedItemStack().getItemTypeAsString()) || plugin.itemIsBlackList(auctionStack.getSerializedItemStack().getItemStack())) {
+			player.sendMessage(plugin.getLocales().getLocale(player).messages().auction().itemBlocked());
+			return;
+		}
 		if(checkNbtLength(auctionStack)) {
-			player.sendMessage(plugin.getLocales().getLocale(player).messages().auction().longNBT());
+			player.sendMessage(plugin.getLocales().getLocale(player).messages().auction().longComponents());
 			return;
 		}
 		if(plugin.getExpire(0).isFee()) {

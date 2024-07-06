@@ -58,7 +58,7 @@ public class Economy {
 						player.sendMessage(plugin.getLocales().getLocale(player.locale()).messages().shop().itemSell(itemStack, currency, money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
 					}
 					if(plugin.getConfig().isDebugEconomy()) {
-						plugin.getLogger().info(plugin.getLocales().getSystemLocale().debug().infoGiveMoney(itemStack, player.name(), money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
+						plugin.getLogger().info(plugin.getLocales().getSystemLocale().debug().infoGiveMoney(itemStack, player.name(), null, money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
 					}
 					return true;
 				} else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getConfig().isDebugEconomy()) {
@@ -102,7 +102,7 @@ public class Economy {
 						player.sendMessage(plugin.getLocales().getLocale(player.locale()).messages().shop().itemBuy(itemStack, currency, money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
 					}
 					if(plugin.getConfig().isDebugEconomy()) {
-						plugin.getLogger().info(plugin.getLocales().getSystemLocale().debug().infoTakeMoney(itemStack, player.name(), money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
+						plugin.getLogger().info(plugin.getLocales().getSystemLocale().debug().infoTakeMoney(itemStack, player.name(), null, money.doubleValue(), getPlayerBalance(player.uniqueId(), currency).doubleValue()));
 					}
 					return true;
 				} else if ((result.result() == ResultType.FAILED || result.result() == ResultType.ACCOUNT_NO_FUNDS) && plugin.getConfig().isDebugEconomy()) {
@@ -133,7 +133,7 @@ public class Economy {
 			if(!checkPlayerBalance(buyerUUID, currency, money)) return false;
 			TransferResult transferResult = sOpt.get().transfer(bOpt.get(), currency, money);
 			if(plugin.getConfig().isDebugEconomy()) {
-				plugin.getLogger().info(plugin.getLocales().getSystemLocale().debug().infoGiveMoney(itemStack, bOpt.get().identifier(), money.doubleValue(), getPlayerBalance(bOpt.get().uniqueId(), currency).doubleValue()));
+				plugin.getLogger().info(plugin.getLocales().getSystemLocale().debug().infoGiveMoney(itemStack, bOpt.get().identifier(), null, money.doubleValue(), getPlayerBalance(bOpt.get().uniqueId(), currency).doubleValue()));
 			}
 			if(transferResult.result() == ResultType.SUCCESS) {
 				if(plugin.getConfig().isPlayerTransactionMessage()) {

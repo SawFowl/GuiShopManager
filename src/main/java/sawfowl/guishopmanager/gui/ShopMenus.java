@@ -3,6 +3,8 @@ package sawfowl.guishopmanager.gui;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
@@ -83,10 +85,11 @@ public class ShopMenus {
 				}
 			}
 		}
+		Set<Integer> indexes = menu.inventory().slots().stream().map(slot -> slot.get(Keys.SLOT_INDEX).get()).collect(Collectors.toSet());
 		menu.registerSlotClick(new SlotClickHandler() {
 			@Override
 			public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
-				if(menu.inventory().containsChild(slot) && slotIndex <= 53) {
+				if(indexes.contains(slotIndex) && slotIndex <= 53) {
 					if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
 					if(slotIndex == 45 && menuId > 1) {
 							Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
@@ -101,7 +104,7 @@ public class ShopMenus {
 							createInventoryToEditor(plugin.getShop(shopId).getShopMenuData(nextMenu), player, shopId, nextMenu);
 						}).build());
 					} else if(slotIndex < 45) {
-						if(clickType == ClickTypes.CLICK_LEFT.get()) {
+						if(clickType.equals(ClickTypes.CLICK_LEFT.get())) {
 							ItemStack itemStack = null;
 							if(shopMenu.containsShopItem(slotIndex)) {
 								itemStack = shopMenu.getShopItem(slotIndex).getItemStack();
@@ -176,10 +179,11 @@ public class ShopMenus {
 				}
 			}
 		}
+		Set<Integer> indexes = menu.inventory().slots().stream().map(slot -> slot.get(Keys.SLOT_INDEX).get()).collect(Collectors.toSet());
 		menu.registerSlotClick(new SlotClickHandler() {
 			@Override
 			public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
-				if(menu.inventory().containsChild(slot) && slotIndex <= 53) {
+				if(indexes.contains(slotIndex) && slotIndex <= 53) {
 					if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
 					if(slotIndex == 45 && menuId > 1) {
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
@@ -298,10 +302,11 @@ public class ShopMenus {
 				slot.set(exit);
 			}
 		}
+		Set<Integer> indexes = menu.inventory().slots().stream().map(slot -> slot.get(Keys.SLOT_INDEX).get()).collect(Collectors.toSet());
 		menu.registerSlotClick(new SlotClickHandler() {
 			@Override
 			public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
-				if(menu.inventory().containsChild(slot) && slotIndex <= 26) {
+				if(indexes.contains(slotIndex) && slotIndex <= 26) {
 					if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
 					if(slotIndex <= 8) {
 						editData.remove = clickType == ClickTypes.CLICK_LEFT.get() ? false : isPricesNonZeroValue(prices);
@@ -477,10 +482,11 @@ public class ShopMenus {
 				}
 			}
 		}
+		Set<Integer> indexes = menu.inventory().slots().stream().map(slot -> slot.get(Keys.SLOT_INDEX).get()).collect(Collectors.toSet());
 		menu.registerSlotClick(new SlotClickHandler() {
 			@Override
 			public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
-				if(menu.inventory().containsChild(slot) && slotIndex <= 26) {
+				if(indexes.contains(slotIndex) && slotIndex <= 26) {
 					if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return true;
 					if(slotIndex <= 8) {
 						boolean increase = clickType == ClickTypes.CLICK_LEFT.get();

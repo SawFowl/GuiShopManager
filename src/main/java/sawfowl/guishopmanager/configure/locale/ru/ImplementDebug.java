@@ -1,4 +1,4 @@
-package sawfowl.guishopmanager.configure.locale.def;
+package sawfowl.guishopmanager.configure.locale.ru;
 
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -15,15 +15,15 @@ import sawfowl.localeapi.api.TextUtils;
 public class ImplementDebug implements Debug {
 
 	@Setting("ErrorTakeMoney")
-	private String errorTakeMoney = "Failed to remove money from balance of player %player%.";
+	private String errorTakeMoney = "Не удалось снять деньги с баланса игрока %player%.";
 	@Setting("ErrorGiveMoney")
-	private String errorGiveMoney = "Failed to add money to the balance of player %player%.";
+	private String errorGiveMoney = "Не удалось пополнить баланс игрока %player%.";
 	@Setting("InfoTakeMoney")
-	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private String infoTakeMoney = "Item [%item%]%size% removed from inventory of player %player%&a. Added money %currency-symbol%%removed%. Balance %currency-symbol%%balance%.";
+	@Comment("Вы можете использовать следующие плейсхолдеры для отображения валюты:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Отображение символа валюты.\n"  + PlaceholderKeys.CURRENCY_NAME + " - Отображение имени валюты.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Отображение имени валюты в множественном числе.")
+	private String infoTakeMoney = "Итем [%item%]%amount% удален из инвентаря игрока %player%&a. Добавлено денег %currency-symbol%%removed%. Баланс %currency-symbol%%balance%.";
 	@Setting("InfoGiveMoney")
-	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private String infoGiveMoney = "Item [%item%]%size% added to inventory of player %player%. Removed money %currency-symbol%%removed%. Balance %currency-symbol%%balance%.";
+	@Comment("Вы можете использовать следующие плейсхолдеры для отображения валюты:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Отображение символа валюты.\n"  + PlaceholderKeys.CURRENCY_NAME + " - Отображение имени валюты.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Отображение имени валюты в множественном числе.")
+	private String infoGiveMoney = "Итем [%item%]%amount% добавлен в инвентарь игрока %player%. Взято денег %currency-symbol%%removed%. Баланс %currency-symbol%%balance%.";
 	public ImplementDebug() {}
 
 	@Override

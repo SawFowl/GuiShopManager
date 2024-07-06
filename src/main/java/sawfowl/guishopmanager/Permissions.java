@@ -1,5 +1,6 @@
 package sawfowl.guishopmanager;
 
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.service.economy.Currency;
 
@@ -30,6 +31,10 @@ public class Permissions {
 
 	public static boolean auctionCurrencyPermission(ServerPlayer player, Currency currency, boolean buy) {
 		return player.hasPermission("guishopmanager.currency." + TextUtils.clearDecorations(currency.displayName())) || player.hasPermission("guishopmanager.currency." + Currencies.getId(currency)) || player.hasPermission(auctionCurrencyPermission(Currencies.getId(currency), buy)) || player.hasPermission(auctionCurrencyPermission(TextUtils.clearDecorations(currency.symbol()), buy)) || player.hasPermission(auctionCurrencyPermission(TextUtils.clearDecorations(currency.displayName()), buy)) || player.hasPermission(auctionCurrencyPermission(TextUtils.clearDecorations(currency.pluralDisplayName()), buy));
+	}
+
+	public static boolean auctionCurrencyPermission(CommandContext context, Currency currency, boolean buy) {
+		return context.hasPermission("guishopmanager.currency." + TextUtils.clearDecorations(currency.displayName())) || context.hasPermission("guishopmanager.currency." + Currencies.getId(currency)) || context.hasPermission(auctionCurrencyPermission(Currencies.getId(currency), buy)) || context.hasPermission(auctionCurrencyPermission(TextUtils.clearDecorations(currency.symbol()), buy)) || context.hasPermission(auctionCurrencyPermission(TextUtils.clearDecorations(currency.displayName()), buy)) || context.hasPermission(auctionCurrencyPermission(TextUtils.clearDecorations(currency.pluralDisplayName()), buy));
 	}
 
 	public static String auctionCurrencyPermission(String currency, boolean buy) {

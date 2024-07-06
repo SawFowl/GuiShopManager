@@ -35,11 +35,7 @@ public interface Messages {
 
 		Component itemBlocked();
 
-		Component addedItemBlocking();
-
-		Component addedMaskBlocking();
-
-		Component longNBT();
+		Component longComponents();
 
 	}
 

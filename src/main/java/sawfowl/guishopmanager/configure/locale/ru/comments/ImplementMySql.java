@@ -1,4 +1,4 @@
-package sawfowl.guishopmanager.configure.locale.def.comments;
+package sawfowl.guishopmanager.configure.locale.ru.comments;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
@@ -9,9 +9,9 @@ import sawfowl.guishopmanager.configure.locale.abstractlocale.comments.MainConfi
 public class ImplementMySql implements MySql {
 
 	@Setting("Title")
-	private String title = "MySql/MariaDB server connection settings.";
+	private String title = "Настройки подключения к серверу MySql/MariaDB.";
 	@Setting("SyncInterval")
-	private String syncInterval = "The frequency of polling the database to load new or changed data. The time is specified in seconds.";
+	private String syncInterval = "Частота опроса базы данных для загрузки новых или измененных данных. Время указывается в секундах.";
 	public ImplementMySql() {}
 
 	@Override

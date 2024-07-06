@@ -1,6 +1,7 @@
 package sawfowl.guishopmanager.configure.locale.abstractlocale;
 
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.service.economy.Currency;
 
 public interface Debug {
 
@@ -8,8 +9,8 @@ public interface Debug {
 
 	String errorGiveMoney(String player);
 
-	String infoTakeMoney(ItemStack itemStack, String player, double removed, double balance);
+	String infoTakeMoney(ItemStack itemStack, String player, Currency currency, double removed, double balance);
 
-	String infoGiveMoney(ItemStack itemStack, String player, double added, double balance);
+	String infoGiveMoney(ItemStack itemStack, String player, Currency currency, double added, double balance);
 
 }

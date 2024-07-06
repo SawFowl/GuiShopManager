@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -151,10 +152,11 @@ public class AuctionMenus {
 				}
 			}
 		}
+		Set<Integer> indexes = menu.inventory().slots().stream().map(slot -> slot.get(Keys.SLOT_INDEX).get()).collect(Collectors.toSet());
 		menu.registerSlotClick(new SlotClickHandler() {
 			@Override
 			public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
-				if(menu.inventory().containsChild(slot) && slotIndex <= 53) {
+				if(indexes.contains(slotIndex) && slotIndex <= 53) {
 					if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return true;
 					if(slotIndex == 45 && page >= 2) {
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
@@ -190,8 +192,8 @@ public class AuctionMenus {
 					} else if(slotIndex <= 44) {
 						SerializedItemStackJsonNbt itemStack = new SerializedItemStackJsonNbt(slot.peek());
 						if(!itemStack.getOrCreateComponent().containsComponent(getPluginContainer(), "uuid")) return true;
-						String uuid = itemStack.getOrCreateComponent().getObject(getPluginContainer(), "uuid", null);
-						if(uuid == null) return true;
+						String uuid = itemStack.getOrCreateComponent().<String>getObject(getPluginContainer(), "uuid", "");
+						if(uuid.equals("")) return true;
 						UUID stackUUID = UUID.fromString(uuid);
 						if(!plugin.getAuctionItems().containsKey(stackUUID)) {
 							player.sendMessage(getMessages(player).itemNotFound());
@@ -290,10 +292,11 @@ public class AuctionMenus {
 				slot.set(exit);
 			}
 		}
+		Set<Integer> indexes = menu.inventory().slots().stream().map(slot -> slot.get(Keys.SLOT_INDEX).get()).collect(Collectors.toSet());
 		menu.registerSlotClick(new SlotClickHandler() {
 			@Override
 			public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
-				if(menu.inventory().containsChild(slot) && slotIndex <= 26) {
+				if(indexes.contains(slotIndex) && slotIndex <= 26) {
 					if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
 					if(!plugin.getAuctionItems().containsKey(idAuctionItem)) {
 						player.sendMessage(getMessages(player).itemNotFound());
@@ -431,10 +434,11 @@ public class AuctionMenus {
 				slot.set(exit);
 			}
 		}
+		Set<Integer> indexes = menu.inventory().slots().stream().map(slot -> slot.get(Keys.SLOT_INDEX).get()).collect(Collectors.toSet());
 		menu.registerSlotClick(new SlotClickHandler() {
 			@Override
 			public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
-				if(menu.inventory().containsChild(slot) && slotIndex <= 26) {
+				if(indexes.contains(slotIndex) && slotIndex <= 26) {
 					if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
 					if(slotIndex <= 8) {
 						boolean increase = clickType == ClickTypes.CLICK_LEFT.get();
@@ -517,7 +521,7 @@ public class AuctionMenus {
 							return false;
 						}
 						if(checkNbtLength(auctionStack)) {
-							player.sendMessage(getMessages(player).longNBT());
+							player.sendMessage(getMessages(player).longComponents());
 							return false;
 						}
 						editData.itemStack = slot.peek();
@@ -548,19 +552,20 @@ public class AuctionMenus {
 		menu.setReadOnly(true);
 		for(SerializedAuctionStack auctionItem : plugin.getAuctionItems().values()) {
 			if(auctionItem.getServerName().equals(serverName) && auctionItem.getOwnerUUID().equals(player.uniqueId())) {
-				SerializedItemStackJsonNbt itemStack = new SerializedItemStackJsonNbt(auctionItem.getSerializedItemStack().getItemStack());
+				SerializedItemStackPlainNBT itemStack = new SerializedItemStackPlainNBT(auctionItem.getSerializedItemStack().getItemStack());
 				itemStack.getOrCreateComponent().putObject(getPluginContainer(), "uuid", auctionItem.getStackUUID().toString());
 				menu.inventory().offer(itemStack.getItemStack());
 			}
 		}
+		Set<Integer> indexes = menu.inventory().slots().stream().map(slot -> slot.get(Keys.SLOT_INDEX).get()).collect(Collectors.toSet());
 		menu.registerSlotClick(new SlotClickHandler() {
 			@Override
 			public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
-				if(menu.inventory().containsChild(slot) && slotIndex <= 53 && slot.totalQuantity() > 0) {
-					SerializedItemStackJsonNbt itemStack = new SerializedItemStackJsonNbt(slot.peek());
+				if(indexes.contains(slotIndex) && slotIndex <= 53 && slot.totalQuantity() > 0) {
+					SerializedItemStackPlainNBT itemStack = new SerializedItemStackPlainNBT(slot.peek());
 					if(itemStack.getOrCreateComponent().containsComponent(getPluginContainer(), "uuid")) {
-						String s = itemStack.getOrCreateComponent().getObject(getPluginContainer(), "uuid", null);
-						if(s == null) return true;
+						String s = itemStack.getOrCreateComponent().getObject(getPluginContainer(), "uuid", "");
+						if(s.equals("")) return true;
 						UUID uuid = UUID.fromString(s);
 						if(uuid != null && plugin.getAuctionItems().containsKey(uuid) && player.inventory().query(QueryTypes.INVENTORY_TYPE.get().of(PrimaryPlayerInventory.class)).freeCapacity() > 0) {
 							slot.clear();
@@ -685,7 +690,7 @@ public class AuctionMenus {
 			return;
 		}
 		if(checkNbtLength(auctionStack)) {
-			player.sendMessage(getMessages(player).longNBT());
+			player.sendMessage(getMessages(player).longComponents());
 			return;
 		}
 		if(plugin.getExpire(0).isFee()) {

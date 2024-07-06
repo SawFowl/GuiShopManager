@@ -38,7 +38,7 @@ public class Edit extends AbstractPlayerCommand {
 					final ServerPlayer fPlayer = player;
 					Component hover = getCommands(locale).shop().openForEdit();
 					Component message = shop1.getOrDefaultTitle(player.locale()).clickEvent(SpongeComponents.executeCallback(cause -> {
-						run(fPlayer, shop);
+						run(fPlayer, shop1);
 					})).hoverEvent(HoverEvent.showText(hover));
 					messages.add(message);
 				}

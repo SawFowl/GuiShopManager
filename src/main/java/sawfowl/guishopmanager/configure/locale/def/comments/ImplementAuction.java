@@ -11,9 +11,9 @@ public class ImplementAuction implements Auction {
 	@Setting("ComponentLimit")
 	private String componentLimit = "Character limit in the components of an item.\nFor validation, all components are converted to a single `json` string.";
 	@Setting("Server")
-	private String server = "\"The name of the server on which the return of the item to the player will be available. Use different names on different servers.";
+	private String server = "The name of the server on which the return of the item to the player will be available. Use different names on different servers.";
 	@Setting("ExpireTime")
-	private String expireTime = "Time until the item is removed from sale in minutes. The number of these sections can be increased.";
+	private String expireTime = "Time until the item is removed from sale in minutes.";
 	@Setting("Tax")
 	private String tax = "Income tax.";
 	@Setting("Fee")

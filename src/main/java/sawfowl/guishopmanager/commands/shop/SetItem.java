@@ -50,7 +50,7 @@ public class SetItem extends AbstractPlayerCommand {
 										if(!player.itemInHand(HandTypes.MAIN_HAND).isEmpty() || !player.itemInHand(HandTypes.OFF_HAND).isEmpty()) {
 											ItemStack itemStack = !player.itemInHand(HandTypes.MAIN_HAND).isEmpty() ? player.itemInHand(HandTypes.MAIN_HAND) : (!player.itemInHand(HandTypes.OFF_HAND).isEmpty() ? player.itemInHand(HandTypes.OFF_HAND) : null);
 											if(itemStack != null && !itemStack.type().equals(ItemTypes.AIR.get())) {
-												Currency currency = plugin.getEconomy().checkCurrency(context.one(CommandParameters.CURRENCY).isPresent() ? context.one(CommandParameters.CURRENCY).get() : "");
+												Currency currency = context.one(CommandParameters.CURRENCY).orElse(plugin.getEconomyService().defaultCurrency());
 												itemStack.setQuantity(1);
 												SerializedShopPrice serializedShopPrice = new SerializedShopPrice(currency);
 												serializedShopPrice.setBuyOrSellPrice(buyPrice, true, true);

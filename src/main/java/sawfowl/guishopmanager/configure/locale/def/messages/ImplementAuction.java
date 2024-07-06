@@ -22,10 +22,10 @@ public class ImplementAuction implements Auction {
 	private Component maxVolume = deserialize("&cYou are already selling the maximum amount of items.");
 	@Setting("Buy")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private Component buy = deserialize("&aYou have successfully buy on auction &7[&r%item%&7]&ax%amount% for %currency-styled-symbol%%removed%. Your balance %currency-styled-symbol%%balance%. Seller &b%player%&a.");
+	private Component buy = deserialize("&aYou have successfully buy on auction &r%item%&ax%amount% for %currency-styled-symbol%%removed%. Your balance %currency-styled-symbol%%balance%. Seller &b%player%&a.");
 	@Setting("Sell")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private Component sell = deserialize("&aYou have successfully sold on auction &7[&r%item%&7]&ax%amount% for %currency-styled-symbol%%added%. Your balance %currency-styled-symbol%%balance%. Buyer &b%player%&a.");
+	private Component sell = deserialize("&aYou have successfully sold on auction &r%item%&ax%amount% for %currency-styled-symbol%%added%. Your balance %currency-styled-symbol%%balance%. Buyer &b%player%&a.");
 	@Setting("Expired")
 	private Component expired = deserialize("&aYour items have expired. Click on this message to get them back.");
 	@Setting("BetExpired")
@@ -45,12 +45,8 @@ public class ImplementAuction implements Auction {
 	private Component betIsNotSet = deserialize("&eYou did not set your bet on the goods.");
 	@Setting("ItemBlocked")
 	private Component itemBlocked = deserialize("&cThis item cannot be put up for sale.");
-	@Setting("AddedItemBlocking")
-	private Component addedItemBlocking = deserialize("&cThe item is now locked.");
-	@Setting("AddedMaskBlocking")
-	private Component addedMaskBlocking = deserialize("&cBlocking mask added.");
-	@Setting("LongNBT")
-	private Component longNBT = deserialize("&cThe item has an NBT tag that is too long.");
+	@Setting("LongComponents")
+	private Component longComponents = deserialize("&cThe size of the components in the item is too large.");
 	public ImplementAuction() {}
 
 	@Override
@@ -114,18 +110,8 @@ public class ImplementAuction implements Auction {
 	}
 
 	@Override
-	public Component addedItemBlocking() {
-		return addedItemBlocking;
-	}
-
-	@Override
-	public Component addedMaskBlocking() {
-		return addedMaskBlocking;
-	}
-
-	@Override
-	public Component longNBT() {
-		return longNBT;
+	public Component longComponents() {
+		return longComponents;
 	}
 
 }

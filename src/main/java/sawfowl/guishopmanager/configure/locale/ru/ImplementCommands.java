@@ -1,4 +1,4 @@
-package sawfowl.guishopmanager.configure.locale.def;
+package sawfowl.guishopmanager.configure.locale.ru;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
@@ -10,10 +10,10 @@ import sawfowl.guishopmanager.configure.locale.abstractlocale.commands.Auction;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.commands.CommandShop;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.commands.Exceptions;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.commands.Shop;
-import sawfowl.guishopmanager.configure.locale.def.commands.ImplementAuction;
-import sawfowl.guishopmanager.configure.locale.def.commands.ImplementCommandShop;
-import sawfowl.guishopmanager.configure.locale.def.commands.ImplementExceptions;
-import sawfowl.guishopmanager.configure.locale.def.commands.ImplementShop;
+import sawfowl.guishopmanager.configure.locale.ru.commands.ImplementAuction;
+import sawfowl.guishopmanager.configure.locale.ru.commands.ImplementCommandShop;
+import sawfowl.guishopmanager.configure.locale.ru.commands.ImplementExceptions;
+import sawfowl.guishopmanager.configure.locale.ru.commands.ImplementShop;
 import sawfowl.localeapi.api.TextUtils;
 
 @ConfigSerializable
@@ -28,13 +28,13 @@ public class ImplementCommands implements Commands {
 	@Setting("Shop")
 	private ImplementShop shop = new ImplementShop();
 	@Setting("Run")
-	private Component run = TextUtils.deserialize("&eClick to execute this command.");
+	private Component run = TextUtils.deserialize("&eКлик для выполнения этой команды.");
 	@Setting("Title")
-	private Component title = TextUtils.deserialize("&3Commands");
+	private Component title = TextUtils.deserialize("&3Команды");
 	@Setting("Run")
 	private Component padding = TextUtils.deserialize("&3=");
 	@Setting("Reload")
-	private Component reload = TextUtils.deserialize("&aThe plugin has been reloaded.");
+	private Component reload = TextUtils.deserialize("&aПлагин перезагружен.");
 	public ImplementCommands() {}
 
 	@Override

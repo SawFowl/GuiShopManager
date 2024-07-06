@@ -1,4 +1,4 @@
-package sawfowl.guishopmanager.configure.locale.def.messages;
+package sawfowl.guishopmanager.configure.locale.ru.messages;
 
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -19,15 +19,15 @@ import sawfowl.localeapi.api.Text;
 public class ImplementShop implements Shop {
 
 	@Setting("ItemSell")
-	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private Component itemSell = deserialize("&aYou have successfully sold &r%item%&ax%size% for %currency-styled-symbol%%added%. Your balance %currency-styled-symbol%%balance%.");
+	@Comment("Вы можете использовать следующие плейсхолдеры для отображения валюты:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Отображение символа валюты.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Отображение символа валюты с применением стиля из ее имени.\n" + PlaceholderKeys.CURRENCY_NAME + " - Отображение имени валюты.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Отображение имени валюты в множественном числе.")
+	private Component itemSell = deserialize("&aВы продали &r%item%&ax%size% за %currency-styled-symbol%%added%. Ваш баланс %currency-styled-symbol%%balance%.");
 	@Setting("ItemBuy")
-	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private Component itemBuy = deserialize("&aYou have successfully purchased &r%item%&ax%size% for %currency-styled-symbol%%removed%. Your balance %currency-styled-symbol%%balance%.");
+	@Comment("Вы можете использовать следующие плейсхолдеры для отображения валюты:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Отображение символа валюты.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Отображение символа валюты с применением стиля из ее имени.\n" + PlaceholderKeys.CURRENCY_NAME + " - Отображение имени валюты.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Отображение имени валюты в множественном числе.")
+	private Component itemBuy = deserialize("&aВы купили &r%item%&ax%size% за %currency-styled-symbol%%removed%. Ваш баланс %currency-styled-symbol%%balance%.");
 	@Setting("BuyCommands")
-	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
-	private Component buyCommands = deserialize("&aYou paid %currency-styled-symbol%%removed% to execute console commands. Your balance %currency-styled-symbol%%balance%.");
-	private Component shopNotExists = deserialize("&cThere is no shop with id = " + PlaceholderKeys.SHOP);
+	@Comment("Вы можете использовать следующие плейсхолдеры для отображения валюты:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Отображение символа валюты.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Отображение символа валюты с применением стиля из ее имени.\n" + PlaceholderKeys.CURRENCY_NAME + " - Отображение имени валюты.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Отображение имени валюты в множественном числе.")
+	private Component buyCommands = deserialize("&aВы заплатили %currency-styled-symbol%%removed% за выполнение команд от имени консоли. Ваш баланс %currency-styled-symbol%%balance%.");
+	private Component shopNotExists = deserialize("&cНет магазина с идентификатором = " + PlaceholderKeys.SHOP);
 	public ImplementShop() {}
 
 	@Override

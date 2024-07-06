@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.spongepowered.api.item.inventory.ItemStack;
+
 import io.leangen.geantyref.TypeToken;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 import sawfowl.guishopmanager.serialization.commandsshop.SerializedCommandShop;
@@ -16,6 +18,8 @@ public class TypeTokens extends sawfowl.localeapi.api.serializetools.itemstack.T
 	public static final TypeToken<Map<UUID, Set<SerializedAuctionStack>>> MAP_EXPIRED_AUCTIONSTACKS_TOKEN = new TypeToken<Map<UUID, Set<SerializedAuctionStack>>>(){};
 
 	public static final TypeToken<Map<String, SerializedItemStackJsonNbt>> MAP_JSON_ITEMSTACK_TOKEN = new TypeToken<Map<String, SerializedItemStackJsonNbt>>(){};
+
+	public static final TypeToken<Map<String, ItemStack>> MAP_ITEMSTACK_TOKEN = new TypeToken<Map<String, ItemStack>>(){};
 
 	public static final TypeToken<List<SerializedItemStackJsonNbt>> LIST_SERIALIZED_JSON_STACKS_TOKEN = new TypeToken<List<SerializedItemStackJsonNbt>>(){};
 
