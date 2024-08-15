@@ -17,7 +17,7 @@ import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.commands.AbstractPlayerCommand;
 import sawfowl.guishopmanager.utils.CommandParameters;
-import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStack;
 
 public class AddCommand extends AbstractPlayerCommand {
 
@@ -38,7 +38,7 @@ public class AddCommand extends AbstractPlayerCommand {
 		if(itemStack != null && !itemStack.type().equals(ItemTypes.AIR.get())) {
 			if(context.one(CommandParameters.COMMAND).isPresent()) {
 				String command = context.one(CommandParameters.COMMAND).get();
-				SerializedItemStackJsonNbt shopStack = new SerializedItemStackJsonNbt(itemStack);
+				SerializedItemStack shopStack = new SerializedItemStack(itemStack);
 				List<String> serializedCommandsList = shopStack.getOrCreateComponent().containsComponent(GuiShopManager.getInstance().getPluginContainer(), "Commands") ? shopStack.getOrCreateComponent().getObjectsList(String.class, GuiShopManager.getInstance().getPluginContainer(), "Commands", new ArrayList<>()) : new ArrayList<>();
 				serializedCommandsList.add(command);
 				shopStack.getOrCreateComponent().putObject(getContainer(), "Commands", serializedCommandsList);

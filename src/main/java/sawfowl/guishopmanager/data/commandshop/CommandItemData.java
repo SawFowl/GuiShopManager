@@ -8,22 +8,22 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import sawfowl.guishopmanager.serialization.commandsshop.CommandsList;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.serialization.commandsshop.SerializedCommandShopPrice;
-import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStack;
 
 public class CommandItemData {
 
-	public CommandItemData(SerializedItemStackJsonNbt itemStack, List<SerializedCommandShopPrice> prices) {
+	public CommandItemData(SerializedItemStack itemStack, List<SerializedCommandShopPrice> prices) {
 		shopStack = itemStack;
 		this.prices = prices;
 	}
 
-	private SerializedItemStackJsonNbt shopStack;
+	private SerializedItemStack shopStack;
 	private List<SerializedCommandShopPrice> prices;
 
 	public ItemStack getItemStack() {
 		return shopStack.getItemStack();
 	}
-	public void setItemStack(SerializedItemStackJsonNbt shopStacks) {
+	public void setItemStack(SerializedItemStack shopStacks) {
 		this.shopStack = shopStacks;
 	}
 	public List<SerializedCommandShopPrice> getPrices() {

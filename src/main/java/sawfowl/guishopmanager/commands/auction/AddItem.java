@@ -177,7 +177,8 @@ public class AddItem extends AbstractPlayerCommand {
 	}
 
 	private boolean checkNbtLength(SerializedAuctionStack auctionStack) {
-		return auctionStack.getSerializedItemStack().getComponents() != null && auctionStack.getSerializedItemStack().getComponents().toString().length() > plugin.getConfig().getAuction().getComponentLimit();
+		if(auctionStack.getSerializedItemStack().getComponentsAsJson() == null) return auctionStack.getSerializedItemStack().getComponentsAsString().length() > plugin.getConfig().getAuction().getComponentLimit();
+		return auctionStack.getSerializedItemStack().getComponentsAsJson().toString().length() > plugin.getConfig().getAuction().getComponentLimit();
 	}
 
 	private long time() {

@@ -4,7 +4,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStack;
 
 import java.io.Serializable;
 import java.util.List;
@@ -15,7 +15,7 @@ public class SerializedShopStack implements Serializable {
 	SerializedShopStack(){}
 	public SerializedShopStack(int slot, ItemStack itemStack, List<SerializedShopPrice> serializedShopPrices) {
 		this.slot = slot;
-		this.itemStack = new SerializedItemStackJsonNbt(itemStack);
+		this.itemStack = new SerializedItemStack(itemStack).toJsonComponents();
 		this.serializedShopPrices = serializedShopPrices;
 	}
 
@@ -26,9 +26,9 @@ public class SerializedShopStack implements Serializable {
 	@Setting("Prices")
 	private List<SerializedShopPrice> serializedShopPrices;
 	@Setting("ItemStack")
-	private SerializedItemStackJsonNbt itemStack;
+	private SerializedItemStack itemStack;
 
-	public SerializedItemStackJsonNbt getSerializedItemStack() {
+	public SerializedItemStack getSerializedItemStack() {
 		return itemStack;
 	}
 

@@ -12,7 +12,7 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import net.kyori.adventure.text.Component;
 import sawfowl.guishopmanager.utils.Currencies;
-import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStack;
 
 @ConfigSerializable
 public class SerializedAuctionStack implements Serializable {
@@ -20,7 +20,7 @@ public class SerializedAuctionStack implements Serializable {
 	SerializedAuctionStack(){}
 
 	public SerializedAuctionStack(ItemStack itemStack, List<SerializedAuctionPrice> prices, UUID ownerUUID, String ownerName, long timeExpires, String serverName) {
-		this.itemStack = new SerializedItemStackJsonNbt(itemStack);
+		setItemStack(itemStack);
 		this.prices = prices;
 		this.ownerUUID = ownerUUID;
 		this.ownerName = ownerName;
@@ -32,7 +32,7 @@ public class SerializedAuctionStack implements Serializable {
 	private static final long serialVersionUID = 01;
 
 	@Setting("ItemStack")
-	private SerializedItemStackJsonNbt itemStack;
+	private SerializedItemStack itemStack;
 	@Setting("Prices")
 	private List<SerializedAuctionPrice> prices;
 	@Setting("OwnerUUID")
@@ -49,9 +49,9 @@ public class SerializedAuctionStack implements Serializable {
 	private SerializedBetData serializedBetData;
 
 	public void setItemStack(ItemStack itemStack) {
-		this.itemStack = new SerializedItemStackJsonNbt(itemStack);
+		this.itemStack = new SerializedItemStack(itemStack).toJsonComponents();
 	}
-	public SerializedItemStackJsonNbt getSerializedItemStack() {
+	public SerializedItemStack getSerializedItemStack() {
 		return itemStack;
 	}
 	public long getTimeExpires() {

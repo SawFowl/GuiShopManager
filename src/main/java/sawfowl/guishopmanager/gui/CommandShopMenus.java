@@ -38,7 +38,7 @@ import sawfowl.guishopmanager.configure.locale.abstractlocale.Messages;
 import sawfowl.guishopmanager.data.commandshop.CommandItemData;
 import sawfowl.guishopmanager.data.commandshop.CommandShopMenuData;
 import sawfowl.guishopmanager.serialization.commandsshop.CommandsList;
-import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStack;
 import sawfowl.guishopmanager.serialization.commandsshop.SerializedCommandShopPrice;
 
 public class CommandShopMenus {
@@ -336,7 +336,7 @@ public class CommandShopMenus {
 							plugin.getCommandShopData(shopId).getCommandShopMenuData(menuID).removeItem(shopSlot);
 						} else {
 							if(editData.itemStack.type() != ItemTypes.AIR) {
-								plugin.getCommandShopData(shopId).getCommandShopMenuData(menuID).addOrUpdateItem(shopSlot, new CommandItemData(new SerializedItemStackJsonNbt(editData.itemStack), prices));
+								plugin.getCommandShopData(shopId).getCommandShopMenuData(menuID).addOrUpdateItem(shopSlot, new CommandItemData(new SerializedItemStack(editData.itemStack), prices));
 							}
 						}
 						plugin.getCommandsShopStorage().saveCommandsShop(shopId);
@@ -367,7 +367,7 @@ public class CommandShopMenus {
 							plugin.getCommandShopData(shopId).getCommandShopMenuData(menuID).removeItem(shopSlot);
 						} else {
 							if(editData.itemStack.type() != ItemTypes.AIR) {
-								plugin.getCommandShopData(shopId).getCommandShopMenuData(menuID).addOrUpdateItem(shopSlot, new CommandItemData(new SerializedItemStackJsonNbt(editData.itemStack), prices));
+								plugin.getCommandShopData(shopId).getCommandShopMenuData(menuID).addOrUpdateItem(shopSlot, new CommandItemData(new SerializedItemStack(editData.itemStack), prices));
 							}
 						}
 						plugin.getCommandsShopStorage().saveCommandsShop(shopId);

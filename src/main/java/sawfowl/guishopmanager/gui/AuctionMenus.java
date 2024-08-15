@@ -41,8 +41,7 @@ import sawfowl.guishopmanager.configure.locale.abstractlocale.Messages;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionPrice;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 import sawfowl.guishopmanager.serialization.auction.SerializedBetData;
-import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
-import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackPlainNBT;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStack;
 
 public class AuctionMenus {
 
@@ -74,7 +73,7 @@ public class AuctionMenus {
 					slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
 				} else {
 					SerializedAuctionStack auctionItem = auctionStacks.get(currentItem);
-					SerializedItemStackJsonNbt configuredStack = new SerializedItemStackJsonNbt(auctionItem.getSerializedItemStack().getItemStack());
+					SerializedItemStack configuredStack = new SerializedItemStack(auctionItem.getSerializedItemStack().getItemStack());
 					configuredStack.getOrCreateComponent().putObject(getPluginContainer(), "uuid", auctionItem.getStackUUID().toString());
 					List<Component> itemLore = configuredStack.getItemStack().get(Keys.LORE).orElse(new ArrayList<Component>());
 					if(configuredStack.getItemStack().get(Keys.LORE).isPresent()) {
@@ -190,7 +189,7 @@ public class AuctionMenus {
 							createInventory(player, page + 1, plugin.getAuctionItems().values().stream().collect(Collectors.toList()));
 						}).build());
 					} else if(slotIndex <= 44) {
-						SerializedItemStackJsonNbt itemStack = new SerializedItemStackJsonNbt(slot.peek());
+						SerializedItemStack itemStack = new SerializedItemStack(slot.peek());
 						if(!itemStack.getOrCreateComponent().containsComponent(getPluginContainer(), "uuid")) return true;
 						String uuid = itemStack.getOrCreateComponent().<String>getObject(getPluginContainer(), "uuid", "");
 						if(uuid.equals("")) return true;
@@ -515,7 +514,7 @@ public class AuctionMenus {
 					}
 				} else {
 					if(slot.totalQuantity() > 0 && !prices.isEmpty()) {
-						SerializedItemStackJsonNbt serializedItemStack = new SerializedItemStackJsonNbt(slot.peek());
+						SerializedItemStack serializedItemStack = new SerializedItemStack(slot.peek());
 						if(plugin.maskIsBlackList(serializedItemStack.getItemTypeAsString()) || plugin.itemIsBlackList(slot.peek())) {
 							player.sendMessage(getMessages(player).itemBlocked());
 							return false;
@@ -552,7 +551,7 @@ public class AuctionMenus {
 		menu.setReadOnly(true);
 		for(SerializedAuctionStack auctionItem : plugin.getAuctionItems().values()) {
 			if(auctionItem.getServerName().equals(serverName) && auctionItem.getOwnerUUID().equals(player.uniqueId())) {
-				SerializedItemStackPlainNBT itemStack = new SerializedItemStackPlainNBT(auctionItem.getSerializedItemStack().getItemStack());
+				SerializedItemStack itemStack = new SerializedItemStack(auctionItem.getSerializedItemStack().getItemStack());
 				itemStack.getOrCreateComponent().putObject(getPluginContainer(), "uuid", auctionItem.getStackUUID().toString());
 				menu.inventory().offer(itemStack.getItemStack());
 			}
@@ -562,7 +561,7 @@ public class AuctionMenus {
 			@Override
 			public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
 				if(indexes.contains(slotIndex) && slotIndex <= 53 && slot.totalQuantity() > 0) {
-					SerializedItemStackPlainNBT itemStack = new SerializedItemStackPlainNBT(slot.peek());
+					SerializedItemStack itemStack = new SerializedItemStack(slot.peek());
 					if(itemStack.getOrCreateComponent().containsComponent(getPluginContainer(), "uuid")) {
 						String s = itemStack.getOrCreateComponent().getObject(getPluginContainer(), "uuid", "");
 						if(s.equals("")) return true;
@@ -681,7 +680,7 @@ public class AuctionMenus {
 	}
 
 	private void addItem(ServerPlayer player, SerializedAuctionStack auctionStack) {
-		if(plugin.maskIsBlackList(new SerializedItemStackPlainNBT(auctionStack.getSerializedItemStack().getItemStack()).getItemTypeAsString()) || plugin.itemIsBlackList(auctionStack.getSerializedItemStack().getItemStack())) {
+		if(plugin.maskIsBlackList(new SerializedItemStack(auctionStack.getSerializedItemStack().getItemStack()).getItemTypeAsString()) || plugin.itemIsBlackList(auctionStack.getSerializedItemStack().getItemStack())) {
 			player.sendMessage(getMessages(player).itemBlocked());
 			return;
 		}
@@ -714,7 +713,8 @@ public class AuctionMenus {
 	}
 
 	private boolean checkNbtLength(SerializedAuctionStack auctionStack) {
-		return auctionStack.getSerializedItemStack().getComponents() != null && auctionStack.getSerializedItemStack().getComponents().toString().length() > plugin.getConfig().getAuction().getComponentLimit();
+		if(auctionStack.getSerializedItemStack().getComponentsAsJson() == null) return auctionStack.getSerializedItemStack().getComponentsAsString().length() > plugin.getConfig().getAuction().getComponentLimit();
+		return auctionStack.getSerializedItemStack().getComponentsAsJson().toString().length() > plugin.getConfig().getAuction().getComponentLimit();
 	}
 
 	private PluginContainer getPluginContainer() {

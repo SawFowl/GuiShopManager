@@ -81,8 +81,7 @@ import sawfowl.guishopmanager.storage.MySqlStorage;
 import sawfowl.localeapi.api.LocaleService;
 import sawfowl.localeapi.api.event.LocaleServiseEvent;
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
-import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackJsonNbt;
-import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStackPlainNBT;
+import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStack;
 
 @Plugin("guishopmanager")
 public class GuiShopManager {
@@ -120,7 +119,7 @@ public class GuiShopManager {
 	private Map<UUID, Set<SerializedAuctionStack>> expiredAuctionItems = new HashMap<UUID, Set<SerializedAuctionStack>>();
 	private Map<UUID, Set<SerializedAuctionStack>> expiredBetAuctionItems = new HashMap<UUID, Set<SerializedAuctionStack>>();
 	private List<Expire> expires = new ArrayList<Expire>();
-	private List<SerializedItemStackPlainNBT> blackListStacks = new ArrayList<SerializedItemStackPlainNBT>();
+	private List<SerializedItemStack> blackListStacks = new ArrayList<SerializedItemStack>();
 
 	//private ScheduledTask updateAuctionTask;
 
@@ -264,17 +263,17 @@ public class GuiShopManager {
 		getBlackList().getMasks().add(itemStack.type().toString().toLowerCase());
 	}
 	public void addBlackListStack(ItemStack itemStack) {
-		blackListStacks.add(new SerializedItemStackPlainNBT(itemStack));
-		getBlackList().getItems().add(new SerializedItemStackJsonNbt(itemStack));
+		blackListStacks.add(new SerializedItemStack(itemStack));
+		getBlackList().getItems().add(new SerializedItemStack(itemStack));
 	}
-	public void setBlackListStacks(List<SerializedItemStackPlainNBT> blackListStacks) {
+	public void setBlackListStacks(List<SerializedItemStack> blackListStacks) {
 		this.blackListStacks = blackListStacks;
 	}
 	public boolean maskIsBlackList(String check) {
 		return getBlackList().getMasks().contains(check) || getBlackList().getMasks().contains(check.split(":")[1]);
 	}
 	public boolean itemIsBlackList(ItemStack check) {
-		SerializedItemStackPlainNBT serializedItemStack = new SerializedItemStackPlainNBT(check);
+		SerializedItemStack serializedItemStack = new SerializedItemStack(check);
 		serializedItemStack.setQuantity(1);
 		return blackListStacks.contains(serializedItemStack) || blackListStacks.toString().contains(serializedItemStack.toString());
 	}
