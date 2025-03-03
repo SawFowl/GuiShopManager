@@ -66,8 +66,8 @@ public class ShopMenus {
 					itemLore.add(getItems(player).lore().transactionVariants());
 					for(SerializedShopPrice serializablePrice : shopItemStack.getPrices()) {
 						itemLore.add(getItems(player).lore().price(serializablePrice.getCurrency(), serializablePrice.getBuyPrice().doubleValue(), serializablePrice.getSellPrice().doubleValue()));
-						itemLore.add(Component.empty());
 					}
+					itemLore.add(Component.empty());
 					itemStack.offer(Keys.LORE, itemLore);
 					slot.offer(itemStack);
 				} else slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
@@ -242,6 +242,11 @@ public class ShopMenus {
 					prices.add(0, serializedShopPrice);
 				}
 			}
+			for(Currency currency : plugin.getEconomy().getCurrencies()) {
+				if(!currency.equals(plugin.getEconomyService().defaultCurrency()) && !prices.stream().filter(p -> p.getCurrency().equals(currency)).findFirst().isPresent()) {
+					prices.add(new SerializedShopPrice(currency));
+				}
+			}
 		}
 		menuTitle = buy ? getGui(player).editBuy() : getGui(player).editSell();
 		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X3)
@@ -309,8 +314,8 @@ public class ShopMenus {
 				if(indexes.contains(slotIndex) && slotIndex <= 26) {
 					if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
 					if(slotIndex <= 8) {
-						editData.remove = clickType == ClickTypes.CLICK_LEFT.get() ? false : isPricesNonZeroValue(prices);
 						boolean increase = clickType == ClickTypes.CLICK_LEFT.get();
+						editData.remove = increase ? false : isPricesNonZeroValue(prices);
 						if(slotIndex == 0) {
 							prices.get(editData.priceNumber).setBuyOrSellPrice(BigDecimal.valueOf(0.01), buy, increase);
 						} else if(slotIndex == 1) {
@@ -337,11 +342,11 @@ public class ShopMenus {
 							player.closeInventory();
 						}
 						if(editData.remove) {
-							plugin.getShop(shopId).getShopMenuData(menuID).removeItem(shopSlot);
+							shopMenu.removeItem(shopSlot);
 						} else {
-							if(editData.itemStack.type() != ItemTypes.AIR) {
-								plugin.getShop(shopId).getShopMenuData(menuID).addOrUpdateItem(shopSlot, new ShopItem(editData.itemStack, prices));
-							}
+							if(!editData.itemStack.type().equals(ItemTypes.AIR.get())) {
+								shopMenu.addOrUpdateItem(shopSlot, new ShopItem(editData.itemStack, prices));
+							} else shopMenu.removeItem(shopSlot);
 						}
 						plugin.getShopStorage().saveShop(shopId);
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
@@ -369,11 +374,11 @@ public class ShopMenus {
 							return false;
 						}
 						if(editData.remove) {
-							plugin.getShop(shopId).getShopMenuData(menuID).removeItem(shopSlot);
+							shopMenu.removeItem(shopSlot);
 						} else {
-							if(editData.itemStack.type() != ItemTypes.AIR) {
-								plugin.getShop(shopId).getShopMenuData(menuID).addOrUpdateItem(shopSlot, new ShopItem(editData.itemStack, prices));
-							}
+							if(!editData.itemStack.type().equals(ItemTypes.AIR.get())) {
+								shopMenu.addOrUpdateItem(shopSlot, new ShopItem(editData.itemStack, prices));
+							} else shopMenu.removeItem(shopSlot);
 						}
 						plugin.getShopStorage().saveShop(shopId);
 						closePlayerInventory(player);
