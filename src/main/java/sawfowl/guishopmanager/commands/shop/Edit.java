@@ -35,10 +35,13 @@ public class Edit extends AbstractPlayerCommand {
 			if(shop == null) {
 				List<Component> messages = new ArrayList<Component>();
 				for(Shop shop1 : plugin.getAllShops()) {
+					String shopId = shop1.getID();
 					final ServerPlayer fPlayer = player;
 					Component hover = getCommands(locale).shop().openForEdit();
 					Component message = shop1.getOrDefaultTitle(player.locale()).clickEvent(SpongeComponents.executeCallback(cause -> {
-						run(fPlayer, shop1);
+						if(plugin.shopExists(shopId)) {
+							run(fPlayer, shop1);
+						} else cause.sendMessage(plugin.getLocales().getLocale(getLocale(cause)).messages().shop().shopNotExists(shopId));
 					})).hoverEvent(HoverEvent.showText(hover));
 					messages.add(message);
 				}
@@ -75,7 +78,7 @@ public class Edit extends AbstractPlayerCommand {
 	}
 
 	private void run(ServerPlayer player, Shop shop) {
-		plugin.getShopMenu().createInventoryToEditor(shop.getShopMenuData(1), (ServerPlayer) player, shop.getID(), 1);
+		plugin.getShopMenu().createInventoryToEditor(shop.getShopMenuData(1), player, shop.getID(), 1);
 	}
 
 }

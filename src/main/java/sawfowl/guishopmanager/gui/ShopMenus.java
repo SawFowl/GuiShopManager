@@ -243,7 +243,7 @@ public class ShopMenus {
 				}
 			}
 			for(Currency currency : plugin.getEconomy().getCurrencies()) {
-				if(!currency.equals(plugin.getEconomyService().defaultCurrency()) && !prices.stream().filter(p -> p.getCurrency().equals(currency)).findFirst().isPresent()) {
+				if(!prices.stream().filter(p -> p.getCurrency().equals(currency)).findFirst().isPresent()) {
 					prices.add(new SerializedShopPrice(currency));
 				}
 			}
@@ -345,7 +345,7 @@ public class ShopMenus {
 							shopMenu.removeItem(shopSlot);
 						} else {
 							if(!editData.itemStack.type().equals(ItemTypes.AIR.get())) {
-								shopMenu.addOrUpdateItem(shopSlot, new ShopItem(editData.itemStack, prices));
+								plugin.getShop(shopId).getShopMenuData(menuID).addOrUpdateItem(shopSlot, new ShopItem(editData.itemStack, prices));
 							} else shopMenu.removeItem(shopSlot);
 						}
 						plugin.getShopStorage().saveShop(shopId);
@@ -359,7 +359,7 @@ public class ShopMenus {
 						}
 						menu.inventory().slot(13).get().set(updateDisplayItemEdit(player, prices, editData));
 					} else if(slotIndex == 22) {
-						shopMenu.addOrUpdateItem(shopSlot, new ShopItem(editData.itemStack, prices));
+						plugin.getShop(shopId).getShopMenuData(menuID).addOrUpdateItem(shopSlot, new ShopItem(editData.itemStack, prices));
 						closePlayerInventory(player);
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
 							editItem(shopMenu, player, shopId, menuID, shopSlot, editData.itemStack, !buy);
@@ -377,7 +377,7 @@ public class ShopMenus {
 							shopMenu.removeItem(shopSlot);
 						} else {
 							if(!editData.itemStack.type().equals(ItemTypes.AIR.get())) {
-								shopMenu.addOrUpdateItem(shopSlot, new ShopItem(editData.itemStack, prices));
+								plugin.getShop(shopId).getShopMenuData(menuID).addOrUpdateItem(shopSlot, new ShopItem(editData.itemStack, prices));
 							} else shopMenu.removeItem(shopSlot);
 						}
 						plugin.getShopStorage().saveShop(shopId);

@@ -193,13 +193,12 @@ public class GuiShopManager {
 	}
 	public void addShop(String id, Shop shop) {
 		shops.put(id, shop);
-		shopStorage.saveShop(id);
 	}
 	public Shop getShop(String id) {
 		return shops.get(id);
 	}
-	public List<Shop> getAllShops() {
-		return shops.values().stream().collect(Collectors.toList());
+	public Collection<Shop> getAllShops() {
+		return shops.values();
 	}
 	public boolean shopsEmpty() {
 		return shops.isEmpty();
@@ -208,15 +207,17 @@ public class GuiShopManager {
 		return shops.containsKey(id);
 	}
 	public void removeShop(String shopId) {
-		shopStorage.deleteShop(shopId);
 		shops.remove(shopId);
+	}
+	public void deleteShop(String shopId) {
+		shopStorage.deleteShop(shopId);
+		removeShop(shopId);
 	}
 	public Collection<String> availableShops() {
 		return shops.keySet();
 	}
 	public void addCommandShopData(String id, CommandShopData shop) {
 		commandShops.put(id, shop);
-		commandsShopStorage.saveCommandsShop(id);
 	}
 	public CommandShopData getCommandShopData(String id) {
 		return commandShops.get(id);
@@ -231,8 +232,11 @@ public class GuiShopManager {
 		return commandShops.containsKey(id);
 	}
 	public void removeCommandShopData(String shopId) {
-		commandsShopStorage.deleteCommandsShop(shopId);
 		commandShops.remove(shopId);
+	}
+	public void deleteCommandShopData(String shopId) {
+		commandsShopStorage.deleteCommandsShop(shopId);
+		removeCommandShopData(shopId);
 	}
 	public Collection<String> availableCommandShops() {
 		return commandShops.keySet();

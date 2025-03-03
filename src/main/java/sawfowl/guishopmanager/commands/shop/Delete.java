@@ -32,7 +32,7 @@ public class Delete extends AbstractCommand {
 	public void execute(CommandContext context, Audience audience, Locale locale, boolean isPlayer) throws CommandException {
 		if(context.one(CommandParameters.SHOP).isPresent()) {
 			Shop shop = context.one(CommandParameters.SHOP).get();
-			plugin.removeShop(shop.getID());
+			plugin.deleteShop(shop.getID());
 			audience.sendMessage(getCommands(locale).shop().delete());
 		} else exception(getExceptions(locale).shopNotPresent());
 	}

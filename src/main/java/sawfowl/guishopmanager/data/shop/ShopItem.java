@@ -51,5 +51,14 @@ public class ShopItem {
 	public boolean isSellForPrice(SerializedShopPrice price) {
 		return price.getSellPrice().doubleValue() > 0;
 	}
+	public ItemStack getShopStack() {
+		return shopStack;
+	}
+	public void setShopStack(ItemStack shopStack) {
+		this.shopStack = shopStack;
+	}
+	public void setPrices(List<SerializedShopPrice> prices) {
+		this.prices = prices;
+	}
 
 }

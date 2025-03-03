@@ -84,4 +84,9 @@ public class Shop {
 		return serializableShop;
 	}
 
+	@Override
+	public String toString() {
+		return "Shop [menus=" + menus + ", titles=" + titles + ", defaultName=" + defaultName + "]";
+	}
+
 }

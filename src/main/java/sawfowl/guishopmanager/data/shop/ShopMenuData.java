@@ -36,4 +36,9 @@ public class ShopMenuData {
 		return items.isEmpty();
 	}
 
+	@Override
+	public String toString() {
+		return "ShopMenuData [items=" + items + "]";
+	}
+
 }

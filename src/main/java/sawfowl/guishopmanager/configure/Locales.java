@@ -68,7 +68,7 @@ public class Locales {
 	}
 
 	private PluginLocale getPluginLocale(Locale locale) {
-		return localeService.getPluginLocales(pluginid).getOrDefault(locale, localeService.getPluginLocales(pluginid).get(org.spongepowered.api.util.locale.Locales.DEFAULT));
+		return localeService.getPluginLocales(pluginid).containsKey(locale) ? localeService.getPluginLocales(pluginid).get(locale) : localeService.getPluginLocales(pluginid).get(org.spongepowered.api.util.locale.Locales.DEFAULT);
 	}
 
 }

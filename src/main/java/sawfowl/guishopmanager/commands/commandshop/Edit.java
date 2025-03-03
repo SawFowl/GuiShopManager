@@ -37,10 +37,13 @@ public class Edit extends AbstractPlayerCommand {
 		} else {
 			List<Component> messages = new ArrayList<Component>();
 			for(CommandShopData shop1 : plugin.getAllCommandShops()) {
+				String shopId = shop1.getID();
 				final ServerPlayer fPlayer = player;
 				Component hover = getCommands(locale).shop().openForEdit();
 				Component message = shop1.getOrDefaultTitle(locale).clickEvent(SpongeComponents.executeCallback(cause -> {
-					run(fPlayer, shop1);
+					if(plugin.shopExists(shopId)) {
+						run(fPlayer, shop1);
+					} else cause.sendMessage(plugin.getLocales().getLocale(getLocale(cause)).messages().shop().shopNotExists(shopId));
 				})).hoverEvent(HoverEvent.showText(hover));
 				messages.add(message);
 			}

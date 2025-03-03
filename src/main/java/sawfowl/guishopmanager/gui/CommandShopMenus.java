@@ -238,6 +238,11 @@ public class CommandShopMenus {
 					prices.add(0, serializedShopPrice);
 				}
 			}
+			for(Currency currency : plugin.getEconomy().getCurrencies()) {
+				if(!prices.stream().filter(p -> p.getCurrency().equals(currency)).findFirst().isPresent()) {
+					prices.add(new SerializedCommandShopPrice(currency));
+				}
+			}
 		}
 		ViewableInventory viewableInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X3)
 				.completeStructure().carrier(player).plugin(plugin.getPluginContainer()).build();

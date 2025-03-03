@@ -92,8 +92,11 @@ public class Shop extends AbstractCommand implements CommandExecutor  {
 				Component hover = getCommands(locale).shop().open();
 				for(sawfowl.guishopmanager.data.shop.Shop shop : plugin.getAllShops()) {
 					final ServerPlayer fPlayer = player;
+					String shopId = shop.getID();
 					Component message = shop.getOrDefaultTitle(((LocaleSource) audience).locale()).clickEvent(SpongeComponents.executeCallback(cause -> {
-						run(fPlayer, shop);
+						if(plugin.shopExists(shopId)) {
+							run(fPlayer, shop);
+						} else cause.sendMessage(plugin.getLocales().getLocale(getLocale(cause)).messages().shop().shopNotExists(shopId));
 					})).hoverEvent(HoverEvent.showText(hover));
 					messages.add(message);
 				}

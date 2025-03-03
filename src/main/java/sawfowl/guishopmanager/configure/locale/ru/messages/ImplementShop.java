@@ -27,6 +27,7 @@ public class ImplementShop implements Shop {
 	@Setting("BuyCommands")
 	@Comment("Вы можете использовать следующие плейсхолдеры для отображения валюты:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Отображение символа валюты.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Отображение символа валюты с применением стиля из ее имени.\n" + PlaceholderKeys.CURRENCY_NAME + " - Отображение имени валюты.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Отображение имени валюты в множественном числе.")
 	private Component buyCommands = deserialize("&aВы заплатили %currency-styled-symbol%%removed% за выполнение команд от имени консоли. Ваш баланс %currency-styled-symbol%%balance%.");
+	@Setting("ShopNotExists")
 	private Component shopNotExists = deserialize("&cНет магазина с идентификатором = " + PlaceholderKeys.SHOP);
 	public ImplementShop() {}
 

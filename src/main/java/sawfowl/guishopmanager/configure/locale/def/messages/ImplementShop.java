@@ -27,6 +27,7 @@ public class ImplementShop implements Shop {
 	@Setting("BuyCommands")
 	@Comment("You can use the following placeholders to display the currency type:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Displays the currency symbol.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Displays the currency symbol using the design from its name.\n" + PlaceholderKeys.CURRENCY_NAME + " - Displays the name of the currency.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Displays the currency name in the plural.")
 	private Component buyCommands = deserialize("&aYou paid %currency-styled-symbol%%removed% to execute console commands. Your balance %currency-styled-symbol%%balance%.");
+	@Setting("ShopNotExists")
 	private Component shopNotExists = deserialize("&cThere is no shop with id = " + PlaceholderKeys.SHOP);
 	public ImplementShop() {}
 

@@ -82,8 +82,11 @@ public class CommandShop extends AbstractCommand {
 				Component hover = getCommands(locale).shop().open();
 				for(CommandShopData shop : plugin.getAllCommandShops()) {
 					final ServerPlayer fPlayer = player;
+					String shopId = shop.getID();
 					Component message = shop.getOrDefaultTitle(locale).clickEvent(SpongeComponents.executeCallback(cause -> {
-						run(fPlayer, shop);
+						if(plugin.shopExists(shopId)) {
+							run(fPlayer, shop);
+						} else cause.sendMessage(plugin.getLocales().getLocale(getLocale(cause)).messages().shop().shopNotExists(shopId));
 					})).hoverEvent(HoverEvent.showText(hover));
 					messages.add(message);
 				}
