@@ -350,19 +350,20 @@ public class ShopMenus {
 						}
 						plugin.getShopStorage().saveShop(shopId);
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
-							createInventoryToEditor(shopMenu, player, shopId, menuID);
+							createInventoryToEditor(plugin.getShop(shopId).getShopMenuData(menuID), player, shopId, menuID);
 						}).build());
 					} else if(slotIndex == 21) {
 						for(SerializedShopPrice price : prices) {
 							price.setZero();
 							editData.remove = true;
+							plugin.getShop(shopId).getShopMenuData(menuID).removeItem(shopSlot);
 						}
-						menu.inventory().slot(13).get().set(updateDisplayItemEdit(player, prices, editData));
+						menu.inventory().slot(13).get().set(ItemStack.empty());
 					} else if(slotIndex == 22) {
 						plugin.getShop(shopId).getShopMenuData(menuID).addOrUpdateItem(shopSlot, new ShopItem(editData.itemStack, prices));
 						closePlayerInventory(player);
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
-							editItem(shopMenu, player, shopId, menuID, shopSlot, editData.itemStack, !buy);
+							editItem(plugin.getShop(shopId).getShopMenuData(menuID), player, shopId, menuID, shopSlot, editData.itemStack, !buy);
 						}).build());
 					} else if(slotIndex == 23) {
 						editData.nextPrice(prices);
