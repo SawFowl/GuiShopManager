@@ -41,7 +41,7 @@ public class AddCommand extends AbstractPlayerCommand {
 				SerializedItemStack shopStack = new SerializedItemStack(itemStack);
 				List<String> serializedCommandsList = shopStack.getOrCreateComponent().containsComponent(GuiShopManager.getInstance().getPluginContainer(), "Commands") ? shopStack.getOrCreateComponent().getObjectsList(String.class, GuiShopManager.getInstance().getPluginContainer(), "Commands", new ArrayList<>()) : new ArrayList<>();
 				serializedCommandsList.add(command);
-				shopStack.getOrCreateComponent().putObject(getContainer(), "Commands", serializedCommandsList);
+				shopStack.getOrCreateComponent().putObjects(getContainer(), "Commands", serializedCommandsList);
 				itemStack.copyFrom(shopStack.getItemStack());
 				if(main) {
 					player.setItemInHand(HandTypes.MAIN_HAND, shopStack.getItemStack());

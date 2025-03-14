@@ -37,7 +37,7 @@ public class ImplementLore implements Lore {
 	private Component price = deserialize("&eВалюта: %currency-name%&e. Покупка: &a%buy%&e. Продажа: &a%sell%");
 	@Setting("CommandPrice")
 	@Comment("Вы можете использовать следующие плейсхолдеры для отображения валюты:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Отображение символа валюты.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Отображение символа валюты с применением стиля из ее имени.\n" + PlaceholderKeys.CURRENCY_NAME + " - Отображение имени валюты.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Отображение имени валюты в множественном числе.")
-	private Component commandPrice = deserialize("&eВалюта: %currency-name%&e. Покупка: &a%buyprice%&e.");
+	private Component commandPrice = deserialize("&eВалюта: %currency-name%&e. Покупка: &a%price%&e.");
 	@Setting("AuctionPrice")
 	@Comment("Вы можете использовать следующие плейсхолдеры для отображения валюты:\n" + PlaceholderKeys.CURRENCY_SYMBOL + " - Отображение символа валюты.\n" + PlaceholderKeys.CURRENCY_STYLED_SYMBOL + " - Отображение символа валюты с применением стиля из ее имени.\n" + PlaceholderKeys.CURRENCY_NAME + " - Отображение имени валюты.\n" + PlaceholderKeys.CURRENCY_PLURAL_NAME + " - Отображение имени валюты в множественном числе.")
 	private Component auctionPrice = deserialize("&eВалюта: %currency-name%&e. Цена за штуку: &a%price%&e. Всего: &a%total%");

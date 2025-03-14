@@ -64,11 +64,11 @@ public class CommandShopMenus {
 				if(shopMenu.containsCommandItem(id)) {
 					CommandItemData shopItemStack = shopMenu.getCommandItem(id);
 					ItemStack itemStack = shopItemStack.getItemStack();
-					List<Component> itemLore = itemStack.get(Keys.LORE).orElse(new ArrayList<Component>());
+					List<Component> itemLore = new ArrayList<Component>(itemStack.get(Keys.LORE).orElse(new ArrayList<Component>()));
 					if(itemStack.get(Keys.LORE).isPresent()) {
 						itemStack.remove(Keys.LORE);
-						itemLore.add(Component.empty());
 					}
+					itemLore.add(Component.empty());
 					itemLore.add(getItems(player).lore().transactionVariants());
 					for(SerializedCommandShopPrice serializablePrice : shopItemStack.getPrices()) {
 						if(serializablePrice.isAllowFree()) itemLore.add(getItems(player).lore().allowFree());
@@ -149,7 +149,7 @@ public class CommandShopMenus {
 				if(shopMenu.containsCommandItem(id)) {
 					CommandItemData shopItemStack = shopMenu.getCommandItem(id);
 					ItemStack itemStack = shopItemStack.getItemStack();
-					List<Component> itemLore = itemStack.get(Keys.LORE).orElse(new ArrayList<Component>());
+					List<Component> itemLore = new ArrayList<Component>(itemStack.get(Keys.LORE).orElse(new ArrayList<Component>()));
 					if(itemStack.get(Keys.LORE).isPresent()) {
 						itemStack.remove(Keys.LORE);
 						itemLore.add(Component.empty());
@@ -399,7 +399,7 @@ public class CommandShopMenus {
 
 	private ItemStack updateDisplayItemEdit(ServerPlayer player, List<SerializedCommandShopPrice> prices, EditData editData) {
 		ItemStack itemStack = editData.itemStack.copy();
-		List<Component> lore = itemStack.get(Keys.LORE).orElse(new ArrayList<Component>());
+		List<Component> lore = new ArrayList<Component>(itemStack.get(Keys.LORE).orElse(new ArrayList<Component>()));
 		if(itemStack.get(Keys.LORE).isPresent()) {
 			itemStack.remove(Keys.LORE);
 			lore.add(Component.empty());
