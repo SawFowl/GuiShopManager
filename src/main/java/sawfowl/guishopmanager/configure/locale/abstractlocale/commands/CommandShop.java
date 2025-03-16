@@ -10,6 +10,8 @@ public interface CommandShop {
 
 	Component commandAdded();
 
+	Component commandsRemoved();
+
 	Component empty();
 
 	Component emptyEditor();

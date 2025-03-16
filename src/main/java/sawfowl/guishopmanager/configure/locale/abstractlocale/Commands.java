@@ -6,6 +6,8 @@ import sawfowl.guishopmanager.configure.locale.abstractlocale.commands.*;
 
 public interface Commands {
 
+	Backup backup();
+
 	Auction auction();
 
 	CommandShop commandShop();

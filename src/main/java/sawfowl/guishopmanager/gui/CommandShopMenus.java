@@ -67,8 +67,8 @@ public class CommandShopMenus {
 					List<Component> itemLore = new ArrayList<Component>(itemStack.get(Keys.LORE).orElse(new ArrayList<Component>()));
 					if(itemStack.get(Keys.LORE).isPresent()) {
 						itemStack.remove(Keys.LORE);
+						itemLore.add(Component.empty());
 					}
-					itemLore.add(Component.empty());
 					itemLore.add(getItems(player).lore().transactionVariants());
 					for(SerializedCommandShopPrice serializablePrice : shopItemStack.getPrices()) {
 						if(serializablePrice.isAllowFree()) itemLore.add(getItems(player).lore().allowFree());
@@ -158,8 +158,8 @@ public class CommandShopMenus {
 					for(SerializedCommandShopPrice serializablePrice : shopItemStack.getPrices()) {
 						if(serializablePrice.isAllowFree()) itemLore.add(getItems(player).lore().allowFree());
 						itemLore.add(getItems(player).lore().commandPrice(serializablePrice.getCurrency(), serializablePrice.getBuyPrice().doubleValue()));
-						itemLore.add(Component.empty());
 					}
+					itemLore.add(Component.empty());
 					itemStack.offer(Keys.LORE, itemLore);
 					slot.offer(itemStack);
 				} else slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));

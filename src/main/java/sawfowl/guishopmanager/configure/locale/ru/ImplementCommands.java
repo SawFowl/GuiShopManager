@@ -7,10 +7,12 @@ import net.kyori.adventure.text.Component;
 
 import sawfowl.guishopmanager.configure.locale.abstractlocale.Commands;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.commands.Auction;
+import sawfowl.guishopmanager.configure.locale.abstractlocale.commands.Backup;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.commands.CommandShop;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.commands.Exceptions;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.commands.Shop;
 import sawfowl.guishopmanager.configure.locale.ru.commands.ImplementAuction;
+import sawfowl.guishopmanager.configure.locale.ru.commands.ImplementBackup;
 import sawfowl.guishopmanager.configure.locale.ru.commands.ImplementCommandShop;
 import sawfowl.guishopmanager.configure.locale.ru.commands.ImplementExceptions;
 import sawfowl.guishopmanager.configure.locale.ru.commands.ImplementShop;
@@ -21,6 +23,8 @@ public class ImplementCommands implements Commands {
 
 	@Setting("Auction")
 	private ImplementAuction auction = new ImplementAuction();
+	@Setting("Backup")
+	private ImplementBackup backup = new ImplementBackup();
 	@Setting("CommandShop")
 	private ImplementCommandShop commandShop = new ImplementCommandShop();
 	@Setting("Exceptions")
@@ -75,6 +79,11 @@ public class ImplementCommands implements Commands {
 	@Override
 	public Component reload() {
 		return reload;
+	}
+
+	@Override
+	public Backup backup() {
+		return backup;
 	}
 
 }

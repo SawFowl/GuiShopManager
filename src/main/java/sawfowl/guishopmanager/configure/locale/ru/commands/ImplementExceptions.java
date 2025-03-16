@@ -45,6 +45,8 @@ public class ImplementExceptions implements Exceptions {
 	private Component localeNotPresent = TextUtils.deserializeLegacy("&cУкажите необходимую локализацию. Формат - en-US, ru-RU и т. д.");
 	@Setting("TranslateNotPresent")
 	private Component translateNotPresent = TextUtils.deserializeLegacy("&cВведите отображаемое имя для вашего магазина.");
+	@Setting("H2NotPresent")
+	private Component h2NotPresent = TextUtils.deserializeLegacy("&cОтсутствует плагин с драйвером h2. Пожалуйста загрузите его с сайта SpongeORE.");
 	public ImplementExceptions() {}
 
 	@Override
@@ -130,6 +132,11 @@ public class ImplementExceptions implements Exceptions {
 	@Override
 	public Component translateNotPresent() {
 		return translateNotPresent;
+	}
+
+	@Override
+	public Component h2NotPresent() {
+		return h2NotPresent;
 	}
 
 }

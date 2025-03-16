@@ -17,6 +17,8 @@ public class ImplementCommandShop implements CommandShop {
 	private Component padding = TextUtils.deserializeLegacy("&3=");
 	@Setting("CommandAdded")
 	private Component commandAdded = TextUtils.deserializeLegacy("&aYou have added a command to an item.");
+	@Setting("CommandsRemoved")
+	private Component commandsRemoved = TextUtils.deserializeLegacy("&aThe command list on the item has been cleared.");
 	@Setting("Empty")
 	private Component empty = TextUtils.deserializeLegacy("&eThe shop list is now empty. Contact the administration.");
 	@Setting("EmptyEditor")
@@ -53,6 +55,11 @@ public class ImplementCommandShop implements CommandShop {
 	@Override
 	public Component delete() {
 		return delete;
+	}
+
+	@Override
+	public Component commandsRemoved() {
+		return commandsRemoved;
 	}
 
 }

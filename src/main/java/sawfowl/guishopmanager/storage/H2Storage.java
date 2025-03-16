@@ -29,7 +29,19 @@ public class H2Storage extends Thread implements DBStorage {
 	private String prefix;
 	private Connection connection;
 	private Statement statement;
+	private final String storageName;
 	public H2Storage(GuiShopManager instance) {
+		this.storageName = "StorageData";
+		plugin = instance;
+		prefix = plugin.getConfig().getMySQL().getPrefix();
+		try {
+			statement = createStatement();
+		} catch (SQLException e) {
+		}
+		createTables();
+	}
+	public H2Storage(GuiShopManager instance, String storageName) {
+		this.storageName = storageName;
 		plugin = instance;
 		prefix = plugin.getConfig().getMySQL().getPrefix();
 		try {
@@ -359,7 +371,7 @@ public class H2Storage extends Thread implements DBStorage {
 
 	@Override
 	public Connection getConnection() throws SQLException {
-		return connection == null || connection.isClosed() ? connection = DriverManager.getConnection("jdbc:h2:" + plugin.getConfigDir().resolve("StorageData").toFile().getAbsolutePath(), "", "") : connection;
+		return connection == null || connection.isClosed() ? connection = DriverManager.getConnection("jdbc:h2:" + plugin.getConfigDir().resolve(storageName).toFile().getAbsolutePath(), "", "") : connection;
 	}
 
 }

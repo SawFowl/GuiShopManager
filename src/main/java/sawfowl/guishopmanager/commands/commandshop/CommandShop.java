@@ -33,6 +33,7 @@ public class CommandShop extends AbstractCommand {
 	public Parameterized build() {
 		return builder()
 				.addChild(new AddCommand(plugin).build(), "addcommand")
+				.addChild(new ClearCommands(plugin).build(), "clearcommands")
 				.addChild(new Create(plugin).build(), "create")
 				.addChild(new Delete(plugin).build(), "delete")
 				.addChild(new Edit(plugin).build(), "edit")

@@ -38,4 +38,6 @@ public interface Exceptions {
 
 	Component translateNotPresent();
 
+	Component h2NotPresent();
+
 }

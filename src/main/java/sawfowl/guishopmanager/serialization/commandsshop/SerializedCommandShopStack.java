@@ -17,7 +17,7 @@ public class SerializedCommandShopStack implements Serializable {
 	SerializedCommandShopStack(){}
 	public SerializedCommandShopStack(int slot, ItemStack itemStack, List<SerializedCommandShopPrice> serializedShopPrices) {
 		this.slot = slot;
-		this.serializedItemStack = new SerializedItemStack(itemStack);
+		this.serializedItemStack = new SerializedItemStack(itemStack).toJsonComponents();
 		this.serializedShopPrices = serializedShopPrices;
 	}
 

@@ -1,7 +1,5 @@
 package sawfowl.guishopmanager.commands.commandshop;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -17,12 +15,11 @@ import sawfowl.commandpack.api.commands.parameterized.ParameterSettings;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
 import sawfowl.guishopmanager.commands.AbstractPlayerCommand;
-import sawfowl.guishopmanager.utils.CommandParameters;
 import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStack;
 
-public class AddCommand extends AbstractPlayerCommand {
+public class ClearCommands extends AbstractPlayerCommand {
 
-	public AddCommand(GuiShopManager instance) {
+	public ClearCommands(GuiShopManager instance) {
 		super(instance);
 	}
 
@@ -37,18 +34,12 @@ public class AddCommand extends AbstractPlayerCommand {
 			main = false;
 		}
 		if(itemStack != null && !itemStack.type().equals(ItemTypes.AIR.get())) {
-			if(context.one(CommandParameters.COMMAND).isPresent()) {
-				String command = context.one(CommandParameters.COMMAND).get();
-				SerializedItemStack shopStack = new SerializedItemStack(itemStack);
-				List<String> serializedCommandsList = shopStack.getOrCreateComponent().containsComponent(GuiShopManager.getInstance().getPluginContainer(), "Commands") ? shopStack.getOrCreateComponent().getObjectsList(String.class, GuiShopManager.getInstance().getPluginContainer(), "Commands", new ArrayList<>()) : new ArrayList<>();
-				serializedCommandsList.add(command);
-				shopStack.getOrCreateComponent().putObjects(getContainer(), "Commands", serializedCommandsList);
-				itemStack.copyFrom(shopStack.getItemStack());
-				if(main) {
-					player.setItemInHand(HandTypes.MAIN_HAND, shopStack.getItemStack());
-				} else player.setItemInHand(HandTypes.OFF_HAND, shopStack.getItemStack());
-			}
-			player.sendMessage(getCommands(locale).commandShop().commandAdded());
+			SerializedItemStack shopStack = new SerializedItemStack(itemStack);
+			shopStack.getOrCreateComponent().removeComponent(getContainer(), "Commands");
+			if(main) {
+				player.setItemInHand(HandTypes.MAIN_HAND, shopStack.getItemStack());
+			} else player.setItemInHand(HandTypes.OFF_HAND, shopStack.getItemStack());
+			player.sendMessage(getCommands(locale).commandShop().commandsRemoved());
 		} else exception(getExceptions(locale).itemNotPresent());
 	}
 
@@ -59,7 +50,7 @@ public class AddCommand extends AbstractPlayerCommand {
 
 	@Override
 	public String command() {
-		return "addcommand";
+		return "clearcommands";
 	}
 
 	@Override
@@ -69,7 +60,7 @@ public class AddCommand extends AbstractPlayerCommand {
 
 	@Override
 	public List<ParameterSettings> getArguments() {
-		return Arrays.asList(ParameterSettings.of(CommandParameters.COMMAND, false, null));
+		return null;
 	}
 
 }

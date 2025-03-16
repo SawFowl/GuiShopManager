@@ -30,7 +30,7 @@ public abstract class AbstractPlayerCommand extends AbstractCommand implements P
 
 	@Override
 	public Map<String, ParameterSettings> getSettingsMap() {
-		return getArguments().stream().collect(Collectors.toMap(arg -> arg.getKey(), arg -> arg));
+		return getArguments() == null ? null : getArguments().stream().collect(Collectors.toMap(arg -> arg.getKey(), arg -> arg));
 	}
 
 }

@@ -10,6 +10,7 @@ import sawfowl.localeapi.api.TextUtils;
 public class Permissions {
 
 	public static final String HELP = "guishopmanager.user.help";
+	public static final String BACKUP = "guishopmanager.staff.backup";
 	public static final String RELOAD = "guishopmanager.staff.reload";
 	public static final String COMMANDSSHOP_CREATE = "guishopmanager.staff.commandshop.create";
 	public static final String COMMANDSSHOP_ADD_COMMAND = "guishopmanager.staff.commandshop.addcommand";

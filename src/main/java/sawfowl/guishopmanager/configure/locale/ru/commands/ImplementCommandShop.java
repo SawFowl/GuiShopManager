@@ -16,11 +16,13 @@ public class ImplementCommandShop implements CommandShop {
 	@Setting("Padding")
 	private Component padding = TextUtils.deserializeLegacy("&3=");
 	@Setting("CommandAdded")
-	private Component commandAdded = TextUtils.deserializeLegacy("&aВы добавили команду к предмету");
+	private Component commandAdded = TextUtils.deserializeLegacy("&aВы добавили команду к предмету.");
+	@Setting("CommandsRemoved")
+	private Component commandsRemoved = TextUtils.deserializeLegacy("&aСписок команд на предмете очищен.");
 	@Setting("Empty")
 	private Component empty = TextUtils.deserializeLegacy("&eСписок магазинов сейчас пуст. Обратитесь к администрации.");
 	@Setting("EmptyEditor")
-	private Component emptyEditor = TextUtils.deserializeLegacy("&eСписок магазинов сейчас пуст. Создайте по крайней мере 1 магазин. ");
+	private Component emptyEditor = TextUtils.deserializeLegacy("&eСписок магазинов сейчас пуст. Создайте по крайней мере 1 магазин.");
 	@Setting("Delete")
 	private Component delete = TextUtils.deserializeLegacy("&aМагазин удален.");
 	public ImplementCommandShop() {}
@@ -53,6 +55,11 @@ public class ImplementCommandShop implements CommandShop {
 	@Override
 	public Component delete() {
 		return delete;
+	}
+
+	@Override
+	public Component commandsRemoved() {
+		return commandsRemoved;
 	}
 
 }
