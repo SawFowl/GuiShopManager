@@ -40,4 +40,6 @@ public interface Exceptions {
 
 	Component h2NotPresent();
 
+	Component backupNotPresent();
+
 }
