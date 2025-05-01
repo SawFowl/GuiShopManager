@@ -535,19 +535,15 @@ public class ShopMenus {
 						menu.inventory().slot(13).get().set(updateDisplayItemTransaction(player, prices, editData));
 					} else if(slotIndex == 18) {
 						if(editData.size > 0) {
-							if(buy) {
-								if(!plugin.getEconomy().checkPlayerBalance(player.uniqueId(), prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice().multiply(BigDecimal.valueOf(editData.itemStack.quantity()))) || !plugin.getEconomy().removeFromPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice(), editData.itemStack)) {
-									player.sendMessage(getExceptions(player).noMoney());
-									return false;
-								}
-								editData.itemStack.setQuantity(editData.size);
-								player.inventory().offer(editData.itemStack.copy());
-							} else {
-								if(!plugin.getEconomy().addToPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getSellPrice(), editData.itemStack)) return false;
-								player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(editData.itemStack.copy())).poll(editData.size);
-								editData.itemStack.setQuantity(editData.size);
-							}
+							editData.itemStack.setQuantity(editData.size);
 							editData.size = 0;
+							if(buy) {
+								if(plugin.getEconomy().checkPlayerBalance(player.uniqueId(), prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice().multiply(BigDecimal.valueOf(editData.itemStack.quantity()))) && plugin.getEconomy().removeFromPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getBuyPrice(), editData.itemStack)) {
+									player.inventory().offer(editData.itemStack.copy());
+								} else player.sendMessage(getExceptions(player).noMoney());
+							} else {
+								if(plugin.getEconomy().addToPlayerBalance(player, prices.get(editData.priceNumber).getCurrency(), prices.get(editData.priceNumber).getSellPrice(), editData.itemStack)) player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(editData.itemStack)).poll(editData.itemStack.quantity());
+							}
 						}
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
 							createInventoryToPlayer(shopMenu, player, shopId, menuID);
