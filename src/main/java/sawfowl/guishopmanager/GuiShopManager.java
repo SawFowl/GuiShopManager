@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.config.ConfigDir;
@@ -43,6 +44,7 @@ import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
+import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
@@ -100,6 +102,7 @@ public class GuiShopManager {
 	private static EconomyService economyService;
 	private static EventContext eventContext;
 	private LocaleService localeAPI;
+	private CommandPack commandPack;
 
 	private static GuiShopManager instance;
 	private GeneratedFillItems fillItems;
@@ -304,6 +307,11 @@ public class GuiShopManager {
 
 	@Listener
 	public void getCommandPackAPI(CommandPack.PostAPI event) {
+		commandPack = event.getAPI();
+	}
+
+	@Listener
+	public void onStart(StartedEngineEvent<Server> event) {
 		if(!Sponge.server().serviceProvider().economyService().isPresent()) {
 			logger.error(locales.getSystemLocale().messages().exceptions().economyNotFound());
 			return;
@@ -324,9 +332,9 @@ public class GuiShopManager {
 			if(!expiredAuctionItems.isEmpty()) Sponge.server().onlinePlayers().forEach(this::checkExpired);
 			if(!expiredBetAuctionItems.isEmpty()) Sponge.server().onlinePlayers().forEach(this::checkExpiredBet);
 		}).build());
-		event.getAPI().registerCommand(new MainCommand(instance));
-		if(getConfig().getAliases().getShop().isEnable()) new sawfowl.guishopmanager.commands.shop.Shop(instance).register(event.getAPI());
-		if(getConfig().getAliases().getAuction().isEnable() && getConfig().getAuction().isEnable()) new Auction(instance).register(event.getAPI());
+		commandPack.registerCommand(new MainCommand(instance));
+		if(getConfig().getAliases().getShop().isEnable()) new sawfowl.guishopmanager.commands.shop.Shop(instance).register(commandPack);
+		if(getConfig().getAliases().getAuction().isEnable() && getConfig().getAuction().isEnable()) new Auction(instance).register(commandPack);
 	}
 
 	@Listener
