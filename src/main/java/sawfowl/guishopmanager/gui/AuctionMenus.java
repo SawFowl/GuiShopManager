@@ -34,7 +34,6 @@ import net.kyori.adventure.text.Component;
 
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
-import sawfowl.guishopmanager.configure.FillItems;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.Gui;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.Items;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.Messages;
@@ -70,7 +69,7 @@ public class AuctionMenus {
 			if(id < 45) {
 				while(currentItem < plugin.getAuctionItems().size() && auctionStacks.get(currentItem).isExpired()) currentItem++;
 				if(plugin.getAuctionItems().isEmpty() || currentItem >= plugin.getAuctionItems().size()) {
-					slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
+					slot.offer(plugin.getFillItems().getBasicFill());
 				} else {
 					SerializedAuctionStack auctionItem = auctionStacks.get(currentItem);
 					SerializedItemStack configuredStack = new SerializedItemStack(auctionItem.getSerializedItemStack().getItemStack());
@@ -126,26 +125,26 @@ public class AuctionMenus {
 					slot.offer(displayStack);
 				}
 			} else if(id <= 53) {
-				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
+				slot.set(plugin.getFillItems().getBottomFill());
 				if(id == 45 && page >= 2) {
-					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.BACK);
+					ItemStack itemStack = plugin.getFillItems().getPreviousMenu();
 					itemStack.offer(Keys.CUSTOM_NAME, getItems(player).name().back());
 					slot.set(itemStack);
 				} else if(id == 47) {
-					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.ADD);
+					ItemStack itemStack = plugin.getFillItems().getAuctionAddItem();
 					itemStack.offer(Keys.CUSTOM_NAME, getItems(player).name().auctionAddItem());
 					slot.set(itemStack);
 				} else if(id == 49) {
-					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.CHANGECURRENCY);
+					ItemStack itemStack = plugin.getFillItems().getChangeCurrency();
 					itemStack.offer(Keys.CUSTOM_NAME, getItems(player).name().changeCurrency());
 					itemStack.offer(Keys.LORE, Arrays.asList(getItems(player).lore().currency(currencies.get(editData.priceNumber))));
 					slot.set(itemStack);
 				} else if(id == 51) {
-					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.RETURN);
+					ItemStack itemStack = plugin.getFillItems().getAuctionReturnItem();
 					itemStack.offer(Keys.CUSTOM_NAME,  getItems(player).name().returnAuctionItem());
 					slot.set(itemStack);
 				} else if(id == 53 && plugin.getAuctionItems().size() >= (page * 45)) {
-					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.NEXT);
+					ItemStack itemStack = plugin.getFillItems().getNextMenu();
 					itemStack.offer(Keys.CUSTOM_NAME,  getItems(player).name().next());
 					slot.set(itemStack);
 				}
@@ -176,7 +175,7 @@ public class AuctionMenus {
 						}).build());
 					} else if(slotIndex == 49) {
 						editData.nextPrice(currencies.size());
-						ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.CHANGECURRENCY);
+						ItemStack itemStack = plugin.getFillItems().getChangeCurrency();
 						itemStack.offer(Keys.CUSTOM_NAME,  getItems(player).name().changeCurrency());
 						itemStack.offer(Keys.LORE, Arrays.asList(getItems(player).lore().currency(currencies.get(editData.priceNumber))));
 						slot.set(itemStack);
@@ -184,7 +183,7 @@ public class AuctionMenus {
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
 							returnItems(player);
 						}).build());
-					} else if(slotIndex == 53 && slot.peek().type().equals(plugin.getFillItems().getItemStack(FillItems.NEXT).type())) {
+					} else if(slotIndex == 53 && slot.peek().type().equals(plugin.getFillItems().getNextMenu().type())) {
 						Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
 							createInventory(player, page + 1, plugin.getAuctionItems().values().stream().collect(Collectors.toList()));
 						}).build());
@@ -197,7 +196,7 @@ public class AuctionMenus {
 						if(!plugin.getAuctionItems().containsKey(stackUUID)) {
 							player.sendMessage(getMessages(player).itemNotFound());
 							Sponge.server().scheduler().submit(Task.builder().delay(Ticks.of(5)).plugin(plugin.getPluginContainer()).execute(() -> {
-								slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
+								slot.offer(plugin.getFillItems().getBasicFill());
 							}).build());
 						}
 						if(plugin.getAuctionItems().get(stackUUID).getOwnerUUID().equals(player.uniqueId())) {
@@ -218,7 +217,7 @@ public class AuctionMenus {
 									player.sendMessage(getExceptions(player).noMoney());
 									return false;
 								}
-								slot.set(plugin.getFillItems().getItemStack(FillItems.BASIC));
+								slot.set(plugin.getFillItems().getBasicFill());
 								ItemStack toOffer = auctionItem.getSerializedItemStack().getItemStack();
 								plugin.getAuctionStorage().removeAuctionStack(auctionItem.getStackUUID());
 								plugin.getAuctionItems().remove(stackUUID);
@@ -254,7 +253,7 @@ public class AuctionMenus {
 		menu.setReadOnly(true);
 		for(Slot slot : menu.inventory().slots()) {
 			int id = slot.get(Keys.SLOT_INDEX).get();
-			slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
+			slot.offer(plugin.getFillItems().getBasicFill());
 			if(id == 13) {
 				slot.set(getDisplayBetItem(player, betData, editData));
 			} else 
@@ -277,16 +276,16 @@ public class AuctionMenus {
 				} else if(id == 8) {
 					price = Component.text("10000");
 				}
-				ItemStack changePrice = plugin.getFillItems().getItemStack(FillItems.valueOf("CHANGEPRICE" + id));
+				ItemStack changePrice = plugin.getFillItems().getChangePrice().getItemStack(id);
 				changePrice.offer(Keys.LORE, getItems(player).lore().changePrice());
 				changePrice.offer(Keys.CUSTOM_NAME, getItems(player).name().price(price));
 				slot.set(changePrice);
 			} else if(id == 18) {
-				ItemStack back = plugin.getFillItems().getItemStack(FillItems.BACK);
+				ItemStack back = plugin.getFillItems().getPreviousMenu();
 				back.offer(Keys.CUSTOM_NAME, getItems(player).name().back());
 				slot.set(back);
 			} else if(id == 26) {
-				ItemStack exit = plugin.getFillItems().getItemStack(FillItems.EXIT);
+				ItemStack exit = plugin.getFillItems().getExit();
 				exit.offer(Keys.CUSTOM_NAME, getItems(player).name().exit());
 				slot.set(exit);
 			}
@@ -373,7 +372,7 @@ public class AuctionMenus {
 		for(Slot slot : menu.inventory().slots()) {
 			int id = slot.get(Keys.SLOT_INDEX).get();
 			if(id != 13) {
-				slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
+				slot.offer(plugin.getFillItems().getBasicFill());
 			}
 			if(id <= 8) {
 				Component price = Component.text("0.01");
@@ -401,34 +400,34 @@ public class AuctionMenus {
 				if(id == 8) {
 					price = Component.text("10000");
 				}
-				ItemStack changePrice = plugin.getFillItems().getItemStack(FillItems.valueOf("CHANGEPRICE" + id));
+				ItemStack changePrice = plugin.getFillItems().getChangePrice().getItemStack(id);
 				changePrice.offer(Keys.LORE, getItems(player).lore().changePrice());
 				changePrice.offer(Keys.CUSTOM_NAME, getItems(player).name().price(price));
 				slot.set(changePrice);
 			}
 			if(id == 18) {
-				ItemStack back = plugin.getFillItems().getItemStack(FillItems.BACK);
+				ItemStack back = plugin.getFillItems().getPreviousMenu();
 				back.offer(Keys.CUSTOM_NAME, getItems(player).name().back());
 				slot.set(back);
 			}
 			if(id == 21) {
-				ItemStack clear = plugin.getFillItems().getItemStack(FillItems.CLEAR);
+				ItemStack clear = plugin.getFillItems().getClearItem();
 				clear.offer(Keys.CUSTOM_NAME, getItems(player).name().clear());
 				slot.set(clear);
 			}
 			if(id == 22) {
-				ItemStack switchMode = plugin.getFillItems().getItemStack(FillItems.SWITCHMODE);
+				ItemStack switchMode = plugin.getFillItems().getSwitchMode();
 				switchMode.offer(Keys.CUSTOM_NAME, getItems(player).name().switchMode());
 				switchMode.offer(Keys.LORE, getItems(player).lore().auctionSwitchMode());
 				slot.set(switchMode);
 			}
 			if(id == 23) {
-				ItemStack changeCurrency = plugin.getFillItems().getItemStack(FillItems.CHANGECURRENCY);
+				ItemStack changeCurrency = plugin.getFillItems().getChangeCurrency();
 				changeCurrency.offer(Keys.CUSTOM_NAME, getItems(player).name().changeCurrency());
 				slot.set(changeCurrency);
 			}
 			if(id == 26) {
-				ItemStack exit = plugin.getFillItems().getItemStack(FillItems.EXIT);
+				ItemStack exit = plugin.getFillItems().getExit();
 				exit.offer(Keys.CUSTOM_NAME, getItems(player).name().exit());
 				slot.set(exit);
 			}
@@ -685,7 +684,7 @@ public class AuctionMenus {
 			return;
 		}
 		if(player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(auctionStack.getSerializedItemStack().getItemStack())).totalQuantity() < auctionStack.getSerializedItemStack().getQuantity()) {
-			player.sendMessage(plugin.getLocales().getLocale(player).commands().exceptions().itemNotPresent());
+			player.sendMessage(plugin.getLocales().getAsReferenced(player).commands().exceptions().itemNotPresent());
 			return;
 		}
 		if(checkNbtLength(auctionStack)) {
@@ -722,19 +721,19 @@ public class AuctionMenus {
 	}
 
 	private Gui.Auction getAuctionGui(ServerPlayer player) {
-		return plugin.getLocales().getLocale(player).gui().auction();
+		return plugin.getLocales().getAsReferenced(player).gui().auction();
 	}
 
 	private Messages.Auction getMessages(ServerPlayer player) {
-		return plugin.getLocales().getLocale(player).messages().auction();
+		return plugin.getLocales().getAsReferenced(player).messages().auction();
 	}
 
 	private Messages.Exceptions getExceptions(ServerPlayer player) {
-		return plugin.getLocales().getLocale(player).messages().exceptions();
+		return plugin.getLocales().getAsReferenced(player).messages().exceptions();
 	}
 
 	private Items getItems(ServerPlayer player) {
-		return plugin.getLocales().getLocale(player).items();
+		return plugin.getLocales().getAsReferenced(player).items();
 	}
 
 	private class EditData {

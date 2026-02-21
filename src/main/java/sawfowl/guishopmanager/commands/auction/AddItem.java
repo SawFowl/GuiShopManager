@@ -44,15 +44,15 @@ public class AddItem extends AbstractPlayerCommand {
 		} else if(!player.itemInHand(HandTypes.OFF_HAND).isEmpty()) {
 			itemStack = player.itemInHand(HandTypes.OFF_HAND);
 		}
-		if(itemStack == null || itemStack.type() == ItemTypes.AIR.get()) exception(plugin.getLocales().getLocale(locale).commands().exceptions().itemNotPresent());
+		if(itemStack == null || itemStack.type() == ItemTypes.AIR.get()) exception(plugin.getLocales().getAsReferenced(locale).commands().exceptions().itemNotPresent());
 		ItemStack toAdd = itemStack;
 		boolean betPresent = context.one(CommandParameters.AUCTION_BET).isPresent();
 		boolean pricePresent = context.one(CommandParameters.AUCTION_PRICE).isPresent();
 		boolean currencyPresent = context.one(CommandParameters.AUCTION_CURRENCY).isPresent();
-		if(!betPresent) exception(plugin.getLocales().getLocale(locale).commands().exceptions().zeroOrNullPrices());
+		if(!betPresent) exception(plugin.getLocales().getAsReferenced(locale).commands().exceptions().zeroOrNullPrices());
 		double bet = context.one(CommandParameters.AUCTION_BET).get();
 		double price = context.one(CommandParameters.AUCTION_PRICE).orElse(0d);
-		if(bet == 0 && price == 0) exception(plugin.getLocales().getLocale(locale).commands().exceptions().zeroOrNullPrices());
+		if(bet == 0 && price == 0) exception(plugin.getLocales().getAsReferenced(locale).commands().exceptions().zeroOrNullPrices());
 		if(!pricePresent || price == 0) {
 			if(currencyPresent) {
 				Component message = getCommands(locale).auction().priceNotPresent().clickEvent(SpongeComponents.executeCallback(cause -> {
@@ -149,11 +149,11 @@ public class AddItem extends AbstractPlayerCommand {
 			return;
 		}
 		if(plugin.maskIsBlackList(auctionStack.getSerializedItemStack().getItemTypeAsString()) || plugin.itemIsBlackList(auctionStack.getSerializedItemStack().getItemStack())) {
-			player.sendMessage(plugin.getLocales().getLocale(player).messages().auction().itemBlocked());
+			player.sendMessage(plugin.getLocales().getAsReferenced(player).messages().auction().itemBlocked());
 			return;
 		}
 		if(checkNbtLength(auctionStack)) {
-			player.sendMessage(plugin.getLocales().getLocale(player).messages().auction().longComponents());
+			player.sendMessage(plugin.getLocales().getAsReferenced(player).messages().auction().longComponents());
 			return;
 		}
 		if(plugin.getExpire(0).isFee()) {
@@ -173,7 +173,7 @@ public class AddItem extends AbstractPlayerCommand {
 			plugin.getAuctionStorage().saveAuctionStack(auctionStack);
 		}).plugin(plugin.getPluginContainer()).build());
 		player.inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY.get().of(auctionStack.getSerializedItemStack().getItemStack())).poll(auctionStack.getSerializedItemStack().getQuantity());
-		player.sendMessage(plugin.getLocales().getLocale(player).messages().auction().itemAdded());
+		player.sendMessage(plugin.getLocales().getAsReferenced(player).messages().auction().itemAdded());
 	}
 
 	private boolean checkNbtLength(SerializedAuctionStack auctionStack) {

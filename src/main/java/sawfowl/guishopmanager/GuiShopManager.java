@@ -16,7 +16,6 @@
 package sawfowl.guishopmanager;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -38,7 +37,6 @@ import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.config.ConfigDir;
-import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKeys;
@@ -50,10 +48,7 @@ import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
-import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.reference.ConfigurationReference;
-import org.spongepowered.configurate.reference.ValueReference;
+import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
@@ -66,10 +61,12 @@ import sawfowl.commandpack.utils.StorageType;
 import sawfowl.guishopmanager.commands.MainCommand;
 import sawfowl.guishopmanager.commands.auction.Auction;
 import sawfowl.guishopmanager.configure.Expire;
-import sawfowl.guishopmanager.configure.GeneratedFillItems;
-import sawfowl.guishopmanager.configure.Locales;
+import sawfowl.guishopmanager.configure.FillItems;
 import sawfowl.guishopmanager.configure.config.BlackList;
 import sawfowl.guishopmanager.configure.config.Config;
+import sawfowl.guishopmanager.configure.locale.abstractlocale.AbstractLocale;
+import sawfowl.guishopmanager.configure.locale.def.ImplementPluginLocale;
+import sawfowl.guishopmanager.configure.locale.ru.ImplementRuPluginLocale;
 import sawfowl.guishopmanager.data.commandshop.CommandShopData;
 import sawfowl.guishopmanager.data.shop.Shop;
 import sawfowl.guishopmanager.gui.AuctionMenus;
@@ -80,23 +77,21 @@ import sawfowl.guishopmanager.storage.ConfigStorage;
 import sawfowl.guishopmanager.storage.DataStorage;
 import sawfowl.guishopmanager.storage.H2Storage;
 import sawfowl.guishopmanager.storage.MySqlStorage;
+import sawfowl.localeapi.api.ConfigTypes;
 import sawfowl.localeapi.api.LocaleService;
-import sawfowl.localeapi.api.event.LocaleServiseEvent;
-import sawfowl.localeapi.api.serializetools.SerializeOptions;
+import sawfowl.localeapi.api.LocalesList;
+import sawfowl.localeapi.api.config.ReferencedConfig;
+import sawfowl.localeapi.api.serializetools.ItemStackSerializerType;
 import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStack;
 
 @Plugin("guishopmanager")
 public class GuiShopManager {
 
-	@Inject
-	@DefaultConfig(sharedRoot = false)
-	private Path defaultConfig;
 	private Path configDir;
 	private File configFile;
-	private ConfigurationReference<CommentedConfigurationNode> configReference;
-	private ValueReference<Config, CommentedConfigurationNode> config;
-	private ConfigurationReference<CommentedConfigurationNode> configReferenceBlackLists;
-	private ValueReference<BlackList, CommentedConfigurationNode> configBlackLists;
+	private ReferencedConfig<Config> config;
+	private ReferencedConfig<BlackList> configBlackLists;
+	private ReferencedConfig<FillItems> fillItemsConfig;
 	private Logger logger;
 	private static PluginContainer container;
 	private static EconomyService economyService;
@@ -105,7 +100,6 @@ public class GuiShopManager {
 	private CommandPack commandPack;
 
 	private static GuiShopManager instance;
-	private GeneratedFillItems fillItems;
 	private ShopMenus shopMenus;
 	private CommandShopMenus commandShopMenus;
 	private AuctionMenus auctionMenus;
@@ -114,7 +108,7 @@ public class GuiShopManager {
 	private DataStorage auctionStorage;
 	private MySQL mySQL;
 	private Economy economy;
-	private Locales locales;
+	private LocalesList<AbstractLocale> locales;
 
 	private Map<String, Shop> shops = new HashMap<String, Shop>();
 	private Map<String, CommandShopData> commandShops = new HashMap<String, CommandShopData>();
@@ -128,9 +122,20 @@ public class GuiShopManager {
 
 	@Inject
 	public GuiShopManager(PluginContainer pluginContainer, @ConfigDir(sharedRoot = false) Path configDirectory) {
+		instance = this;
 		configDir = configDirectory;
 		configFile = configDirectory.toFile();
 		container = pluginContainer;
+		logger = LogManager.getLogger("GuiShopManager");
+		eventContext = EventContext.builder().add(EventContextKeys.PLUGIN, container).build();
+		localeAPI = LocaleService.getInstance();
+		locales = localeAPI.createLocales(pluginContainer, ImplementPluginLocale.class);
+		if(!locales.contains(Locales.DEFAULT)) locales.createReferencedTranslation(ConfigTypes.HOCON, Locales.DEFAULT, ImplementPluginLocale.class);
+		if(!locales.contains(Locales.RU_RU)) locales.createReferencedTranslation(ConfigTypes.HOCON, Locales.RU_RU, ImplementRuPluginLocale.class);
+		commandPack = CommandPack.getInstance();
+		config = ReferencedConfig.create(pluginContainer, configDirectory, "Config", ConfigTypes.HOCON, ItemStackSerializerType.SIMPLE, null, Config.class);
+		configBlackLists = ReferencedConfig.create(pluginContainer, configDirectory, "BlackList", ConfigTypes.HOCON, ItemStackSerializerType.SIMPLE, null, BlackList.class);
+		loadConfigs();
 	}
 
 	public Logger getLogger() {
@@ -163,16 +168,18 @@ public class GuiShopManager {
 	public LocaleService getLocaleAPI() {
 		return localeAPI;
 	}
-	public GeneratedFillItems getFillItems() {
-		return fillItems;
+	public FillItems getFillItems() {
+		return fillItemsConfig.get();
 	}
+	/**public GeneratedFillItems getFillItems() {
+		return fillItems;
+	}*/
 	public ShopMenus getShopMenu() {
 		return shopMenus;
 	}
 	public CommandShopMenus getCommandShopMenu() {
 		return commandShopMenus;
 	}
-
 	public AuctionMenus getAuctionMenus() {
 		return auctionMenus;
 	}
@@ -191,7 +198,7 @@ public class GuiShopManager {
 	public Economy getEconomy() {
 		return economy;
 	}
-	public Locales getLocales() {
+	public LocalesList<AbstractLocale> getLocales() {
 		return locales;
 	}
 	public void addShop(String id, Shop shop) {
@@ -286,38 +293,14 @@ public class GuiShopManager {
 	}
 
 	@Listener
-	public void onConstruct(LocaleServiseEvent.Construct event) {
-		instance = this;
-		logger = LogManager.getLogger("GuiShopManager");
-		eventContext = EventContext.builder().add(EventContextKeys.PLUGIN, container).build();
-		localeAPI = event.getLocaleService();
-		locales = new Locales(localeAPI);
-		try {
-			configReference = SerializeOptions.createHoconConfigurationLoader(1).path(configDir.resolve("Config.conf")).build().loadToReference();
-			config = configReference.referenceTo(Config.class);
-			configReference.save();
-			configReferenceBlackLists = SerializeOptions.createHoconConfigurationLoader(1).path(configDir.resolve("BlackList.conf")).build().loadToReference();
-			configBlackLists = configReferenceBlackLists.referenceTo(BlackList.class);
-			configReferenceBlackLists.save();
-		} catch (ConfigurateException e) {
-			logger.error(e.getLocalizedMessage());
-		}
-		loadConfigs();
-	}
-
-	@Listener
-	public void getCommandPackAPI(CommandPack.PostAPI event) {
-		commandPack = event.getAPI();
-	}
-
-	@Listener
 	public void onStart(StartedEngineEvent<Server> event) {
 		if(!Sponge.server().serviceProvider().economyService().isPresent()) {
-			logger.error(locales.getSystemLocale().messages().exceptions().economyNotFound());
+			logger.error(locales.getSystemAsReferenced().messages().exceptions().economyNotFound());
 			return;
 		} else economyService  = Sponge.server().serviceProvider().economyService().get();
 		loadExpires();
-		fillItems = new GeneratedFillItems(instance);
+		//fillItems = new GeneratedFillItems(instance);
+		fillItemsConfig = ReferencedConfig.create(container, configDir, "FillItems", ConfigTypes.HOCON, ItemStackSerializerType.JSON, null, FillItems.class);
 		economy = new Economy(instance);
 		setWorkDataClasses();
 		shopMenus = new ShopMenus(instance);
@@ -345,8 +328,9 @@ public class GuiShopManager {
 	public void reload() {
 		loadConfigs();
 		setWorkDataClasses();
-		fillItems = null;
-		fillItems = new GeneratedFillItems(instance);
+		//fillItems = null;
+		//fillItems = new GeneratedFillItems(instance);
+		if(fillItemsConfig != null) fillItemsConfig.load();
 		expires.clear();
 		loadExpires();
 		shops.clear();
@@ -575,7 +559,7 @@ public class GuiShopManager {
 				}
 			}
 			if(sendMessage) {
-				player.sendMessage(locales.getLocale(player).messages().auction().expired()
+				player.sendMessage(locales.getAsReferenced(player).messages().auction().expired()
 						.clickEvent(SpongeComponents.executeCallback(cause -> {
 							if(expiredAuctionItems.containsKey(uuid)) {
 								if(!expiredAuctionItems.get(uuid).isEmpty()) {
@@ -584,7 +568,7 @@ public class GuiShopManager {
 									toRemove.addAll(expiredAuctionItems.get(uuid));
 									for(SerializedAuctionStack auctionItem : toRemove) {
 										if(emptySlots <= 0) {
-											player.sendMessage(locales.getLocale(player).messages().auction().noEmptySlots(expiredAuctionItems.get(uuid).size()));
+											player.sendMessage(locales.getAsReferenced(player).messages().auction().noEmptySlots(expiredAuctionItems.get(uuid).size()));
 											return;
 										}
 										if(auctionItem.getServerName().equals(getConfig().getAuction().getServer())) {
@@ -612,7 +596,7 @@ public class GuiShopManager {
 				}
 			}
 			if(sendMessage) {
-				player.sendMessage(locales.getLocale(player).messages().auction().betExpired()
+				player.sendMessage(locales.getAsReferenced(player).messages().auction().betExpired()
 						.clickEvent(SpongeComponents.executeCallback(cause -> {
 							if(expiredBetAuctionItems.containsKey(uuid)) {
 								if(!expiredBetAuctionItems.get(uuid).isEmpty()) {
@@ -621,7 +605,7 @@ public class GuiShopManager {
 									toRemove.addAll(expiredBetAuctionItems.get(uuid));
 									for(SerializedAuctionStack auctionItem : toRemove) {
 										if(emptySlots <= 0) {
-											player.sendMessage(locales.getLocale(player).messages().auction().noEmptySlots(expiredAuctionItems.get(uuid).size()));
+											player.sendMessage(locales.getAsReferenced(player).messages().auction().noEmptySlots(expiredAuctionItems.get(uuid).size()));
 											return;
 										}
 										if(auctionItem.getBetData().getServer().equals(getConfig().getAuction().getServer())) {
@@ -639,18 +623,12 @@ public class GuiShopManager {
 	}
 
 	public void updateConfigs() {
-		configBlackLists.setAndSave(getBlackList());
+		configBlackLists.save();
 	}
 
 	public void loadConfigs() {
-		try {
-			configReference = SerializeOptions.createHoconConfigurationLoader(1).path(configDir.resolve("Config.conf")).build().loadToReference();
-			config = configReference.referenceTo(Config.class);
-			configReferenceBlackLists = SerializeOptions.createHoconConfigurationLoader(1).path(configDir.resolve("BlackList.conf")).build().loadToReference();
-			configBlackLists = configReferenceBlackLists.referenceTo(BlackList.class);
-		} catch (IOException e) {
-			logger.error(e.getLocalizedMessage());
-		}
+		config.load();
+		configBlackLists.load();
 	}
 
 }

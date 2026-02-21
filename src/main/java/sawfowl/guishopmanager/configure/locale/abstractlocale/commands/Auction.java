@@ -2,9 +2,9 @@ package sawfowl.guishopmanager.configure.locale.abstractlocale.commands;
 
 import net.kyori.adventure.text.Component;
 
-import sawfowl.localeapi.api.LocaleReference;
+import sawfowl.localeapi.api.Translation;
 
-public interface Auction extends LocaleReference {
+public interface Auction extends Translation {
 
 	Component addedToBlackList();
 

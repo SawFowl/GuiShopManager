@@ -1,8 +1,8 @@
 package sawfowl.guishopmanager.configure.locale.abstractlocale;
 
-import sawfowl.localeapi.api.LocaleReference;
+import sawfowl.localeapi.api.Translation;
 
-public interface AbstractLocale extends LocaleReference {
+public interface AbstractLocale extends Translation {
 
 	Commands commands();
 

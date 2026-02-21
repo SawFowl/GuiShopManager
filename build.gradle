@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "sawfowl.guishopmanager"
-version = "${major}.${minor}.${patch}-${api}-${suffix}"
+version = "${major}.${minor}.${patch}-${suffix}-${api}"
 
 java {
 	sourceCompatibility = targetCompatibility = JavaVersion.VERSION_21
@@ -30,10 +30,10 @@ tasks.withType(JavaCompile) {
 
 dependencies {
 	implementation "org.spongepowered:spongeapi:${api}"
-	implementation 'org.spongepowered:spongevanilla:1.21-12.0.0-RC1779:universal'
-	implementation "com.github.SawFowl:LocaleAPI:${localeapi}"
-	implementation "com.github.SawFowl:CommandPack:${commandpack}"
-	//implementation fileTree(dir: 'libs', include: '*.jar')
+	//implementation 'org.spongepowered:spongevanilla:1.21-12.0.0-RC1779:universal'
+	//implementation "com.github.SawFowl:LocaleAPI:${localeapi}"
+	//implementation "com.github.SawFowl:CommandPack:${commandpack}"
+	implementation fileTree(dir: 'libs', include: '*.jar')
 }
 
 sponge {

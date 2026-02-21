@@ -36,16 +36,16 @@ public class Backup extends AbstractCommand {
 	public void execute(CommandContext context, Audience audience, Locale locale, boolean isPlayer) throws CommandException {
 		List<Component> messages = new ArrayList<Component>();
 		if(isPlayer) {
-			messages.add(text("&a/guishopmanager backup load").clickEvent(ClickEvent.runCommand("/guishopmanager backup load")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
-			messages.add(text("&a/guishopmanager backup save").clickEvent(ClickEvent.runCommand("/guishopmanager backup save")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+			messages.add(text("&a/guishopmanager backup load").clickEvent(ClickEvent.runCommand("/guishopmanager backup load")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
+			messages.add(text("&a/guishopmanager backup save").clickEvent(ClickEvent.runCommand("/guishopmanager backup save")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 		} else {
 			messages.add(text("&a/guishopmanager backup load"));
 			messages.add(text("&a/guishopmanager backup save"));
 		}
 		PaginationList.builder()
 		.contents(messages)
-		.title(plugin.getLocales().getLocale(locale).commands().title())
-		.padding(plugin.getLocales().getLocale(locale).commands().padding())
+		.title(plugin.getLocales().getAsReferenced(locale).commands().title())
+		.padding(plugin.getLocales().getAsReferenced(locale).commands().padding())
 		.linesPerPage(5)
 		.sendTo(audience);
 	}

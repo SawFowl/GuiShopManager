@@ -31,7 +31,6 @@ import net.kyori.adventure.text.Component;
 
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.Permissions;
-import sawfowl.guishopmanager.configure.FillItems;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.Gui;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.Items;
 import sawfowl.guishopmanager.configure.locale.abstractlocale.Messages;
@@ -70,16 +69,16 @@ public class ShopMenus {
 					itemLore.add(Component.empty());
 					itemStack.offer(Keys.LORE, itemLore);
 					slot.offer(itemStack);
-				} else slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
+				} else slot.offer(plugin.getFillItems().getBasicFill());
 			} else if(id <= 53) {
-				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
+				slot.set(plugin.getFillItems().getBottomFill());
 				if(id == 45 && plugin.getShop(shopId).hasPreviousExist(menuId)) {
-					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.BACK);
+					ItemStack itemStack = plugin.getFillItems().getPreviousMenu();
 					itemStack.offer(Keys.CUSTOM_NAME, getItems(player).name().back());
 					slot.set(itemStack);
 				}
 				if(id == 53) {
-					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.NEXT);
+					ItemStack itemStack = plugin.getFillItems().getNextMenu();
 					itemStack.offer(Keys.CUSTOM_NAME, getItems(player).name().next());
 					slot.set(itemStack);
 				}
@@ -164,16 +163,16 @@ public class ShopMenus {
 					itemLore.add(Component.empty());
 					itemStack.offer(Keys.LORE, itemLore);
 					slot.offer(itemStack);
-				} else slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
+				} else slot.offer(plugin.getFillItems().getBasicFill());
 			} else if(id <= 53) {
-				slot.set(plugin.getFillItems().getItemStack(FillItems.BOTTOM));
+				slot.set(plugin.getFillItems().getBottomFill());
 				if(id == 45 && plugin.getShop(shopId).hasPreviousExist(menuId)) {
-					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.BACK);
+					ItemStack itemStack = plugin.getFillItems().getPreviousMenu();
 					itemStack.offer(Keys.CUSTOM_NAME, getItems(player).name().back());
 					slot.set(itemStack);
 				}
 				if(id == 53 && plugin.getShop(shopId).hasNextExist(menuId) && !plugin.getShop(shopId).getShopMenuData(menuId + 1).isEmpty()) {
-					ItemStack itemStack = plugin.getFillItems().getItemStack(FillItems.NEXT);
+					ItemStack itemStack = plugin.getFillItems().getNextMenu();
 					itemStack.offer(Keys.CUSTOM_NAME, getItems(player).name().next());
 					slot.set(itemStack);
 				}
@@ -257,7 +256,7 @@ public class ShopMenus {
 		for(Slot slot : menu.inventory().slots()) {
 			int id = slot.get(Keys.SLOT_INDEX).get();
 			if(id != 13) {
-				slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
+				slot.offer(plugin.getFillItems().getBasicFill());
 			}
 			if(id <= 8) {
 				Component price = Component.text("0.01");
@@ -278,7 +277,7 @@ public class ShopMenus {
 				} else if(id == 8) {
 					price = Component.text("10000");
 				}
-				ItemStack changePrice = plugin.getFillItems().getItemStack(FillItems.valueOf("CHANGEPRICE" + id));
+				ItemStack changePrice = plugin.getFillItems().getChangePrice().getItemStack(id);
 				changePrice.offer(Keys.LORE, getItems(player).lore().changePrice());
 				changePrice.offer(Keys.CUSTOM_NAME, getItems(player).name().price(price));
 				slot.set(changePrice);
@@ -286,23 +285,23 @@ public class ShopMenus {
 				editData.itemStack = itemStack;
 				slot.offer(updateDisplayItemEdit(player, prices, editData));
 			} else if(id == 18) {
-				ItemStack back = plugin.getFillItems().getItemStack(FillItems.BACK);
+				ItemStack back = plugin.getFillItems().getPreviousMenu();
 				back.offer(Keys.CUSTOM_NAME, getItems(player).name().back());
 				slot.set(back);
 			} else if(id == 21) {
-				ItemStack clear = plugin.getFillItems().getItemStack(FillItems.CLEAR);
+				ItemStack clear = plugin.getFillItems().getClearItem();
 				clear.offer(Keys.CUSTOM_NAME, getItems(player).name().clear());
 				slot.set(clear);
 			} else if(id == 22) {
-				ItemStack switchMode = plugin.getFillItems().getItemStack(FillItems.SWITCHMODE);
+				ItemStack switchMode = plugin.getFillItems().getSwitchMode();
 				switchMode.offer(Keys.CUSTOM_NAME, getItems(player).name().switchMode());
 				slot.set(switchMode);
 			} else if(id == 23) {
-				ItemStack changeCurrency = plugin.getFillItems().getItemStack(FillItems.CHANGECURRENCY);
+				ItemStack changeCurrency = plugin.getFillItems().getChangeCurrency();
 				changeCurrency.offer(Keys.CUSTOM_NAME, getItems(player).name().changeCurrency());
 				slot.set(changeCurrency);
 			} else if(id == 26) {
-				ItemStack exit = plugin.getFillItems().getItemStack(FillItems.EXIT);
+				ItemStack exit = plugin.getFillItems().getExit();
 				exit.offer(Keys.CUSTOM_NAME, getItems(player).name().exit());
 				slot.set(exit);
 			}
@@ -431,7 +430,7 @@ public class ShopMenus {
 		menu.setReadOnly(true);
 		for(Slot slot : menu.inventory().slots()) {
 			int id = slot.get(Keys.SLOT_INDEX).get();
-			if(id != 13) slot.offer(plugin.getFillItems().getItemStack(FillItems.BASIC));
+			if(id != 13) slot.offer(plugin.getFillItems().getBasicFill());
 			if(id <= 8) {
 				Component size = Component.text("1");
 				if(id == 1) {
@@ -449,7 +448,7 @@ public class ShopMenus {
 				} else if(id == 7) {
 					size = Component.text("128");
 				} else if(id == 8) size = Component.text("MAX");
-				ItemStack changeSize = plugin.getFillItems().getItemStack(FillItems.valueOf("CHANGESIZE" + id));
+				ItemStack changeSize = plugin.getFillItems().getChangeSize().getItemStack(id);
 				changeSize.offer(Keys.LORE, getItems(player).lore().changeSize());
 				changeSize.offer(Keys.CUSTOM_NAME, getItems(player).name().size(size));
 				slot.set(changeSize);
@@ -457,7 +456,7 @@ public class ShopMenus {
 				editData.itemStack = itemStack;
 				slot.offer(updateDisplayItemTransaction(player, prices, editData));
 			} else if(id == 18) {
-				ItemStack back = plugin.getFillItems().getItemStack(FillItems.BACK);
+				ItemStack back = plugin.getFillItems().getPreviousMenu();
 				if(buy) {
 					back.offer(Keys.CUSTOM_NAME, getItems(player).name().buyAndBack());
 				} else {
@@ -465,24 +464,24 @@ public class ShopMenus {
 				}
 				slot.set(back);
 			} else if(id == 21) {
-				ItemStack clear = plugin.getFillItems().getItemStack(FillItems.CLEAR);
+				ItemStack clear = plugin.getFillItems().getClearItem();
 				clear.offer(Keys.CUSTOM_NAME, getItems(player).name().clear());
 				slot.set(clear);
 			} else if(id == 22) {
-				ItemStack switchMode = plugin.getFillItems().getItemStack(FillItems.SWITCHMODE);
+				ItemStack switchMode = plugin.getFillItems().getSwitchMode();
 				switchMode.offer(Keys.CUSTOM_NAME, getItems(player).name().switchMode());
 				slot.set(switchMode);
 			} else if(id == 23) {
-				ItemStack changeCurrency = plugin.getFillItems().getItemStack(FillItems.CHANGECURRENCY);
+				ItemStack changeCurrency = plugin.getFillItems().getChangeCurrency();
 				changeCurrency.offer(Keys.CUSTOM_NAME, getItems(player).name().changeCurrency());
 				slot.set(changeCurrency);
 			} else if(id == 26) {
 				if(buy) {
-					ItemStack buyItem = plugin.getFillItems().getItemStack(FillItems.BUY);
+					ItemStack buyItem = plugin.getFillItems().getBuyItem();
 					buyItem.offer(Keys.CUSTOM_NAME, getItems(player).name().buy());
 					slot.set(buyItem);
 				} else {
-					ItemStack sellItem = plugin.getFillItems().getItemStack(FillItems.SELL);
+					ItemStack sellItem = plugin.getFillItems().getSellItem();
 					sellItem.offer(Keys.CUSTOM_NAME, getItems(player).name().sell());
 					slot.set(sellItem);
 				}
@@ -666,19 +665,19 @@ public class ShopMenus {
 	}
 
 	private Gui.Shop getGui(ServerPlayer player) {
-		return plugin.getLocales().getLocale(player).gui().shop();
+		return plugin.getLocales().getAsReferenced(player).gui().shop();
 	}
 
 	private Messages.Shop getMessages(ServerPlayer player) {
-		return plugin.getLocales().getLocale(player).messages().shop();
+		return plugin.getLocales().getAsReferenced(player).messages().shop();
 	}
 
 	private Messages.Exceptions getExceptions(ServerPlayer player) {
-		return plugin.getLocales().getLocale(player).messages().exceptions();
+		return plugin.getLocales().getAsReferenced(player).messages().exceptions();
 	}
 
 	private Items getItems(ServerPlayer player) {
-		return plugin.getLocales().getLocale(player).items();
+		return plugin.getLocales().getAsReferenced(player).items();
 	}
 
 	private class EditData {

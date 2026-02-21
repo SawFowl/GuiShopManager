@@ -30,8 +30,8 @@ public class Load extends AbstractCommand {
 
 	@Override
 	public void execute(CommandContext context, Audience audience, Locale locale, boolean isPlayer) throws CommandException {
-		if(!driverExist) exception(plugin.getLocales().getLocale(locale).commands().exceptions().h2NotPresent());
-		if(!plugin.getConfigDir().resolve("Backup.mv.db").toFile().exists()) exception(plugin.getLocales().getLocale(locale).commands().exceptions().backupNotPresent());
+		if(!driverExist) exception(plugin.getLocales().getAsReferenced(locale).commands().exceptions().h2NotPresent());
+		if(!plugin.getConfigDir().resolve("Backup.mv.db").toFile().exists()) exception(plugin.getLocales().getAsReferenced(locale).commands().exceptions().backupNotPresent());
 		H2Storage h2Storage = new H2Storage(plugin, "Backup");
 		h2Storage.loadAuction();
 		h2Storage.loadShops();
@@ -60,7 +60,7 @@ public class Load extends AbstractCommand {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		audience.sendMessage(plugin.getLocales().getLocale(locale).commands().backup().load());
+		audience.sendMessage(plugin.getLocales().getAsReferenced(locale).commands().backup().load());
 	}
 
 	@Override

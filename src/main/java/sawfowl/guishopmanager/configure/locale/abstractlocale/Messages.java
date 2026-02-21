@@ -5,11 +5,11 @@ import org.spongepowered.api.service.economy.Currency;
 
 import net.kyori.adventure.text.Component;
 
-import sawfowl.localeapi.api.LocaleReference;
+import sawfowl.localeapi.api.Translation;
 
 public interface Messages {
 
-	interface Auction extends LocaleReference {
+	interface Auction extends Translation {
 
 		Component maxVolume();
 
@@ -51,7 +51,7 @@ public interface Messages {
 
 	}
 
-	interface Shop extends LocaleReference {
+	interface Shop extends Translation {
 
 		Component itemSell(ItemStack itemStack, Currency currency, double added, double balance);
 

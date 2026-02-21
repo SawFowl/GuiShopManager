@@ -30,7 +30,7 @@ public class Save extends AbstractCommand {
 
 	@Override
 	public void execute(CommandContext context, Audience audience, Locale locale, boolean isPlayer) throws CommandException {
-		if(!driverExist) exception(plugin.getLocales().getLocale(locale).commands().exceptions().h2NotPresent());
+		if(!driverExist) exception(plugin.getLocales().getAsReferenced(locale).commands().exceptions().h2NotPresent());
 		if(plugin.getConfigDir().resolve("Backup.mv.db").toFile().exists()) plugin.getConfigDir().resolve("Backup.mv.db").toFile().delete();
 		H2Storage h2Storage = new H2Storage(plugin, "Backup");
 		for(Shop shop : plugin.getAllShops()) {
@@ -57,7 +57,7 @@ public class Save extends AbstractCommand {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		audience.sendMessage(plugin.getLocales().getLocale(locale).commands().backup().save());
+		audience.sendMessage(plugin.getLocales().getAsReferenced(locale).commands().backup().save());
 	}
 
 	@Override

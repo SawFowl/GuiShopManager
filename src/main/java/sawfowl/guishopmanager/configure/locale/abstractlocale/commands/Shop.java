@@ -4,9 +4,9 @@ import org.spongepowered.api.item.inventory.ItemStack;
 
 import net.kyori.adventure.text.Component;
 
-import sawfowl.localeapi.api.LocaleReference;
+import sawfowl.localeapi.api.Translation;
 
-public interface Shop extends LocaleReference {
+public interface Shop extends Translation {
 
 	Component delete();
 

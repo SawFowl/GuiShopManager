@@ -43,7 +43,7 @@ public class Edit extends AbstractPlayerCommand {
 				Component message = shop1.getOrDefaultTitle(locale).clickEvent(SpongeComponents.executeCallback(cause -> {
 					if(plugin.shopExists(shopId)) {
 						run(fPlayer, shop1);
-					} else cause.sendMessage(plugin.getLocales().getLocale(getLocale(cause)).messages().shop().shopNotExists(shopId));
+					} else cause.sendMessage(plugin.getLocales().getAsReferenced(getLocale(cause)).messages().shop().shopNotExists(shopId));
 				})).hoverEvent(HoverEvent.showText(hover));
 				messages.add(message);
 			}

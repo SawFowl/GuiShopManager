@@ -6,11 +6,11 @@ import org.spongepowered.api.service.economy.Currency;
 
 import net.kyori.adventure.text.Component;
 
-import sawfowl.localeapi.api.LocaleReference;
+import sawfowl.localeapi.api.Translation;
 
 public interface Items {
 
-	interface Name extends LocaleReference {
+	interface Name extends Translation {
 
 		Component back();
 
@@ -44,7 +44,7 @@ public interface Items {
 
 	}
 
-	interface Lore extends LocaleReference {
+	interface Lore extends Translation {
 
 		List<Component> changePrice();
 

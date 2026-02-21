@@ -47,7 +47,7 @@ public abstract class AbstractCommand extends AbstractPluginCommand<GuiShopManag
 	}
 
 	protected Commands getCommands(Locale locale) {
-		return plugin.getLocales().getLocale(locale).commands();
+		return plugin.getLocales().getAsReferenced(locale).commands();
 	}
 
 	protected Commands getCommands(ServerPlayer player) {

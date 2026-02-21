@@ -22,6 +22,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.utils.TypeTokens;
 import sawfowl.localeapi.api.ConfigTypes;
+import sawfowl.localeapi.api.serializetools.ItemStackSerializerType;
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
 import sawfowl.guishopmanager.data.commandshop.CommandShopData;
 import sawfowl.guishopmanager.data.shop.Shop;
@@ -39,13 +40,13 @@ public class ConfigStorage implements DataStorage {
 		plugin = instance;
 		Optional<File> auctionConfig = Stream.of(plugin.getConfigDir().toFile().listFiles()).filter(file -> file.getName().contains("Auction")).findFirst();
 		if(auctionConfig.isPresent()) {
-			auctionConfigLoader = createConfigLoader(auctionConfig.get(), 2);
-		} else auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getConfig().getConfigType().getAuction()), plugin.getConfig().getConfigType().getAuction(), 2);
+			auctionConfigLoader = createConfigLoader(auctionConfig.get(), ItemStackSerializerType.JSON);
+		} else auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getConfig().getConfigType().getAuction()), plugin.getConfig().getConfigType().getAuction(), ItemStackSerializerType.JSON);
 		try {
 			auctionNode = auctionConfigLoader.load();
 			if(auctionConfig.isPresent() && !plugin.getConfig().getConfigType().getAuction().equals("." + getExtension(auctionConfig.get().getName()))) {
 				BasicConfigurationNode copy = BasicConfigurationNode.root().from(auctionNode);
-				auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getConfig().getConfigType().getAuction()), plugin.getConfig().getConfigType().getAuction(), 2);
+				auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getConfig().getConfigType().getAuction()), plugin.getConfig().getConfigType().getAuction(), ItemStackSerializerType.JSON);
 				auctionConfigLoader.save(copy);
 				auctionNode = auctionConfigLoader.load();
 				auctionConfig.get().delete();
@@ -61,7 +62,7 @@ public class ConfigStorage implements DataStorage {
 	public void saveShop(String shopId) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			try {
-				createConfigLoader(plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getShops() + File.separator + shopId + plugin.getConfig().getConfigType().getShops()), plugin.getConfig().getConfigType().getShops(), 2).loadToReference().referenceTo(SerializedShop.class).setAndSave(plugin.getShop(shopId).serialize());
+				createConfigLoader(plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getShops() + File.separator + shopId + plugin.getConfig().getConfigType().getShops()), plugin.getConfig().getConfigType().getShops(), ItemStackSerializerType.JSON).loadToReference().referenceTo(SerializedShop.class).setAndSave(plugin.getShop(shopId).serialize());
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
@@ -75,7 +76,7 @@ public class ConfigStorage implements DataStorage {
 			if(!shopsFolder.exists()) return;
 			for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().endsWith(".conf") || file.getName().endsWith(".json") || file.getName().endsWith(".yml"))).collect(Collectors.toList())) {
 				try {
-					Shop shop = createConfigLoader(shopFile, 2).loadToReference().referenceTo(SerializedShop.class).get().deserialize();
+					Shop shop = createConfigLoader(shopFile, ItemStackSerializerType.JSON).loadToReference().referenceTo(SerializedShop.class).get().deserialize();
 					setShopCurrencies(plugin, shop);
 					plugin.addShop(shop.getID(), shop);
 					if(!plugin.getConfig().getConfigType().getShops().equals("." + getExtension(shopFile.getName()))) {
@@ -103,7 +104,7 @@ public class ConfigStorage implements DataStorage {
 	public void saveCommandsShop(String shopId) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			try {
-				createConfigLoader(plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getCommandsShops() + File.separator + shopId + plugin.getConfig().getConfigType().getCommandsShops()), plugin.getConfig().getConfigType().getCommandsShops(), 2).loadToReference().referenceTo(SerializedCommandShop.class).setAndSave(plugin.getCommandShopData(shopId).serialize());
+				createConfigLoader(plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getCommandsShops() + File.separator + shopId + plugin.getConfig().getConfigType().getCommandsShops()), plugin.getConfig().getConfigType().getCommandsShops(), ItemStackSerializerType.JSON).loadToReference().referenceTo(SerializedCommandShop.class).setAndSave(plugin.getCommandShopData(shopId).serialize());
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
@@ -117,7 +118,7 @@ public class ConfigStorage implements DataStorage {
 			if(!shopsFolder.exists()) return;
 			for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().endsWith(".conf") || file.getName().endsWith(".json") || file.getName().endsWith(".yml"))).collect(Collectors.toList())) {
 				try {
-					CommandShopData shop = createConfigLoader(shopFile, 2).loadToReference().referenceTo(SerializedCommandShop.class).get().deserialize();
+					CommandShopData shop = createConfigLoader(shopFile, ItemStackSerializerType.JSON).loadToReference().referenceTo(SerializedCommandShop.class).get().deserialize();
 					setCommandShopCurrencies(plugin, shop);
 					String shopId = shop.getID();
 					plugin.addCommandShopData(shopId, shop);
@@ -270,7 +271,7 @@ public class ConfigStorage implements DataStorage {
 		return Stream.of(ConfigTypes.values()).filter(t -> t.toString().equals(string)).findFirst().orElse(ConfigTypes.HOCON);
 	}
 
-	private ConfigurationLoader<? extends ConfigurationNode> createConfigLoader(Path path, String configType, int itemStackSerializerVariant) {
+	private ConfigurationLoader<? extends ConfigurationNode> createConfigLoader(Path path, String configType, ItemStackSerializerType itemStackSerializerVariant) {
 		switch (getConfigType(configType)) {
 			case HOCON: return SerializeOptions.createHoconConfigurationLoader(itemStackSerializerVariant).path(path).build();
 			case YAML: return SerializeOptions.createYamlConfigurationLoader(itemStackSerializerVariant).path(path).build();
@@ -279,7 +280,7 @@ public class ConfigStorage implements DataStorage {
 		}
 	}
 
-	private ConfigurationLoader<? extends ConfigurationNode> createConfigLoader(File file, int itemStackSerializerVariant) {
+	private ConfigurationLoader<? extends ConfigurationNode> createConfigLoader(File file, ItemStackSerializerType itemStackSerializerVariant) {
 		switch (getConfigType("." + getExtension(file.getName()))) {
 			case HOCON: return SerializeOptions.createHoconConfigurationLoader(itemStackSerializerVariant).file(file).build();
 			case YAML: return SerializeOptions.createYamlConfigurationLoader(itemStackSerializerVariant).file(file).build();

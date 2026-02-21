@@ -41,68 +41,68 @@ public class MainCommand extends AbstractCommand {
 			if(plugin.getConfig().getAuction().isEnable()) {
 				if(player.hasPermission(Permissions.AUCTION_OPEN_SELF)) {
 					if(player.hasPermission(Permissions.AUCTION_OPEN_OTHER)) {
-						messages.add(text("&a/guishopmanager auction &e<Player>").clickEvent(ClickEvent.suggestCommand("/guishopmanager auction")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+						messages.add(text("&a/guishopmanager auction &e<Player>").clickEvent(ClickEvent.suggestCommand("/guishopmanager auction")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 					} else {
-						messages.add(text("&a/guishopmanager auction").clickEvent(ClickEvent.runCommand("/guishopmanager auction")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+						messages.add(text("&a/guishopmanager auction").clickEvent(ClickEvent.runCommand("/guishopmanager auction")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 					}
 				}
 				if(player.hasPermission(Permissions.AUCTION_ADD_ITEM)) {
-					messages.add(text("&a/guishopmanager auction additem &c<Bet> <Price> &e<Currency>").clickEvent(ClickEvent.suggestCommand("/guishopmanager auction additem ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+					messages.add(text("&a/guishopmanager auction additem &c<Bet> <Price> &e<Currency>").clickEvent(ClickEvent.suggestCommand("/guishopmanager auction additem ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 				}
 				if(player.hasPermission(Permissions.AUCTION_BLOCK_ITEM)) {
-					messages.add(text("&a/guishopmanager auction blacklist &e<flags [mask | item]>").clickEvent(ClickEvent.suggestCommand("/guishopmanager auction blacklist ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+					messages.add(text("&a/guishopmanager auction blacklist &e<flags [mask | item]>").clickEvent(ClickEvent.suggestCommand("/guishopmanager auction blacklist ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 				}
 			}
 			if(player.hasPermission(Permissions.BACKUP)) {
-				messages.add(text("&a/guishopmanager backup").clickEvent(ClickEvent.runCommand("/guishopmanager backup")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+				messages.add(text("&a/guishopmanager backup").clickEvent(ClickEvent.runCommand("/guishopmanager backup")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 			}
 			if(player.hasPermission(Permissions.SHOP_CREATE)) {
-				messages.add(text("&a/guishopmanager shop create &c<Shop>").clickEvent(ClickEvent.suggestCommand("/guishopmanager shop create ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+				messages.add(text("&a/guishopmanager shop create &c<Shop>").clickEvent(ClickEvent.suggestCommand("/guishopmanager shop create ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 			}
 			if(player.hasPermission(Permissions.SHOP_DELETE)) {
-				messages.add(text("&a/guishopmanager shop delete &c<Shop>").clickEvent(ClickEvent.suggestCommand("/guishopmanager shop delete ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+				messages.add(text("&a/guishopmanager shop delete &c<Shop>").clickEvent(ClickEvent.suggestCommand("/guishopmanager shop delete ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 			}
 			if(player.hasPermission(Permissions.SHOP_EDIT)) {
-				messages.add(text("&a/guishopmanager shop edit &c<Shop>").clickEvent(ClickEvent.runCommand("/guishopmanager shop edit")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
-				messages.add(text("&a/guishopmanager shop setitem &c<Shop> <Menu> <Slot> <BuyPrice> <SellPrice> &e<Currency>").clickEvent(ClickEvent.suggestCommand("/guishopmanager shop setitem ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+				messages.add(text("&a/guishopmanager shop edit &c<Shop>").clickEvent(ClickEvent.runCommand("/guishopmanager shop edit")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
+				messages.add(text("&a/guishopmanager shop setitem &c<Shop> <Menu> <Slot> <BuyPrice> <SellPrice> &e<Currency>").clickEvent(ClickEvent.suggestCommand("/guishopmanager shop setitem ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 			}
 			if(player.hasPermission(Permissions.SHOP_TRANSLATE)) {
-				messages.add(text("&a/guishopmanager shop translate &c<Shop>").clickEvent(ClickEvent.suggestCommand("/guishopmanager shop translate ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+				messages.add(text("&a/guishopmanager shop translate &c<Shop>").clickEvent(ClickEvent.suggestCommand("/guishopmanager shop translate ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 			}
 			if(player.hasPermission(Permissions.SHOP_OPEN_SELF)) {
 				if(player.hasPermission(Permissions.SHOP_OPEN_OTHER)) {
-					messages.add(text("&a/guishopmanager shop open &c<Shop> &e<Player>").clickEvent(ClickEvent.runCommand("/guishopmanager shop open")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+					messages.add(text("&a/guishopmanager shop open &c<Shop> &e<Player>").clickEvent(ClickEvent.runCommand("/guishopmanager shop open")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 				} else {
-					messages.add(text("&a/guishopmanager shop open &c<Shop>").clickEvent(ClickEvent.runCommand("/guishopmanager shop open")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+					messages.add(text("&a/guishopmanager shop open &c<Shop>").clickEvent(ClickEvent.runCommand("/guishopmanager shop open")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 				}
 			}
 			if(player.hasPermission(Permissions.COMMANDSSHOP_CREATE)) {
-				messages.add(text("&a/guishopmanager cshop create &c<Shop>").clickEvent(ClickEvent.suggestCommand("/guishopmanager cshop create ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+				messages.add(text("&a/guishopmanager cshop create &c<Shop>").clickEvent(ClickEvent.suggestCommand("/guishopmanager cshop create ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 			}
 			if(player.hasPermission(Permissions.COMMANDSSHOP_DELETE)) {
-				messages.add(text("&a/guishopmanager cshop delete &c<Shop>").clickEvent(ClickEvent.suggestCommand("/guishopmanager cshop delete ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+				messages.add(text("&a/guishopmanager cshop delete &c<Shop>").clickEvent(ClickEvent.suggestCommand("/guishopmanager cshop delete ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 			}
 			if(player.hasPermission(Permissions.COMMANDSSHOP_EDIT)) {
-				messages.add(text("&a/guishopmanager cshop edit &c<Shop>").clickEvent(ClickEvent.runCommand("/guishopmanager cshop edit")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
-				messages.add(text("&a/guishopmanager cshop addcommand &c<Args>").clickEvent(ClickEvent.suggestCommand("/guishopmanager setitem ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+				messages.add(text("&a/guishopmanager cshop edit &c<Shop>").clickEvent(ClickEvent.runCommand("/guishopmanager cshop edit")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
+				messages.add(text("&a/guishopmanager cshop addcommand &c<Args>").clickEvent(ClickEvent.suggestCommand("/guishopmanager setitem ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 			}
 			if(player.hasPermission(Permissions.COMMANDSSHOP_TRANSLATE)) {
-				messages.add(text("&a/guishopmanager cshop translate &c<Shop>").clickEvent(ClickEvent.suggestCommand("/guishopmanager cshop translate ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+				messages.add(text("&a/guishopmanager cshop translate &c<Shop>").clickEvent(ClickEvent.suggestCommand("/guishopmanager cshop translate ")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 			}
 			if(player.hasPermission(Permissions.COMMANDSSHOP_OPEN_SELF)) {
 				if(player.hasPermission(Permissions.COMMANDSSHOP_OPEN_OTHER)) {
-					messages.add(text("&a/guishopmanager cshop open &c<Shop> &e<Player>").clickEvent(ClickEvent.runCommand("/guishopmanager cshop open")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+					messages.add(text("&a/guishopmanager cshop open &c<Shop> &e<Player>").clickEvent(ClickEvent.runCommand("/guishopmanager cshop open")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 				} else {
-					messages.add(text("&a/guishopmanager cshop open &c<Shop>").clickEvent(ClickEvent.runCommand("/guishopmanager cshop open")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+					messages.add(text("&a/guishopmanager cshop open &c<Shop>").clickEvent(ClickEvent.runCommand("/guishopmanager cshop open")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 				}
 			}
 			if(player.hasPermission(Permissions.RELOAD)) {
-				messages.add(text("&a/guishopmanager reload").clickEvent(ClickEvent.runCommand("/guishopmanager reload")).hoverEvent(HoverEvent.showText(plugin.getLocales().getLocale(locale).commands().run())));
+				messages.add(text("&a/guishopmanager reload").clickEvent(ClickEvent.runCommand("/guishopmanager reload")).hoverEvent(HoverEvent.showText(plugin.getLocales().getAsReferenced(locale).commands().run())));
 			}
 			PaginationList.builder()
 				.contents(messages)
-				.title(plugin.getLocales().getLocale(locale).commands().title())
-				.padding(plugin.getLocales().getLocale(locale).commands().padding())
+				.title(plugin.getLocales().getAsReferenced(locale).commands().title())
+				.padding(plugin.getLocales().getAsReferenced(locale).commands().padding())
 				.linesPerPage(7)
 				.sendTo(player);
 		} else {
@@ -127,8 +127,8 @@ public class MainCommand extends AbstractCommand {
 			messages.add(text("&a/guishopmanager reload"));
 			PaginationList.builder()
 				.contents(messages)
-				.title(plugin.getLocales().getLocale(locale).commands().title())
-				.padding(plugin.getLocales().getLocale(locale).commands().padding())
+				.title(plugin.getLocales().getAsReferenced(locale).commands().title())
+				.padding(plugin.getLocales().getAsReferenced(locale).commands().padding())
 				.linesPerPage(20)
 				.sendTo(audience);
 		}
@@ -171,7 +171,7 @@ public class MainCommand extends AbstractCommand {
 								@Override
 								public CommandResult execute(CommandContext context) throws CommandException {
 									plugin.reload();
-									context.cause().audience().sendMessage(plugin.getLocales().getLocale(context.cause().subject() instanceof ServerPlayer ? (((ServerPlayer) context.cause().subject()).locale()) : plugin.getLocaleAPI().getSystemOrDefaultLocale()).commands().reload());
+									context.cause().audience().sendMessage(plugin.getLocales().getAsReferenced(context.cause().subject() instanceof ServerPlayer ? (((ServerPlayer) context.cause().subject()).locale()) : plugin.getLocaleAPI().getSystemOrDefaultLocale()).commands().reload());
 									return CommandResult.success();
 								}
 							})
@@ -192,7 +192,7 @@ public class MainCommand extends AbstractCommand {
 								@Override
 								public CommandResult execute(CommandContext context) throws CommandException {
 									plugin.reload();
-									context.cause().audience().sendMessage(plugin.getLocales().getLocale(context.cause().subject() instanceof ServerPlayer ? (((ServerPlayer) context.cause().subject()).locale()) : plugin.getLocaleAPI().getSystemOrDefaultLocale()).commands().reload());
+									context.cause().audience().sendMessage(plugin.getLocales().getAsReferenced(context.cause().subject() instanceof ServerPlayer ? (((ServerPlayer) context.cause().subject()).locale()) : plugin.getLocaleAPI().getSystemOrDefaultLocale()).commands().reload());
 									return CommandResult.success();
 								}
 							})

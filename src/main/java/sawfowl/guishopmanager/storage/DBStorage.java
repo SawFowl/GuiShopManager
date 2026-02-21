@@ -13,6 +13,7 @@ import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 
+import sawfowl.localeapi.api.serializetools.ItemStackSerializerType;
 import sawfowl.localeapi.api.serializetools.SerializeOptions;
 
 public interface DBStorage extends DataStorage {
@@ -28,22 +29,22 @@ public interface DBStorage extends DataStorage {
 	default ConfigurationLoader<? extends ConfigurationNode> createLoader(StringWriter sink) {
 		switch (getFormat()) {
 			case HOCON: 
-				return SerializeOptions.createHoconConfigurationLoader(2).sink(() -> new BufferedWriter(sink)).build();
+				return SerializeOptions.createHoconConfigurationLoader(ItemStackSerializerType.JSON).sink(() -> new BufferedWriter(sink)).build();
 			case YAML: 
-				return SerializeOptions.createYamlConfigurationLoader(2).sink(() -> new BufferedWriter(sink)).build();
+				return SerializeOptions.createYamlConfigurationLoader(ItemStackSerializerType.JSON).sink(() -> new BufferedWriter(sink)).build();
 			default:
-				return SerializeOptions.createJsonConfigurationLoader(2).sink(() -> new BufferedWriter(sink)).build();
+				return SerializeOptions.createJsonConfigurationLoader(ItemStackSerializerType.JSON).sink(() -> new BufferedWriter(sink)).build();
 		}
 	}
 
 	default ConfigurationNode createNode(String data) throws ConfigurateException {
 		switch (getFormat()) {
 			case HOCON: 
-				return SerializeOptions.createHoconConfigurationLoader(2).source(() -> new BufferedReader(new StringReader(data))).build().load();
+				return SerializeOptions.createHoconConfigurationLoader(ItemStackSerializerType.JSON).source(() -> new BufferedReader(new StringReader(data))).build().load();
 			case YAML: 
-				return SerializeOptions.createYamlConfigurationLoader(2).source(() -> new BufferedReader(new StringReader(data))).build().load();
+				return SerializeOptions.createYamlConfigurationLoader(ItemStackSerializerType.JSON).source(() -> new BufferedReader(new StringReader(data))).build().load();
 			default:
-				return SerializeOptions.createJsonConfigurationLoader(2).source(() -> new BufferedReader(new StringReader(data))).build().load();
+				return SerializeOptions.createJsonConfigurationLoader(ItemStackSerializerType.JSON).source(() -> new BufferedReader(new StringReader(data))).build().load();
 		}
 	}
 
