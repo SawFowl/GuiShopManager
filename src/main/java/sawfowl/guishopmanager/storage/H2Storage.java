@@ -1,7 +1,5 @@
 package sawfowl.guishopmanager.storage;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -14,14 +12,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.loader.ConfigurationLoader;
-
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
 import sawfowl.guishopmanager.serialization.commandsshop.SerializedCommandShop;
 import sawfowl.guishopmanager.serialization.shop.SerializedShop;
-import sawfowl.guishopmanager.utils.TypeTokens;
+import sawfowl.localeapi.api.ConfigTypes;
+import sawfowl.localeapi.api.services.ConfigurationService;
 
 public class H2Storage extends Thread implements DBStorage {
 
@@ -94,23 +90,13 @@ public class H2Storage extends Thread implements DBStorage {
 	@Override
 	public void saveShop(String shopId) {
 		SerializedShop serializableShop = plugin.getShop(shopId).serialize();
-		try {
-			StringWriter sink = new StringWriter();
-			ConfigurationLoader<? extends ConfigurationNode> loader = createLoader(sink);
-			ConfigurationNode node = loader.createNode();
-			node.set(TypeTokens.SHOP_TOKEN, serializableShop);
-			loader.save(node);
-			String sql = "MERGE INTO " + prefix + "SHOPS(SHOP_ID, SHOP_DATA) VALUES(?, ?);";
-			try(PreparedStatement statement = getConnection().prepareStatement(sql)) {
-				statement.setString(1, shopId);
-				statement.setString(2, sink.toString());
-				statement.execute();
-				statement.close();
-			} catch (SQLException e) {
-				plugin.getLogger().error("Write shop data to database");
-				plugin.getLogger().error(e.getLocalizedMessage());
-			}
-		} catch (Exception e) {
+		String sql = "MERGE INTO " + prefix + "SHOPS(SHOP_ID, SHOP_DATA) VALUES(?, ?);";
+		try(PreparedStatement statement = getConnection().prepareStatement(sql)) {
+			statement.setString(1, shopId);
+			statement.setString(2, ConfigurationService.getInstance().createVirtualReferencedConfig(serializableShop).setType(getFormat()).build().getRawData());
+			statement.execute();
+			statement.close();
+		} catch (SQLException e) {
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
 	}
@@ -120,10 +106,27 @@ public class H2Storage extends Thread implements DBStorage {
 		try {
 			ResultSet results = getStatement().executeQuery("SELECT * FROM " + prefix + "SHOPS;");
 			while(!results.isClosed() && results.next()) {
-				plugin.addShop(results.getString("SHOP_ID"), setShopCurrencies(plugin, createNode(results.getString("SHOP_DATA")).get(TypeTokens.SHOP_TOKEN).deserialize()));
+				plugin.addShop(
+					results.getString("SHOP_ID"),
+					setShopCurrencies(
+						plugin,
+						ConfigurationService
+							.getInstance()
+							.createVirtualReferencedConfig(
+								SerializedShop.class,
+								results.getString("SHOP_DATA")
+							)
+							.setType(
+								getFormat()
+							)
+							.build()
+							.get()
+							.deserialize()
+					)
+				);
 			}
 		}
-		catch (SQLException | IOException e) {
+		catch (SQLException e) {
 			plugin.getLogger().error("Get shops data");
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
@@ -143,15 +146,10 @@ public class H2Storage extends Thread implements DBStorage {
 	public void saveCommandsShop(String shopId) {
 		SerializedCommandShop serializableShop = plugin.getCommandShopData(shopId).serialize();
 		try {
-			StringWriter sink = new StringWriter();
-			ConfigurationLoader<? extends ConfigurationNode> loader = createLoader(sink);
-			ConfigurationNode node = loader.createNode();
-			node.set(TypeTokens.COMMANDS_SHOP_TOKEN, serializableShop);
-			loader.save(node);
 			String sql = "MERGE INTO " + prefix + "COMMANDS(SHOP_ID, SHOP_DATA) VALUES(?, ?);";
 			try(PreparedStatement statement = getConnection().prepareStatement(sql)) {
 				statement.setString(1, shopId);
-				statement.setString(2, sink.toString());
+				statement.setString(2, ConfigurationService.getInstance().createVirtualReferencedConfig(serializableShop).setType(getFormat()).build().getRawData());
 				statement.execute();
 				statement.close();
 			} catch (SQLException e) {
@@ -168,10 +166,25 @@ public class H2Storage extends Thread implements DBStorage {
 		try {
 			ResultSet results = getStatement().executeQuery("SELECT * FROM " + prefix + "COMMANDS;");
 			while(!results.isClosed() && results.next()) {
-				plugin.addCommandShopData(results.getString("SHOP_ID"), setCommandShopCurrencies(plugin, createNode(results.getString("SHOP_DATA")).get(TypeTokens.COMMANDS_SHOP_TOKEN).deserialize()));
+				plugin.addCommandShopData(results.getString("SHOP_ID"), setCommandShopCurrencies(
+					plugin, 
+					ConfigurationService
+						.getInstance()
+						.createVirtualReferencedConfig(
+							SerializedCommandShop.class,
+							results.getString("SHOP_DATA")
+						)
+						.setType(
+							getFormat()
+						)
+						.build()
+						.get()
+						.deserialize()
+					)
+				);
 			}
 		}
-		catch (SQLException | IOException e) {
+		catch (SQLException e) {
 			plugin.getLogger().error("Get shops data");
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
@@ -197,18 +210,9 @@ public class H2Storage extends Thread implements DBStorage {
 	@Override
 	public void saveAuctionStack(SerializedAuctionStack serializedAuctionStack) {
 		String sql = "MERGE INTO " + prefix + "AUCTION(STACK_UUID, AUCTION_STACK) VALUES(?, ?);";
-		StringWriter sink = new StringWriter();
-		ConfigurationLoader<? extends ConfigurationNode> loader = createLoader(sink);
-		ConfigurationNode node = loader.createNode();
-		try {
-			node.set(TypeTokens.AUCTIONSTACK_TOKEN, serializedAuctionStack);
-			loader.save(node);
-		} catch (IOException e) {
-			plugin.getLogger().error(e.getLocalizedMessage());
-		}
 		try(PreparedStatement statement = getConnection().prepareStatement(sql)) {
 			statement.setString(1, serializedAuctionStack.getStackUUID().toString());
-			statement.setString(2, sink.toString());
+			statement.setString(2, ConfigurationService.getInstance().createVirtualReferencedConfig(serializedAuctionStack).setType(getFormat()).build().getRawData());
 			statement.execute();
 			statement.close();
 		} catch (SQLException e) {
@@ -229,18 +233,9 @@ public class H2Storage extends Thread implements DBStorage {
 	@Override
 	public void saveExpireAuctionData(SerializedAuctionStack serializedAuctionStack) {
 		String sql = "MERGE INTO " + prefix + "AUCTION_EXPIRED(STACK_UUID, AUCTION_STACK) VALUES(?, ?);";
-		StringWriter sink = new StringWriter();
-		ConfigurationLoader<? extends ConfigurationNode> loader = createLoader(sink);
-		ConfigurationNode node = loader.createNode();
-		try {
-			node.set(TypeTokens.AUCTIONSTACK_TOKEN, serializedAuctionStack);
-			loader.save(node);
-		} catch (IOException e) {
-			plugin.getLogger().error(e.getLocalizedMessage());
-		}
 		try(PreparedStatement statement = getConnection().prepareStatement(sql)) {
 			statement.setString(1, serializedAuctionStack.getStackUUID().toString());
-			statement.setString(2, sink.toString());
+			statement.setString(2, ConfigurationService.getInstance().createVirtualReferencedConfig(serializedAuctionStack).setType(getFormat()).build().getRawData());
 			statement.execute();
 			statement.close();
 		} catch (SQLException e) {
@@ -262,18 +257,9 @@ public class H2Storage extends Thread implements DBStorage {
 	@Override
 	public void saveExpireBetAuctionData(SerializedAuctionStack serializedAuctionStack) {
 		String sql = "REPLACE INTO " + prefix + "AUCTION_EXPIRED_BET(STACK_UUID, AUCTION_STACK) VALUES(?, ?);";
-		StringWriter sink = new StringWriter();
-		ConfigurationLoader<? extends ConfigurationNode> loader = createLoader(sink);
-		ConfigurationNode node = loader.createNode();
-		try {
-			node.set(TypeTokens.AUCTIONSTACK_TOKEN, serializedAuctionStack);
-			loader.save(node);
-		} catch (IOException e) {
-			plugin.getLogger().error(e.getLocalizedMessage());
-		}
 		try(PreparedStatement statement = getConnection().prepareStatement(sql)) {
 			statement.setString(1, serializedAuctionStack.getStackUUID().toString());
-			statement.setString(2, sink.toString());
+			statement.setString(2, ConfigurationService.getInstance().createVirtualReferencedConfig(serializedAuctionStack).setType(getFormat()).build().getRawData());
 			statement.execute();
 			statement.close();
 		} catch (SQLException e) {
@@ -292,8 +278,8 @@ public class H2Storage extends Thread implements DBStorage {
 	}
 
 	@Override
-	public Format getFormat() {
-		return Format.find(plugin.getConfig().getConfigType().getSqlFormat());
+	public ConfigTypes getFormat() {
+		return plugin.getConfig().getSqlFormat();
 	}
 
 	private void loadActualAuctionData() {
@@ -302,7 +288,19 @@ public class H2Storage extends Thread implements DBStorage {
 			Map<UUID, SerializedAuctionStack> loaded = new HashMap<UUID, SerializedAuctionStack>();
 			while(!results.isClosed() && results.next()) {
 				UUID stackUUID = UUID.fromString(results.getString("STACK_UUID"));
-				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, createNode(results.getString("AUCTION_STACK")).get(TypeTokens.AUCTIONSTACK_TOKEN));
+				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, 
+					ConfigurationService
+						.getInstance()
+						.createVirtualReferencedConfig(
+								SerializedAuctionStack.class,
+								results.getString("AUCTION_STACK")
+						)
+						.setType(
+							getFormat()
+						)
+						.build()
+						.get()
+				);
 				serializedAuctionStack.setStackUUID(stackUUID);
 				if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
 					serializedAuctionStack.setStackUUID(stackUUID);
@@ -311,7 +309,7 @@ public class H2Storage extends Thread implements DBStorage {
 			}
 			plugin.getAuctionItems().clear();
 			plugin.getAuctionItems().putAll(loaded);
-		} catch (SQLException | IOException e) {
+		} catch (SQLException e) {
 			plugin.getLogger().error("Get actual auction data");
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
@@ -322,7 +320,17 @@ public class H2Storage extends Thread implements DBStorage {
 			ResultSet results = getStatement().executeQuery("SELECT * FROM " + prefix + "AUCTION_EXPIRED;");
 			Map<UUID, Set<SerializedAuctionStack>> loadedExpireData = new HashMap<UUID, Set<SerializedAuctionStack>>();
 			while(!results.isClosed() && results.next()) {
-				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, createNode(results.getString("AUCTION_STACK")).get(TypeTokens.AUCTIONSTACK_TOKEN));
+				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, ConfigurationService
+						.getInstance()
+						.createVirtualReferencedConfig(
+								SerializedAuctionStack.class,
+								results.getString("AUCTION_STACK")
+						)
+						.setType(
+							getFormat()
+						)
+						.build()
+						.get());
 				if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
 					if(!loadedExpireData.containsKey(serializedAuctionStack.getOwnerUUID())) {
 						Set<SerializedAuctionStack> newList = new HashSet<SerializedAuctionStack>();
@@ -335,7 +343,7 @@ public class H2Storage extends Thread implements DBStorage {
 			}
 			plugin.getExpiredAuctionItems().clear();
 			plugin.getExpiredAuctionItems().putAll(loadedExpireData);
-		} catch (SQLException | IOException e) {
+		} catch (SQLException e) {
 			plugin.getLogger().error("Get expired auction data");
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
@@ -346,7 +354,17 @@ public class H2Storage extends Thread implements DBStorage {
 			ResultSet results = getStatement().executeQuery("SELECT * FROM " + prefix + "AUCTION_EXPIRED_BET;");
 			Map<UUID, Set<SerializedAuctionStack>> loadedExpireBetData = new HashMap<UUID, Set<SerializedAuctionStack>>();
 			while(!results.isClosed() && results.next()) {
-				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, createNode(results.getString("AUCTION_STACK")).get(TypeTokens.AUCTIONSTACK_TOKEN));
+				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, ConfigurationService
+						.getInstance()
+						.createVirtualReferencedConfig(
+								SerializedAuctionStack.class,
+								results.getString("AUCTION_STACK")
+						)
+						.setType(
+							getFormat()
+						)
+						.build()
+						.get());
 				if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
 					if(!loadedExpireBetData.containsKey(serializedAuctionStack.getOwnerUUID())) {
 						Set<SerializedAuctionStack> newList = new HashSet<SerializedAuctionStack>();
@@ -359,7 +377,7 @@ public class H2Storage extends Thread implements DBStorage {
 			}
 			plugin.getExpiredBetAuctionItems().clear();
 			plugin.getExpiredBetAuctionItems().putAll(loadedExpireBetData);
-		} catch (SQLException | IOException e) {
+		} catch (SQLException e) {
 			plugin.getLogger().error("Get expired auction data");
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}

@@ -1,9 +1,12 @@
 package sawfowl.guishopmanager.configure.locale.def.comments;
 
+import java.util.stream.Stream;
+
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import sawfowl.guishopmanager.configure.locale.abstractlocale.comments.MainConfig;
+import sawfowl.localeapi.api.ConfigTypes;
 
 @ConfigSerializable
 public class ImplementMainConfig implements MainConfig {
@@ -14,8 +17,8 @@ public class ImplementMainConfig implements MainConfig {
 	private ImplementMySql mySql = new ImplementMySql();
 	@Setting("Aliases")
 	private String aliases = "Aliases for commands \"/gsm shop open\" and \"/gsm auction\".";
-	@Setting("ConfigType")
-	private String configType = "Configuration type when saving plugin data in files.\nAvailable variants: `.conf`, `.json`, `.yml`.";
+	@Setting("SqlFormat")
+	private String sqlFormat = "Configuration type when saving plugin data in DB.\nAvailable variants: `" + String.join("`, `", Stream.of(ConfigTypes.values()).filter(t -> t != ConfigTypes.UNKNOWN).map(t -> t.getTypeName()).toArray(String[]::new)) + "'.";
 	@Setting("SplitStorage")
 	private String splitStorage = "Data storage methods.\nAvailable variants: File, H2, MySql.";
 	@Setting("StorageFolders")
@@ -42,8 +45,8 @@ public class ImplementMainConfig implements MainConfig {
 	}
 
 	@Override
-	public String configType() {
-		return configType;
+	public String sqlFormat() {
+		return sqlFormat;
 	}
 
 	@Override

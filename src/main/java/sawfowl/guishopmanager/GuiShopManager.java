@@ -78,11 +78,12 @@ import sawfowl.guishopmanager.storage.DataStorage;
 import sawfowl.guishopmanager.storage.H2Storage;
 import sawfowl.guishopmanager.storage.MySqlStorage;
 import sawfowl.localeapi.api.ConfigTypes;
-import sawfowl.localeapi.api.LocaleService;
 import sawfowl.localeapi.api.LocalesList;
 import sawfowl.localeapi.api.config.ReferencedConfig;
 import sawfowl.localeapi.api.serializetools.ItemStackSerializerType;
 import sawfowl.localeapi.api.serializetools.itemstack.SerializedItemStack;
+import sawfowl.localeapi.api.services.ConfigurationService;
+import sawfowl.localeapi.api.services.LocaleService;
 
 @Plugin("guishopmanager")
 public class GuiShopManager {
@@ -133,8 +134,8 @@ public class GuiShopManager {
 		if(!locales.contains(Locales.DEFAULT)) locales.createReferencedTranslation(ConfigTypes.HOCON, Locales.DEFAULT, ImplementPluginLocale.class);
 		if(!locales.contains(Locales.RU_RU)) locales.createReferencedTranslation(ConfigTypes.HOCON, Locales.RU_RU, ImplementRuPluginLocale.class);
 		commandPack = CommandPack.getInstance();
-		config = ReferencedConfig.create(pluginContainer, configDirectory, "Config", ConfigTypes.HOCON, ItemStackSerializerType.SIMPLE, null, Config.class);
-		configBlackLists = ReferencedConfig.create(pluginContainer, configDirectory, "BlackList", ConfigTypes.HOCON, ItemStackSerializerType.SIMPLE, null, BlackList.class);
+		config = ConfigurationService.getInstance().createReferencedConfig(pluginContainer, Config.class).setPath(configDirectory).setName("Config").setType(ConfigTypes.HOCON).build();
+		configBlackLists = ConfigurationService.getInstance().createReferencedConfig(pluginContainer, BlackList.class).setPath(configDirectory).setName("BlackList").setItemStackSerializerType(ItemStackSerializerType.JSON).setType(ConfigTypes.HOCON).build();;
 		loadConfigs();
 	}
 
@@ -300,7 +301,7 @@ public class GuiShopManager {
 		} else economyService  = Sponge.server().serviceProvider().economyService().get();
 		loadExpires();
 		//fillItems = new GeneratedFillItems(instance);
-		fillItemsConfig = ReferencedConfig.create(container, configDir, "FillItems", ConfigTypes.HOCON, ItemStackSerializerType.JSON, null, FillItems.class);
+		fillItemsConfig = ConfigurationService.getInstance().createReferencedConfig(container, FillItems.class).setPath(configDir).setName("FillItems").setItemStackSerializerType(ItemStackSerializerType.JSON).setType(ConfigTypes.HOCON).build();
 		economy = new Economy(instance);
 		setWorkDataClasses();
 		shopMenus = new ShopMenus(instance);

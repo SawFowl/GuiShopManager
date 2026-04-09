@@ -30,7 +30,7 @@ public interface MainConfig {
 
 	String aliases();
 
-	String configType();
+	String sqlFormat();
 
 	String splitStorage();
 

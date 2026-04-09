@@ -3,6 +3,7 @@ package sawfowl.guishopmanager.configure.config;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
+import sawfowl.localeapi.api.ConfigTypes;
 import sawfowl.localeapi.api.LocalisedComment;
 
 @ConfigSerializable
@@ -13,9 +14,9 @@ public class Config {
 	private AliasesConfig aliases = new AliasesConfig();
 	@Setting("Auction")
 	private Auction auction = new Auction();
-	@Setting("ConfigType")
-	@LocalisedComment(path = { "Comments", "MainConfig", "ConfigType" }, plugin = "guishopmanager")
-	private ConfigType configType = new ConfigType();
+	@LocalisedComment(path = { "Comments", "MainConfig", "SqlFormat" }, plugin = "guishopmanager")
+	@Setting("SqlFormat")
+	private ConfigTypes sqlFormat = ConfigTypes.JSON;
 	@Setting("MySQL")
 	@LocalisedComment(path = { "Comments", "MainConfig", "MySql", "Title" }, plugin = "guishopmanager")
 	private MySQL mySQL = new MySQL();
@@ -41,8 +42,8 @@ public class Config {
 		return auction;
 	}
 
-	public ConfigType getConfigType() {
-		return configType;
+	public ConfigTypes getSqlFormat() {
+		return sqlFormat;
 	}
 
 	public MySQL getMySQL() {

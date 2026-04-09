@@ -1,7 +1,5 @@
 package sawfowl.guishopmanager.storage;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,12 +16,11 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import sawfowl.guishopmanager.GuiShopManager;
-import sawfowl.guishopmanager.utils.TypeTokens;
+import sawfowl.localeapi.api.ConfigTypes;
+import sawfowl.localeapi.api.services.ConfigurationService;
 import sawfowl.guishopmanager.data.commandshop.CommandItemData;
 import sawfowl.guishopmanager.data.commandshop.CommandShopMenuData;
 import sawfowl.guishopmanager.data.shop.ShopItem;
@@ -102,15 +99,10 @@ public class MySqlStorage extends Thread implements DBStorage {
 	public void saveShop(String shopId) {
 		SerializedShop serializableShop = plugin.getShop(shopId).serialize();
 		try {
-			StringWriter sink = new StringWriter();
-			ConfigurationLoader<? extends ConfigurationNode> loader = createLoader(sink);
-			ConfigurationNode node = loader.createNode();
-			node.set(TypeTokens.SHOP_TOKEN, serializableShop);
-			loader.save(node);
 			String sql = "REPLACE INTO " + prefix + "shops(shop_id, shop_data) VALUES(?, ?);";
 			try(PreparedStatement statement = getConnection().prepareStatement(sql)) {
 				statement.setString(1, shopId);
-				statement.setString(2, sink.toString());
+				statement.setString(2, ConfigurationService.getInstance().createVirtualReferencedConfig(serializableShop).setType(getFormat()).build().getRawData());
 				statement.execute();
 				statement.close();
 			} catch (SQLException e) {
@@ -129,12 +121,25 @@ public class MySqlStorage extends Thread implements DBStorage {
 			ResultSet results = statement.executeQuery("SELECT * FROM " + prefix + "shops ORDER BY written;");
 			while(results.next()) {
 				if(updateTimeShops == null) updateTimeShops = results.getString("written");
-				plugin.addShop(results.getString("shop_id"), setShopCurrencies(plugin, createNode(results.getString("shop_data")).get(TypeTokens.SHOP_TOKEN).deserialize()));
+				plugin.addShop(results.getString("shop_id"), setShopCurrencies(
+						plugin,
+						ConfigurationService
+							.getInstance()
+							.createVirtualReferencedConfig(
+								SerializedShop.class,
+								results.getString("shop_data")
+							)
+							.setType(getFormat())
+							.build()
+							.get()
+							.deserialize()
+						)
+					);
 			}
 			statement.close();
 			statement = null;
 		}
-		catch (SQLException | IOException e) {
+		catch (SQLException e) {
 			plugin.getLogger().error("Get shops data");
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
@@ -157,15 +162,10 @@ public class MySqlStorage extends Thread implements DBStorage {
 	public void saveCommandsShop(String shopId) {
 		SerializedCommandShop serializableShop = plugin.getCommandShopData(shopId).serialize();
 		try {
-			StringWriter sink = new StringWriter();
-			ConfigurationLoader<? extends ConfigurationNode> loader = createLoader(sink);
-			ConfigurationNode node = loader.createNode();
-			node.set(TypeTokens.COMMANDS_SHOP_TOKEN, serializableShop);
-			loader.save(node);
 			String sql = "REPLACE INTO " + prefix + "commands(shop_id, shop_data) VALUES(?, ?);";
 			try(PreparedStatement statement = getConnection().prepareStatement(sql)) {
 				statement.setString(1, shopId);
-				statement.setString(2, sink.toString());
+				statement.setString(2, ConfigurationService.getInstance().createVirtualReferencedConfig(serializableShop).setType(getFormat()).build().getRawData());
 				statement.execute();
 				statement.close();
 			} catch (SQLException e) {
@@ -184,12 +184,24 @@ public class MySqlStorage extends Thread implements DBStorage {
 			ResultSet results = statement.executeQuery("SELECT * FROM " + prefix + "commands ORDER BY written;");
 			while(results.next()) {
 				if(updateTimeCommandShops == null) updateTimeCommandShops = results.getString("written");
-				plugin.addCommandShopData(results.getString("shop_id"), setCommandShopCurrencies(plugin, createNode(results.getString("shop_data")).get(TypeTokens.COMMANDS_SHOP_TOKEN).deserialize()));
+				plugin.addCommandShopData(results.getString("shop_id"), setCommandShopCurrencies(plugin,
+						ConfigurationService
+						.getInstance()
+						.createVirtualReferencedConfig(
+							SerializedCommandShop.class,
+							results.getString("shop_data")
+						)
+						.setType(getFormat())
+						.build()
+						.get()
+						.deserialize()
+					)
+				);
 			}
 			statement.close();
 			statement = null;
 		}
-		catch (SQLException | IOException e) {
+		catch (SQLException e) {
 			plugin.getLogger().error("Get shops data");
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
@@ -218,18 +230,9 @@ public class MySqlStorage extends Thread implements DBStorage {
 	@Override
 	public void saveAuctionStack(SerializedAuctionStack serializedAuctionStack) {
 		String sql = "REPLACE INTO " + prefix + "auction(stack_uuid, auction_stack) VALUES(?, ?);";
-		StringWriter sink = new StringWriter();
-		ConfigurationLoader<? extends ConfigurationNode> loader = createLoader(sink);
-		ConfigurationNode node = loader.createNode();
-		try {
-			node.set(TypeTokens.AUCTIONSTACK_TOKEN, serializedAuctionStack);
-			loader.save(node);
-		} catch (IOException e) {
-			plugin.getLogger().error(e.getLocalizedMessage());
-		}
 		try(PreparedStatement statement = getConnection().prepareStatement(sql)) {
 			statement.setString(1, serializedAuctionStack.getStackUUID().toString());
-			statement.setString(2, sink.toString());
+			statement.setString(2, ConfigurationService.getInstance().createVirtualReferencedConfig(serializedAuctionStack).setType(getFormat()).build().getRawData());
 			statement.execute();
 			statement.close();
 		} catch (SQLException e) {
@@ -253,18 +256,9 @@ public class MySqlStorage extends Thread implements DBStorage {
 	@Override
 	public void saveExpireAuctionData(SerializedAuctionStack serializedAuctionStack) {
 		String sql = "REPLACE INTO " + prefix + "auction_expired(stack_uuid, auction_stack) VALUES(?, ?);";
-		StringWriter sink = new StringWriter();
-		ConfigurationLoader<? extends ConfigurationNode> loader = createLoader(sink);
-		ConfigurationNode node = loader.createNode();
-		try {
-			node.set(TypeTokens.AUCTIONSTACK_TOKEN, serializedAuctionStack);
-			loader.save(node);
-		} catch (IOException e) {
-			plugin.getLogger().error(e.getLocalizedMessage());
-		}
 		try(PreparedStatement statement = getConnection().prepareStatement(sql)) {
 			statement.setString(1, serializedAuctionStack.getStackUUID().toString());
-			statement.setString(2, sink.toString());
+			statement.setString(2, ConfigurationService.getInstance().createVirtualReferencedConfig(serializedAuctionStack).setType(getFormat()).build().getRawData());
 			statement.execute();
 			statement.close();
 		} catch (SQLException e) {
@@ -289,18 +283,9 @@ public class MySqlStorage extends Thread implements DBStorage {
 	@Override
 	public void saveExpireBetAuctionData(SerializedAuctionStack serializedAuctionStack) {
 		String sql = "REPLACE INTO " + prefix + "auction_expired_bet(stack_uuid, auction_stack) VALUES(?, ?);";
-		StringWriter sink = new StringWriter();
-		ConfigurationLoader<? extends ConfigurationNode> loader = createLoader(sink);
-		ConfigurationNode node = loader.createNode();
-		try {
-			node.set(TypeTokens.AUCTIONSTACK_TOKEN, serializedAuctionStack);
-			loader.save(node);
-		} catch (IOException e) {
-			plugin.getLogger().error(e.getLocalizedMessage());
-		}
 		try(PreparedStatement statement = getConnection().prepareStatement(sql)) {
 			statement.setString(1, serializedAuctionStack.getStackUUID().toString());
-			statement.setString(2, sink.toString());
+			statement.setString(2, ConfigurationService.getInstance().createVirtualReferencedConfig(serializedAuctionStack).setType(getFormat()).build().getRawData());
 			statement.execute();
 			statement.close();
 		} catch (SQLException e) {
@@ -322,8 +307,8 @@ public class MySqlStorage extends Thread implements DBStorage {
 	}
 
 	@Override
-	public Format getFormat() {
-		return Format.find(plugin.getConfig().getConfigType().getSqlFormat());
+	public ConfigTypes getFormat() {
+		return plugin.getConfig().getSqlFormat();
 	}
 
 	private void loadActualAuctionData() {
@@ -334,7 +319,16 @@ public class MySqlStorage extends Thread implements DBStorage {
 			while(results.next()) {
 				if(updateTimeAuction == null) updateTimeAuction = results.getString("written");
 				UUID stackUUID = UUID.fromString(results.getString("stack_uuid"));
-				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, createNode(results.getString("auction_stack")).get(TypeTokens.AUCTIONSTACK_TOKEN));
+				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin,
+						ConfigurationService
+						.getInstance()
+						.createVirtualReferencedConfig(
+							SerializedAuctionStack.class,
+							results.getString("auction_stack")
+						)
+						.setType(getFormat())
+						.build().get()
+					);
 				serializedAuctionStack.setStackUUID(stackUUID);
 				if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
 					serializedAuctionStack.setStackUUID(stackUUID);
@@ -345,7 +339,7 @@ public class MySqlStorage extends Thread implements DBStorage {
 			statement = null;
 			plugin.getAuctionItems().clear();
 			plugin.getAuctionItems().putAll(loaded);
-		} catch (SQLException | IOException e) {
+		} catch (SQLException e) {
 			plugin.getLogger().error("Get actual auction data");
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
@@ -358,7 +352,15 @@ public class MySqlStorage extends Thread implements DBStorage {
 			Map<UUID, Set<SerializedAuctionStack>> loadedExpireData = new HashMap<UUID, Set<SerializedAuctionStack>>();
 			while(results.next()) {
 				if(updateTimeAuctionExpired == null) updateTimeAuctionExpired = results.getString("written");
-				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, createNode(results.getString("auction_stack")).get(TypeTokens.AUCTIONSTACK_TOKEN));
+				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, ConfigurationService
+						.getInstance()
+						.createVirtualReferencedConfig(
+							SerializedAuctionStack.class,
+							results.getString("auction_stack")
+						)
+						.setType(getFormat())
+						.build().get()
+					);
 				if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
 					if(!loadedExpireData.containsKey(serializedAuctionStack.getOwnerUUID())) {
 						Set<SerializedAuctionStack> newList = new HashSet<SerializedAuctionStack>();
@@ -373,7 +375,7 @@ public class MySqlStorage extends Thread implements DBStorage {
 			plugin.getExpiredAuctionItems().putAll(loadedExpireData);
 			statement.close();
 			statement = null;
-		} catch (SQLException | IOException e) {
+		} catch (SQLException e) {
 			plugin.getLogger().error("Get expired auction data");
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
@@ -386,7 +388,16 @@ public class MySqlStorage extends Thread implements DBStorage {
 			Map<UUID, Set<SerializedAuctionStack>> loadedExpireBetData = new HashMap<UUID, Set<SerializedAuctionStack>>();
 			while(results.next()) {
 				if(updateTimeAuctionExpiredBet == null) updateTimeAuctionExpiredBet = results.getString("written");
-				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, createNode(results.getString("auction_stack")).get(TypeTokens.AUCTIONSTACK_TOKEN));
+				SerializedAuctionStack serializedAuctionStack = setAuctionCurrencies(plugin, 
+						ConfigurationService
+						.getInstance()
+						.createVirtualReferencedConfig(
+							SerializedAuctionStack.class,
+							results.getString("auction_stack")
+						)
+						.setType(getFormat())
+						.build().get()
+					);
 				if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
 					if(!loadedExpireBetData.containsKey(serializedAuctionStack.getOwnerUUID())) {
 						Set<SerializedAuctionStack> newList = new HashSet<SerializedAuctionStack>();
@@ -401,7 +412,7 @@ public class MySqlStorage extends Thread implements DBStorage {
 			plugin.getExpiredBetAuctionItems().putAll(loadedExpireBetData);
 			statement.close();
 			statement = null;
-		} catch (SQLException | IOException e) {
+		} catch (SQLException e) {
 			plugin.getLogger().error("Get expired auction data");
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
@@ -455,7 +466,14 @@ public class MySqlStorage extends Thread implements DBStorage {
 				updateTime = true;
 			}
 			UUID stackUUID = UUID.fromString(results.getString("stack_uuid"));
-			SerializedAuctionStack serializedAuctionStack = createNode(results.getString("auction_stack")).get(TypeTokens.AUCTIONSTACK_TOKEN);
+			SerializedAuctionStack serializedAuctionStack = ConfigurationService
+					.getInstance()
+					.createVirtualReferencedConfig(
+						SerializedAuctionStack.class,
+						results.getString("auction_stack")
+					)
+					.setType(getFormat())
+					.build().get();
 			serializedAuctionStack.setStackUUID(stackUUID);
 			if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
 				serializedAuctionStack.setStackUUID(stackUUID);
@@ -483,7 +501,14 @@ public class MySqlStorage extends Thread implements DBStorage {
 				updateTimeAuctionExpired = results.getString("written");
 				updateTime = true;
 			}
-			SerializedAuctionStack serializedAuctionStack = createNode(results.getString("auction_stack")).get(TypeTokens.AUCTIONSTACK_TOKEN);
+			SerializedAuctionStack serializedAuctionStack = ConfigurationService
+					.getInstance()
+					.createVirtualReferencedConfig(
+						SerializedAuctionStack.class,
+						results.getString("auction_stack")
+					)
+					.setType(getFormat())
+					.build().get();
 			serializedAuctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(serializedAuctionStack.getBetData().getCurrencyId()));
 			if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
 				serializedAuctionStack.getPrices().forEach(price -> {
@@ -515,7 +540,14 @@ public class MySqlStorage extends Thread implements DBStorage {
 				updateTimeAuctionExpiredBet = results.getString("written");
 				updateTime = true;
 			}
-			SerializedAuctionStack serializedAuctionStack = createNode(results.getString("auction_stack")).get(TypeTokens.AUCTIONSTACK_TOKEN);
+			SerializedAuctionStack serializedAuctionStack = ConfigurationService
+					.getInstance()
+					.createVirtualReferencedConfig(
+						SerializedAuctionStack.class,
+						results.getString("auction_stack")
+					)
+					.setType(getFormat())
+					.build().get();
 			if(serializedAuctionStack.getSerializedItemStack().getItemType().isPresent()) {
 				serializedAuctionStack.getBetData().setCurrency(plugin.getEconomy().checkCurrency(serializedAuctionStack.getBetData().getCurrencyId()));
 				serializedAuctionStack.getPrices().forEach(price -> {
@@ -549,7 +581,25 @@ public class MySqlStorage extends Thread implements DBStorage {
 			}
 			String shopId = results.getString("shop_id");
 			plugin.removeShop(shopId);
-			plugin.addShop(shopId, createNode(results.getString("shop_data")).get(TypeTokens.SHOP_TOKEN).deserialize());
+			ConfigurationService
+			.getInstance()
+			.createVirtualReferencedConfig(
+				SerializedShop.class,
+				results.getString("shop_data")
+			)
+			.setType(getFormat())
+			.build().get();
+			plugin.addShop(shopId, 
+					ConfigurationService
+						.getInstance()
+						.createVirtualReferencedConfig(
+							SerializedShop.class,
+							results.getString("shop_data")
+						)
+						.setType(getFormat())
+						.build().get()
+						.deserialize()
+					);
 			for(ShopMenuData shopMenuData : plugin.getShop(shopId).getMenus().values()) {
 				for(ShopItem shopItem : shopMenuData.getItems().values()) {
 					shopItem.getPrices().forEach(price -> {
@@ -577,7 +627,17 @@ public class MySqlStorage extends Thread implements DBStorage {
 			}
 			String shopId = results.getString("shop_id");
 			plugin.removeCommandShopData(shopId);
-			plugin.addCommandShopData(shopId, createNode(results.getString("shop_data")).get(TypeTokens.COMMANDS_SHOP_TOKEN).deserialize());
+			plugin.addCommandShopData(shopId,
+				ConfigurationService
+					.getInstance()
+					.createVirtualReferencedConfig(
+						SerializedCommandShop.class,
+						results.getString("shop_data")
+					)
+					.setType(getFormat())
+					.build().get()
+					.deserialize()
+				);
 			for(CommandShopMenuData shopMenuData : plugin.getCommandShopData(shopId).getMenus().values()) {
 				for(CommandItemData shopItem : shopMenuData.getItems().values()) {
 					shopItem.getPrices().forEach(price -> {

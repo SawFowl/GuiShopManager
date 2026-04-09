@@ -1,29 +1,22 @@
 package sawfowl.guishopmanager.storage;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.configurate.BasicConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import sawfowl.guishopmanager.GuiShopManager;
 import sawfowl.guishopmanager.utils.TypeTokens;
 import sawfowl.localeapi.api.ConfigTypes;
+import sawfowl.localeapi.api.config.Config;
 import sawfowl.localeapi.api.serializetools.ItemStackSerializerType;
-import sawfowl.localeapi.api.serializetools.SerializeOptions;
+import sawfowl.localeapi.api.services.ConfigurationService;
 import sawfowl.guishopmanager.data.commandshop.CommandShopData;
 import sawfowl.guishopmanager.data.shop.Shop;
 import sawfowl.guishopmanager.serialization.auction.SerializedAuctionStack;
@@ -33,39 +26,23 @@ import sawfowl.guishopmanager.serialization.shop.SerializedShop;
 public class ConfigStorage implements DataStorage {
 
 	private GuiShopManager plugin;
-	private ConfigurationLoader<?> auctionConfigLoader;
-	private ConfigurationNode auctionNode;
+	private Config auctionConfig;
 	private boolean isLoaded = false;
 	public ConfigStorage(GuiShopManager instance) {
 		plugin = instance;
-		Optional<File> auctionConfig = Stream.of(plugin.getConfigDir().toFile().listFiles()).filter(file -> file.getName().contains("Auction")).findFirst();
-		if(auctionConfig.isPresent()) {
-			auctionConfigLoader = createConfigLoader(auctionConfig.get(), ItemStackSerializerType.JSON);
-		} else auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getConfig().getConfigType().getAuction()), plugin.getConfig().getConfigType().getAuction(), ItemStackSerializerType.JSON);
-		try {
-			auctionNode = auctionConfigLoader.load();
-			if(auctionConfig.isPresent() && !plugin.getConfig().getConfigType().getAuction().equals("." + getExtension(auctionConfig.get().getName()))) {
-				BasicConfigurationNode copy = BasicConfigurationNode.root().from(auctionNode);
-				auctionConfigLoader = createConfigLoader(plugin.getConfigDir().resolve("Auction" + plugin.getConfig().getConfigType().getAuction()), plugin.getConfig().getConfigType().getAuction(), ItemStackSerializerType.JSON);
-				auctionConfigLoader.save(copy);
-				auctionNode = auctionConfigLoader.load();
-				auctionConfig.get().delete();
-				auctionConfig = null;
-				copy = null;
-			}
-		} catch (IOException e) {
-			plugin.getLogger().error(e.getLocalizedMessage());
-		}
+		auctionConfig = ConfigurationService.getInstance().createSimpleConfig(plugin.getPluginContainer()).setPath(plugin.getConfigDir()).setName("Auction").setType(ConfigTypes.HOCON).setItemStackSerializerType(ItemStackSerializerType.JSON).build();
 	}
 
 	@Override
 	public void saveShop(String shopId) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			try {
-				createConfigLoader(plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getShops() + File.separator + shopId + plugin.getConfig().getConfigType().getShops()), plugin.getConfig().getConfigType().getShops(), ItemStackSerializerType.JSON).loadToReference().referenceTo(SerializedShop.class).setAndSave(plugin.getShop(shopId).serialize());
-			} catch (ConfigurateException e) {
-				plugin.getLogger().error(e.getLocalizedMessage());
-			}
+			ConfigurationService.getInstance()
+				.createReferencedConfig(plugin.getPluginContainer(), plugin.getShop(shopId).serialize())
+				.setPath(plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getShops()))
+				.setName(shopId)
+				.setType(ConfigTypes.HOCON)
+				.setItemStackSerializerType(ItemStackSerializerType.JSON)
+				.build();
 		});
 	}
 
@@ -74,19 +51,17 @@ public class ConfigStorage implements DataStorage {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			File shopsFolder = plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getShops()).toFile();
 			if(!shopsFolder.exists()) return;
-			for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().endsWith(".conf") || file.getName().endsWith(".json") || file.getName().endsWith(".yml"))).collect(Collectors.toList())) {
-				try {
-					Shop shop = createConfigLoader(shopFile, ItemStackSerializerType.JSON).loadToReference().referenceTo(SerializedShop.class).get().deserialize();
-					setShopCurrencies(plugin, shop);
-					plugin.addShop(shop.getID(), shop);
-					if(!plugin.getConfig().getConfigType().getShops().equals("." + getExtension(shopFile.getName()))) {
-						shopFile.delete();
-						saveShop(shop.getID());
-					}
-				} catch (ConfigurateException e) {
-					plugin.getLogger().error(e.getLocalizedMessage());
-				}
-				
+			for(File shopFile : shopsFolder.listFiles()) {
+				if(!ConfigTypes.isValidExtension(ConfigTypes.getExtension(shopFile.getName()))) continue;
+				SerializedShop serializedShop = ConfigurationService.getInstance()
+					.createReferencedConfig(plugin.getPluginContainer(), SerializedShop.class)
+					.fromFile(shopFile)
+					.setItemStackSerializerType(ItemStackSerializerType.JSON)
+					.build().get();
+				if(serializedShop == null) continue;
+				Shop shop = serializedShop.deserialize();
+				setShopCurrencies(plugin, shop);
+				plugin.addShop(shop.getID(), shop);
 			}
 		});
 	}
@@ -103,11 +78,13 @@ public class ConfigStorage implements DataStorage {
 	@Override
 	public void saveCommandsShop(String shopId) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
-			try {
-				createConfigLoader(plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getCommandsShops() + File.separator + shopId + plugin.getConfig().getConfigType().getCommandsShops()), plugin.getConfig().getConfigType().getCommandsShops(), ItemStackSerializerType.JSON).loadToReference().referenceTo(SerializedCommandShop.class).setAndSave(plugin.getCommandShopData(shopId).serialize());
-			} catch (ConfigurateException e) {
-				plugin.getLogger().error(e.getLocalizedMessage());
-			}
+			ConfigurationService.getInstance()
+				.createReferencedConfig(plugin.getPluginContainer(), plugin.getCommandShopData(shopId).serialize())
+				.setPath(plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getShops()))
+				.setName(shopId)
+				.setType(ConfigTypes.HOCON)
+				.setItemStackSerializerType(ItemStackSerializerType.JSON)
+				.build();
 		});
 	}
 
@@ -116,19 +93,19 @@ public class ConfigStorage implements DataStorage {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			File shopsFolder = plugin.getConfigDir().resolve(plugin.getConfig().getStorageFolders().getCommandsShops()).toFile();
 			if(!shopsFolder.exists()) return;
-			for(File shopFile : Arrays.stream(shopsFolder.listFiles()).filter(file -> (file.getName().endsWith(".conf") || file.getName().endsWith(".json") || file.getName().endsWith(".yml"))).collect(Collectors.toList())) {
-				try {
-					CommandShopData shop = createConfigLoader(shopFile, ItemStackSerializerType.JSON).loadToReference().referenceTo(SerializedCommandShop.class).get().deserialize();
-					setCommandShopCurrencies(plugin, shop);
-					String shopId = shop.getID();
-					plugin.addCommandShopData(shopId, shop);
-					if(!plugin.getConfig().getConfigType().getCommandsShops().equals("." + getExtension(shopFile.getName()))) {
-						shopFile.delete();
-						saveCommandsShop(shop.getID());
-					}
-				} catch (ConfigurateException e) {
-					plugin.getLogger().error(e.getLocalizedMessage());
-				}
+			for(File shopFile : shopsFolder.listFiles()) {
+				if(!ConfigTypes.isValidExtension(ConfigTypes.getExtension(shopFile.getName()))) continue;
+				SerializedCommandShop serializedCommandShop = ConfigurationService.getInstance()
+					.createReferencedConfig(plugin.getPluginContainer(), SerializedCommandShop.class)
+					.fromFile(shopFile)
+					.setItemStackSerializerType(ItemStackSerializerType.JSON)
+					.build()
+					.get();
+				if(serializedCommandShop == null) continue;
+				CommandShopData shop = serializedCommandShop.deserialize();
+				setCommandShopCurrencies(plugin, shop);
+				String shopId = shop.getID();
+				plugin.addCommandShopData(shopId, shop);
 			}
 		});
 	}
@@ -148,9 +125,9 @@ public class ConfigStorage implements DataStorage {
 			if(isLoaded) {
 				return;
 			}
-			if(!auctionNode.node("ActualData").virtual() && !auctionNode.node("ActualData").empty() && !auctionNode.node("ActualData").childrenMap().isEmpty()) {
+			if(!auctionConfig.getRootNode().node("ActualData").virtual() && !auctionConfig.getRootNode().node("ActualData").empty() && !auctionConfig.getRootNode().node("ActualData").childrenMap().isEmpty()) {
 				Map<UUID, SerializedAuctionStack> toAdd = new HashMap<UUID, SerializedAuctionStack>();
-				auctionNode.node("ActualData").childrenMap().forEach((object, node) -> {
+				auctionConfig.getRootNode().node("ActualData").childrenMap().forEach((object, node) -> {
 					try {
 						SerializedAuctionStack auctionStack = node.get(TypeTokens.AUCTIONSTACK_TOKEN);
 						setAuctionCurrencies(plugin, auctionStack);
@@ -161,9 +138,9 @@ public class ConfigStorage implements DataStorage {
 				});
 				plugin.getAuctionItems().putAll(toAdd);
 			}
-			if(!auctionNode.node("ExpiredData").virtual() && !auctionNode.node("ExpiredData").empty()) {
+			if(!auctionConfig.getRootNode().node("ExpiredData").virtual() && !auctionConfig.getRootNode().node("ExpiredData").empty()) {
 				try {
-					plugin.getExpiredAuctionItems().putAll(auctionNode.node("ExpiredData").get(TypeTokens.MAP_EXPIRED_AUCTIONSTACKS_TOKEN));
+					plugin.getExpiredAuctionItems().putAll(auctionConfig.getRootNode().node("ExpiredData").get(TypeTokens.MAP_EXPIRED_AUCTIONSTACKS_TOKEN));
 					for(Set<SerializedAuctionStack> auctionStacks : plugin.getExpiredAuctionItems().values()) {
 						for(SerializedAuctionStack auctionStack : auctionStacks) setAuctionCurrencies(plugin, auctionStack);
 					}
@@ -171,9 +148,9 @@ public class ConfigStorage implements DataStorage {
 					plugin.getLogger().error(e.getLocalizedMessage());
 				}
 			}
-			if(!auctionNode.node("ExpiredDataBet").virtual() && !auctionNode.node("ExpiredDataBet").empty()) {
+			if(!auctionConfig.getRootNode().node("ExpiredDataBet").virtual() && !auctionConfig.getRootNode().node("ExpiredDataBet").empty()) {
 				try {
-					plugin.getExpiredBetAuctionItems().putAll(auctionNode.node("ExpiredDataBet").get(TypeTokens.MAP_EXPIRED_AUCTIONSTACKS_TOKEN));
+					plugin.getExpiredBetAuctionItems().putAll(auctionConfig.getRootNode().node("ExpiredDataBet").get(TypeTokens.MAP_EXPIRED_AUCTIONSTACKS_TOKEN));
 					for(Set<SerializedAuctionStack> auctionStacks : plugin.getExpiredBetAuctionItems().values()) {
 						for(SerializedAuctionStack auctionStack : auctionStacks) setAuctionCurrencies(plugin, auctionStack);
 					}
@@ -189,13 +166,9 @@ public class ConfigStorage implements DataStorage {
 	public void saveAuctionStack(SerializedAuctionStack serializedAuctionStack) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			try {
-				auctionNode.node("ActualData", serializedAuctionStack.getStackUUID().toString()).set(TypeTokens.AUCTIONSTACK_TOKEN, serializedAuctionStack);
+				auctionConfig.getRootNode().node("ActualData", serializedAuctionStack.getStackUUID().toString()).set(TypeTokens.AUCTIONSTACK_TOKEN, serializedAuctionStack);
+				auctionConfig.save();
 			} catch (SerializationException e) {
-				plugin.getLogger().error(e.getLocalizedMessage());
-			}
-			try {
-				auctionConfigLoader.save(auctionNode);
-			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
 		});
@@ -203,13 +176,9 @@ public class ConfigStorage implements DataStorage {
 
 	@Override
 	public void removeAuctionStack(UUID stackUUID) {
-		if(auctionNode.node("ActualData").hasChild(stackUUID.toString())) {
-			auctionNode.node("ActualData").removeChild(stackUUID.toString());
-			try {
-				auctionConfigLoader.save(auctionNode);
-			} catch (ConfigurateException e) {
-				plugin.getLogger().error(e.getLocalizedMessage());
-			}
+		if(auctionConfig.getRootNode().node("ActualData").hasChild(stackUUID.toString())) {
+			auctionConfig.getRootNode().node("ActualData").removeChild(stackUUID.toString());
+			auctionConfig.save();
 		}
 	}
 
@@ -217,8 +186,8 @@ public class ConfigStorage implements DataStorage {
 	public void saveExpireAuctionData(SerializedAuctionStack serializedAuctionStack) {
 		Sponge.asyncScheduler().executor(plugin.getPluginContainer()).execute(() -> {
 			try {
-				auctionNode.node("ExpiredData", serializedAuctionStack.getOwnerUUID().toString()).set(TypeTokens.LIST_AUCTIONSTACK_TOKEN, plugin.getExpiredAuctionItems().get(serializedAuctionStack.getOwnerUUID()));
-				auctionConfigLoader.save(auctionNode);
+				auctionConfig.getRootNode().node("ExpiredData", serializedAuctionStack.getOwnerUUID().toString()).set(TypeTokens.LIST_AUCTIONSTACK_TOKEN, plugin.getExpiredAuctionItems().get(serializedAuctionStack.getOwnerUUID()));
+				auctionConfig.save();
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
@@ -228,13 +197,13 @@ public class ConfigStorage implements DataStorage {
 	@Override
 	public void removeExpireAuctionData(SerializedAuctionStack serializedAuctionStack) {
 		UUID owner = serializedAuctionStack.getOwnerUUID();
-		if(auctionNode.node("ExpiredData").hasChild(owner.toString())) {
+		if(auctionConfig.getRootNode().node("ExpiredData").hasChild(owner.toString())) {
 			try {
-				auctionNode.node("ExpiredData", owner.toString()).set(TypeTokens.LIST_AUCTIONSTACK_TOKEN, plugin.getExpiredAuctionItems().get(owner));
-				if(auctionNode.node("ExpiredData", owner.toString()).empty()) {
-					auctionNode.node("ExpiredData").removeChild(owner.toString());
+				auctionConfig.getRootNode().node("ExpiredData", owner.toString()).set(TypeTokens.LIST_AUCTIONSTACK_TOKEN, plugin.getExpiredAuctionItems().get(owner));
+				if(auctionConfig.getRootNode().node("ExpiredData", owner.toString()).empty()) {
+					auctionConfig.getRootNode().node("ExpiredData").removeChild(owner.toString());
 				}
-				auctionConfigLoader.save(auctionNode);
+				auctionConfig.save();
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
@@ -244,8 +213,8 @@ public class ConfigStorage implements DataStorage {
 	@Override
 	public void saveExpireBetAuctionData(SerializedAuctionStack serializedAuctionStack) {
 		try {
-			auctionNode.node("ExpiredDataBet", serializedAuctionStack.getOwnerUUID().toString()).set(TypeTokens.LIST_AUCTIONSTACK_TOKEN, plugin.getExpiredBetAuctionItems().get(serializedAuctionStack.getOwnerUUID()));
-			auctionConfigLoader.save(auctionNode);
+			auctionConfig.getRootNode().node("ExpiredDataBet", serializedAuctionStack.getOwnerUUID().toString()).set(TypeTokens.LIST_AUCTIONSTACK_TOKEN, plugin.getExpiredBetAuctionItems().get(serializedAuctionStack.getOwnerUUID()));
+			auctionConfig.save();
 		} catch (ConfigurateException e) {
 			plugin.getLogger().error(e.getLocalizedMessage());
 		}
@@ -254,53 +223,17 @@ public class ConfigStorage implements DataStorage {
 	@Override
 	public void removeExpireBetAuctionData(SerializedAuctionStack serializedAuctionStack) {
 		UUID owner = serializedAuctionStack.getOwnerUUID();
-		if(auctionNode.node("ExpiredDataBet").hasChild(owner.toString())) {
+		if(auctionConfig.getRootNode().node("ExpiredDataBet").hasChild(owner.toString())) {
 			try {
-				auctionNode.node("ExpiredDataBet", owner.toString()).set(TypeTokens.LIST_AUCTIONSTACK_TOKEN, plugin.getExpiredBetAuctionItems().get(owner));
-				if(auctionNode.node("ExpiredDataBet", owner.toString()).empty()) {
-					auctionNode.node("ExpiredDataBet").removeChild(owner.toString());
+				auctionConfig.getRootNode().node("ExpiredDataBet", owner.toString()).set(TypeTokens.LIST_AUCTIONSTACK_TOKEN, plugin.getExpiredBetAuctionItems().get(owner));
+				if(auctionConfig.getRootNode().node("ExpiredDataBet", owner.toString()).empty()) {
+					auctionConfig.getRootNode().node("ExpiredDataBet").removeChild(owner.toString());
 				}
-				auctionConfigLoader.save(auctionNode);
+				auctionConfig.save();
 			} catch (ConfigurateException e) {
 				plugin.getLogger().error(e.getLocalizedMessage());
 			}
 		}
-	}
-
-	private ConfigTypes getConfigType(String string) {
-		return Stream.of(ConfigTypes.values()).filter(t -> t.toString().equals(string)).findFirst().orElse(ConfigTypes.HOCON);
-	}
-
-	private ConfigurationLoader<? extends ConfigurationNode> createConfigLoader(Path path, String configType, ItemStackSerializerType itemStackSerializerVariant) {
-		switch (getConfigType(configType)) {
-			case HOCON: return SerializeOptions.createHoconConfigurationLoader(itemStackSerializerVariant).path(path).build();
-			case YAML: return SerializeOptions.createYamlConfigurationLoader(itemStackSerializerVariant).path(path).build();
-			case JSON: return SerializeOptions.createJsonConfigurationLoader(itemStackSerializerVariant).path(path).build();
-			default: return SerializeOptions.createHoconConfigurationLoader(itemStackSerializerVariant).path(path).build();
-		}
-	}
-
-	private ConfigurationLoader<? extends ConfigurationNode> createConfigLoader(File file, ItemStackSerializerType itemStackSerializerVariant) {
-		switch (getConfigType("." + getExtension(file.getName()))) {
-			case HOCON: return SerializeOptions.createHoconConfigurationLoader(itemStackSerializerVariant).file(file).build();
-			case YAML: return SerializeOptions.createYamlConfigurationLoader(itemStackSerializerVariant).file(file).build();
-			case JSON: return SerializeOptions.createJsonConfigurationLoader(itemStackSerializerVariant).file(file).build();
-			default: return SerializeOptions.createHoconConfigurationLoader(itemStackSerializerVariant).file(file).build();
-		}
-	}
-
-	String getExtension(String fileName) {
-		char ch;
-		int len;
-		if(fileName==null || 
-				(len = fileName.length())==0 ||
-				(ch = fileName.charAt(len-1))=='/' || ch=='\\' ||
-				 ch=='.' )
-			return "";
-		int dotInd = fileName.lastIndexOf('.'),
-			sepInd = Math.max(fileName.lastIndexOf('/'), fileName.lastIndexOf('\\'));
-		if(dotInd<=sepInd) return "";
-		else return fileName.substring(dotInd+1).toLowerCase();
 	}
 
 }
